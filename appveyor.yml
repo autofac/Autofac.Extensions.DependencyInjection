@@ -1,0 +1,26 @@
+version: 4.0.0.{build}
+
+configuration: Release
+
+nuget:
+  disable_publish_on_pr: true
+
+clone_depth: 1
+
+test: off
+
+build_script:
+- ps: .\build.ps1
+
+artifacts:
+- path: artifacts\packages\**\*.nupkg
+  name: MyGet
+
+deploy:
+- provider: NuGet
+  server: https://www.myget.org/F/autofac/api/v2/package
+  api_key:
+    secure: rCUEY75fXN0wxtMy6QL4jCrLdaYbxIBzIXWeN+wEu/XDpyqimzreOc5AH5jMd5ah
+  skip_symbols: false
+  symbol_server: https://www.myget.org/F/autofac/symbols/api/v2/package
+  artifact: MyGet
