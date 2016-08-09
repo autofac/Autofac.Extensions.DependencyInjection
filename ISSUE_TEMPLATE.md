@@ -2,7 +2,7 @@ Try StackOverflow! If you have a _usage question_ ("How do I...?" "Others have t
 
 **Have you [read the docs?](http://autofac.readthedocs.io/)**
 
-**This repo is for core Autofac only.** If you are encountering issues with an integration package (MVC, Web API, etc.) please file it in the appropriate repo. Thanks!
+**This repo is for Autofac.Extensions.DependencyInjection only.** If you are encountering issues with another package (MVC, Web API, etc.) or core Autofac, please file it in the appropriate repo. Thanks!
 
 **When filing an issue, please include:**
 
