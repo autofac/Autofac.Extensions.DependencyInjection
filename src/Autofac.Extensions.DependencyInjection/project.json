@@ -38,6 +38,7 @@
       "Autofac Contributors"
     ],
     "projectUrl": "http://autofac.org",
+    "releaseNotes": "Release notes are at https://github.com/autofac/Autofac.Extensions.DependencyInjection/releases",
     "repository": {
       "type": "git",
       "url": "https://github.com/autofac/Autofac"
