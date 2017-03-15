@@ -10,9 +10,9 @@
     "Autofac.Extensions.DependencyInjection": {
       "target": "project"
     },
-    "Microsoft.Extensions.DependencyInjection": "1.0.0",
-    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
-    "Microsoft.Extensions.DependencyInjection.Specification.Tests": "1.0.0",
+    "Microsoft.Extensions.DependencyInjection": "1.1.0",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.1.0",
+    "Microsoft.Extensions.DependencyInjection.Specification.Tests": "1.1.0",
     "Microsoft.Extensions.Options": "1.0.0",
     "StyleCop.Analyzers": {
       "type": "build",
@@ -22,11 +22,11 @@
     "xunit": "2.2.0-*"
   },
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0"
+          "version": "1.1.0"
         }
       },
       "imports": [
