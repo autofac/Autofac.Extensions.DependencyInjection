@@ -21,9 +21,7 @@ function Get-DotNetProjectDirectory
     $RootPath
   )
 
-  # We don't search for project.json because that gets copied around. .xproj is the only
-  # good way to actually locate where the source project is.
-  Get-ChildItem -Path $RootPath -Recurse -Include "*.xproj" | Select-Object @{ Name="ParentFolder"; Expression={ $_.Directory.FullName.TrimEnd("\") } } | Select-Object -ExpandProperty ParentFolder
+  Get-ChildItem -Path $RootPath -Recurse -Include "*.csproj" | Select-Object @{ Name="ParentFolder"; Expression={ $_.Directory.FullName.TrimEnd("\") } } | Select-Object -ExpandProperty ParentFolder
 }
 
 <#
@@ -108,7 +106,7 @@ function Invoke-DotNetBuild
     foreach($Project in $ProjectDirectory)
     {
       & dotnet build ("""" + $Project.FullName + """") --configuration Release
-      if($LASTEXITCODE -ne 0)
+      if ($LASTEXITCODE -ne 0)
       {
         exit 1
       }
@@ -125,6 +123,9 @@ function Invoke-DotNetBuild
 
  .PARAMETER PackagesPath
   Path to the "artifacts\packages" folder where packages should go.
+
+ .PARAMETER VersionSuffix
+  The version suffix to use for the NuGet package version.
 #>
 function Invoke-DotNetPack
 {
@@ -138,7 +139,12 @@ function Invoke-DotNetPack
     [Parameter(Mandatory=$True, ValueFromPipeline=$False)]
     [ValidateNotNull()]
     [System.IO.DirectoryInfo]
-    $PackagesPath
+    $PackagesPath,
+
+    [Parameter(Mandatory=$True, ValueFromPipeline=$False)]
+    [ValidateNotNull()]
+    [System.IO.DirectoryInfo]
+    $VersionSuffix
   )
   Begin
   {
@@ -148,9 +154,9 @@ function Invoke-DotNetPack
   {
     foreach($Project in $ProjectDirectory)
     {
-      & dotnet build ("""" + $Project.FullName + """") --configuration Release
-      & dotnet pack ("""" + $Project.FullName + """") --configuration Release --output $PackagesPath
-      if($LASTEXITCODE -ne 0)
+      & dotnet build ("""" + $Project.FullName + """") --configuration Release --version-suffix $VersionSuffix
+      & dotnet pack ("""" + $Project.FullName + """") --configuration Release --version-suffix $VersionSuffix --include-symbols --output $PackagesPath
+      if ($LASTEXITCODE -ne 0)
       {
         exit 1
       }
@@ -178,11 +184,16 @@ function Invoke-Test
   {
     foreach($Project in $ProjectDirectory)
     {
-      & dotnet test ("""" + $Project.FullName + """")
-      if($LASTEXITCODE -ne 0)
+      Push-Location $Project
+
+      & dotnet test --configuration Release
+      if ($LASTEXITCODE -ne 0)
       {
+        Pop-Location
         exit 3
       }
+
+      Pop-Location
     }
   }
 }
