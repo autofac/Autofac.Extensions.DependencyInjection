@@ -46,33 +46,6 @@ function Get-DotNetProjectDirectory
 
 <#
  .SYNOPSIS
-  Gets the SDK version specified in a global.json, if any. Defaults to "Latest".
-
- .PARAMETER GlobalJson
-  Path to the global.json file.
-#>
-function Get-DotNetSdkVersion
-{
-  [CmdletBinding()]
-  Param(
-    [Parameter(Mandatory=$True, ValueFromPipeline=$False, ValueFromPipelineByPropertyName=$False)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $GlobalJson
-  )
-
-  $version = (Get-Content $GlobalJson | ConvertFrom-Json).sdk.version
-
-  if ($version -eq $Null)
-  {
-    return "Latest"
-  }
-
-  return $version
-}
-
-<#
- .SYNOPSIS
   Runs the dotnet CLI install script from GitHub to install a project-local
   copy of the CLI.
 #>
@@ -226,27 +199,6 @@ function Invoke-Test
       Pop-Location
     }
   }
-}
-
-<#
-.SYNOPSIS
-    Removes a path entry from the current user and process path.
-.DESCRIPTION
-    Updates the user and process paths as needed to remove a specific path
-    from the overall search path.
-.PARAMETER VariableToRemove
-    The directory/path that should be removed.
-#>
-function Remove-EnvironmentPathEntry
-{
-  [cmdletbinding()]
-  param([string] $VariableToRemove)
-  $path = [Environment]::GetEnvironmentVariable("PATH", "User")
-  $newItems = $path.Split(';') | Where-Object { $_.ToString() -inotlike $VariableToRemove }
-  [Environment]::SetEnvironmentVariable("PATH", [System.String]::Join(';', $newItems), "User")
-  $path = [Environment]::GetEnvironmentVariable("PATH", "Process")
-  $newItems = $path.Split(';') | Where-Object { $_.ToString() -inotlike $VariableToRemove }
-  [Environment]::SetEnvironmentVariable("PATH", [System.String]::Join(';', $newItems), "Process")
 }
 
 <#
