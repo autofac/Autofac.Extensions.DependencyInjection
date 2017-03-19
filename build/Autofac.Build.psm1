@@ -6,6 +6,26 @@
 
 <#
  .SYNOPSIS
+  Writes a build progress message to the host.
+
+ .PARAMETER Message
+  The message to write.
+#>
+function Write-Message
+{
+  [CmdletBinding()]
+  Param(
+    [Parameter(Mandatory=$True, ValueFromPipeline=$False, ValueFromPipelineByPropertyName=$False)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $Message
+  )
+
+  Write-Host "[BUILD] $Message" -ForegroundColor Cyan
+}
+
+<#
+ .SYNOPSIS
   Gets the set of directories in which projects are available for compile/processing.
 
  .PARAMETER RootPath
@@ -64,6 +84,16 @@ function Install-DotNetCli
     $Version = "Latest"
   )
 
+  if ((Get-Command "dotnet.exe" -ErrorAction SilentlyContinue) -ne $null)
+  {
+    $installedVersion = dotnet --version
+    if ($installedVersion -eq $Version)
+    {
+      Write-Message ".NET Core SDK version $Version is already installed"
+      return;
+    }
+  }
+
   $callerPath = Split-Path $MyInvocation.PSCommandPath
   $installDir = Join-Path -Path $callerPath -ChildPath ".dotnet\cli"
   if (!(Test-Path $installDir))
@@ -74,7 +104,7 @@ function Install-DotNetCli
   # Download the dotnet CLI install script
   if (!(Test-Path .\dotnet\install.ps1))
   {
-    Invoke-WebRequest "https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.ps1" -OutFile ".\.dotnet\dotnet-install.ps1"
+    Invoke-WebRequest "https://raw.githubusercontent.com/dotnet/cli/rel/1.0.1/scripts/obtain/dotnet-install.ps1" -OutFile ".\.dotnet\dotnet-install.ps1"
   }
 
   # Run the dotnet CLI install
