@@ -189,7 +189,7 @@ function Invoke-Test
     {
       Push-Location $Project
 
-      & dotnet test --configuration Release
+      & dotnet test --configuration Release --logger:trx
       if ($LASTEXITCODE -ne 0)
       {
         Pop-Location
