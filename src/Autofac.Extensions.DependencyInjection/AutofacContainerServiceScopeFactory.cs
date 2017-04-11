@@ -23,27 +23,25 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection
 {
     /// <summary>
-    /// Autofac implementation of the ASP.NET Core <see cref="IServiceScopeFactory"/>.
+    /// Autofac implementation of the ASP.NET Core <see cref="IServiceScopeFactory"/> that creates scopes from the application container.
     /// </summary>
     /// <seealso cref="Microsoft.Extensions.DependencyInjection.IServiceScopeFactory" />
-    [SuppressMessage("Microsoft.ApiDesignGuidelines", "CA2213", Justification = "The creator of the root service lifetime scope is responsible for disposal.")]
-    internal class AutofacServiceScopeFactory : IServiceScopeFactory
+    public class AutofacContainerServiceScopeFactory : IServiceScopeFactory
     {
-        private readonly ILifetimeScope _lifetimeScope;
+        private readonly IContainer container;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AutofacServiceScopeFactory"/> class.
+        /// Initializes a new instance of the <see cref="AutofacContainerServiceScopeFactory"/> class.
         /// </summary>
-        /// <param name="lifetimeScope">The lifetime scope.</param>
-        public AutofacServiceScopeFactory(ILifetimeScope lifetimeScope)
+        /// <param name="container">The Autofac container.</param>
+        public AutofacContainerServiceScopeFactory(IContainer container)
         {
-            this._lifetimeScope = lifetimeScope;
+            this.container = container;
         }
 
         /// <summary>
@@ -59,7 +57,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </returns>
         public IServiceScope CreateScope()
         {
-            return new AutofacServiceScope(this._lifetimeScope.BeginLifetimeScope());
+            return new AutofacServiceScope(container.BeginLifetimeScope());
         }
     }
 }
