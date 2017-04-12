@@ -33,7 +33,7 @@ namespace Autofac.Extensions.DependencyInjection
     /// </summary>
     /// <seealso cref="System.IServiceProvider" />
     /// <seealso cref="Microsoft.Extensions.DependencyInjection.ISupportRequiredService" />
-    public class AutofacServiceProvider : IServiceProvider, ISupportRequiredService
+    public class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IDisposable
     {
         private readonly IComponentContext _componentContext;
 
@@ -82,6 +82,11 @@ namespace Autofac.Extensions.DependencyInjection
         public object GetService(Type serviceType)
         {
             return this._componentContext.ResolveOptional(serviceType);
+        }
+
+        public void Dispose()
+        {
+            this._componentContext.Dispose();
         }
     }
 }
