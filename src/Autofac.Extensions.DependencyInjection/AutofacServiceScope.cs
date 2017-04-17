@@ -45,7 +45,7 @@ namespace Autofac.Extensions.DependencyInjection
         public AutofacServiceScope(ILifetimeScope lifetimeScope)
         {
             this._lifetimeScope = lifetimeScope;
-            this.ServiceProvider = this._lifetimeScope.Resolve<IServiceProvider>();
+            this.ServiceProvider = new AutofacServiceProvider(this._lifetimeScope);
         }
 
         /// <summary>

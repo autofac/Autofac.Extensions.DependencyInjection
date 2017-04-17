@@ -66,6 +66,8 @@ namespace Autofac.Extensions.DependencyInjection
         /// </exception>
         public object GetRequiredService(Type serviceType)
         {
+            if (serviceType == typeof(IServiceProvider)) return this;
+            else if (serviceType == typeof(IServiceScopeFactory)) return new AutofacServiceScopeFactory((ILifetimeScope)_componentContext);
             return this._componentContext.Resolve(serviceType);
         }
 
@@ -81,6 +83,8 @@ namespace Autofac.Extensions.DependencyInjection
         /// </returns>
         public object GetService(Type serviceType)
         {
+            if (serviceType == typeof(IServiceProvider)) return this;
+            else if (serviceType == typeof(IServiceScopeFactory)) return new AutofacServiceScopeFactory((ILifetimeScope)_componentContext);
             return this._componentContext.ResolveOptional(serviceType);
         }
     }
