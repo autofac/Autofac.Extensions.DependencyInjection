@@ -47,7 +47,7 @@ namespace Autofac.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Creates an <see cref="IServiceScope" /> which contains an
+        /// Begins a new lifetime scope, wrapped inside an <see cref="IServiceScope" /> which contains an
         /// <see cref="System.IServiceProvider" /> used to resolve dependencies within
         /// the scope.
         /// </summary>
