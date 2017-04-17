@@ -68,7 +68,7 @@ namespace Autofac.Extensions.DependencyInjection
         public object GetRequiredService(Type serviceType)
         {
             if (serviceType == typeof(IServiceProvider)) return this;
-            else if (serviceType == typeof(IServiceScopeFactory)) return new AutofacContainerServiceScopeFactory(container);
+            else if (serviceType == typeof(IServiceScopeFactory)) return new AutofacServiceScopeFactory(container);
             else return container.Resolve(serviceType);
         }
 
@@ -88,7 +88,7 @@ namespace Autofac.Extensions.DependencyInjection
         public object GetService(Type serviceType)
         {
             if (serviceType == typeof(IServiceProvider)) return this;
-            else if (serviceType == typeof(IServiceScopeFactory)) return new AutofacContainerServiceScopeFactory(container);
+            else if (serviceType == typeof(IServiceScopeFactory)) return new AutofacServiceScopeFactory(container);
             else return container.ResolveOptional(serviceType);
         }
     }
