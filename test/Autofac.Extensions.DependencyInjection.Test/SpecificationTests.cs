@@ -13,7 +13,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
             builder.Populate(serviceCollection);
 
             IContainer container = builder.Build();
-            return container.Resolve<IServiceProvider>();
+            return new AutofacServiceProvider(container);
         }
     }
 }

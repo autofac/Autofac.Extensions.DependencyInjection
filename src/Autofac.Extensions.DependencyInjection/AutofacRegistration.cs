@@ -126,7 +126,7 @@ namespace Autofac.Extensions.DependencyInjection
                 {
                     var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
                     {
-                        var serviceProvider = context.Resolve<IServiceProvider>();
+                        var serviceProvider = new AutofacServiceProvider(context);
                         return descriptor.ImplementationFactory(serviceProvider);
                     })
                     .ConfigureLifecycle(descriptor.Lifetime)
