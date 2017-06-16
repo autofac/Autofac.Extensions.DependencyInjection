@@ -56,7 +56,7 @@ namespace Autofac.Extensions.DependencyInjection
         public static void Populate(
             this ContainerBuilder builder,
             IEnumerable<ServiceDescriptor> descriptors,
-            string lifetimeScopeTagForSingletons = null)
+            object lifetimeScopeTagForSingletons = null)
         {
             builder.RegisterType<AutofacServiceProvider>().As<IServiceProvider>();
             builder.RegisterType<AutofacServiceScopeFactory>().As<IServiceScopeFactory>();
