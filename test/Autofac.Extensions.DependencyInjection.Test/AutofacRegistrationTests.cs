@@ -78,6 +78,19 @@ namespace Autofac.Extensions.DependencyInjection.Test
         }
 
         [Fact]
+        public void CanRebaseSingletonServiceToNamedLifetimeScope()
+        {
+            var builder = new ContainerBuilder();
+            var descriptor = new ServiceDescriptor(typeof(IService), typeof(Service), ServiceLifetime.Singleton);
+            builder.Populate(new ServiceDescriptor[] { descriptor }, "MY_SCOPE");
+            var container = builder.Build();
+
+            container.AssertLifetime<IService, MatchingScopeLifetime>();
+            container.AssertSharing<IService>(InstanceSharing.Shared);
+            container.AssertOwnership<IService>(InstanceOwnership.OwnedByLifetimeScope);
+        }
+
+        [Fact]
         public void CanRegisterScopedService()
         {
             var builder = new ContainerBuilder();
