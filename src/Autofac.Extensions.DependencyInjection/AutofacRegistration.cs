@@ -57,7 +57,8 @@ namespace Autofac.Extensions.DependencyInjection
         /// <summary>
         /// Populates the Autofac container builder with the set of registered service descriptors
         /// and makes <see cref="IServiceProvider"/> and <see cref="IServiceScopeFactory"/>
-        /// available in the container.
+        /// available in the container. Using this overload is incompatible with the ASP.NET Core
+        /// support for <see cref="IServiceProviderFactory{TContainerBuilder}"/>.
         /// </summary>
         /// <param name="builder">
         /// The <see cref="ContainerBuilder"/> into which the registrations should be made.
@@ -71,6 +72,16 @@ namespace Autofac.Extensions.DependencyInjection
         /// with provided <paramref name="lifetimeScopeTagForSingletons"/>
         /// instead of using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.SingleInstance"/>.
         /// </param>
+        /// <remarks>
+        /// <para>
+        /// Specifying a <paramref name="lifetimeScopeTagForSingletons"/> addresses a specific case where you have
+        /// an application that uses Autofac but where you need to isolate a set of services in a child scope. For example,
+        /// if you have a large application that self-hosts ASP.NET Core items, you may want to isolate the ASP.NET
+        /// Core registrations in a child lifetime scope so they don't show up for the rest of the application.
+        /// This overload allows that. Note it is the developer's responsibility to execute this and create an
+        /// <see cref="AutofacServiceProvider"/> using the child lifetime scope.
+        /// </para>
+        /// </remarks>
         public static void Populate(
             this ContainerBuilder builder,
             IEnumerable<ServiceDescriptor> descriptors,
