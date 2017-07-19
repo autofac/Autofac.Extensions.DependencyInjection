@@ -4,28 +4,45 @@ Autofac is an [IoC container](http://martinfowler.com/articles/injection.html) f
 
 [![Build status](https://ci.appveyor.com/api/projects/status/1mhkjcqr1ug80lra/branch/develop?svg=true)](https://ci.appveyor.com/project/Autofac/autofac-extensions-dependencyinjection/branch/develop)
 
-## Get Packages
+Please file issues and pull requests for this package in this repository rather than in the Autofac core repo.
 
-You can get started with `Autofac.Extensions.DependencyInjection` by [grabbing the latest NuGet package](https://www.nuget.org/packages/Autofac.Extensions.DependencyInjection).
+- [Documentation - .NET Core Integration](http://autofac.readthedocs.io/en/latest/integration/netcore.html)
+- [Documentation - ASP.NET Core Integration](http://autofac.readthedocs.io/en/latest/integration/aspnetcore.html)
+- [NuGet](https://www.nuget.org/packages/Autofac.Extensions.DependencyInjection)
+- [Contributing](http://autofac.readthedocs.io/en/latest/contributors.html)
 
-If you're feeling adventurous, [continuous integration builds are on MyGet](https://www.myget.org/gallery/autofac).
+## Get Started in ASP.NET Core
 
-## Get Help
-
-**Need help with Autofac?** We have [a documentation site](http://autofac.readthedocs.io/) as well as [API documentation](http://autofac.org/apidoc/). We're ready to answer your questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/autofac) or check out the [discussion forum](https://groups.google.com/forum/#forum/autofac).
-
-## Get Started
-
-To take advantage of Autofac in your ASP.NET Core pipeline:
+This quick start shows how to use the `IServiceProviderFactory{T}` integration that ASP.NET Core supports to help automatically build the root service provider for you. If you want more manual control, [check out the documentation for examples](http://autofac.readthedocs.io/en/latest/integration/aspnetcore.html).
 
 - Reference the `Autofac.Extensions.DependencyInjection` package from NuGet.
-- In the `ConfigureServices` method of your `Startup` class...
-  - Register services from the `IServiceCollection`.
-  - Build your container.
-  - Create an `AutofacServiceProvider` using the container and return it.
-- In the `Configure` method of your `Startup` class, you can optionally register with the `IApplicationLifetime.ApplicationStopped` event to dispose of the container at app shutdown.
+- In your `Program.Main` method, where you configure the `WebHostBuilder`, call `AddAutofac` to hook Autofac into the startup pipeline.
+- In the `ConfigureServices` method of your `Startup` class register things into the `IServiceCollection` using extension methods provided by other libraries.
+- In the `ConfigureContainer` method of your `Startup` class register things directly into an Autofac `ContainerBuilder`.
+
+The `IServiceProvider` will automatically be created for you, so there's nothing you have to do but *register things*.
+
 
 ```C#
+public class Program
+{
+  public static void Main(string[] args)
+  {
+    // The ConfigureServices call here allows for
+    // ConfigureContainer to be supported in Startup with
+    // a strongly-typed ContainerBuilder.
+    var host = new WebHostBuilder()
+        .UseKestrel()
+        .ConfigureServices(services => services.AddAutofac())
+        .UseContentRoot(Directory.GetCurrentDirectory())
+        .UseIISIntegration()
+        .UseStartup<Startup>()
+        .Build();
+
+    host.Run();
+  }
+}
+
 public class Startup
 {
   public Startup(IHostingEnvironment env)
@@ -38,60 +55,45 @@ public class Startup
     this.Configuration = builder.Build();
   }
 
-  public IContainer ApplicationContainer { get; private set; }
-
   public IConfigurationRoot Configuration { get; private set; }
 
   // ConfigureServices is where you register dependencies. This gets
-  // called by the runtime before the Configure method, below.
-  public IServiceProvider ConfigureServices(IServiceCollection services)
+  // called by the runtime before the ConfigureContainer method, below.
+  public void ConfigureServices(IServiceCollection services)
   {
-    // Add services to the collection.
+    // Add services to the collection. Don't build or return
+    // any IServiceProvider or the ConfigureContainer method
+    // won't get called.
     services.AddMvc();
+  }
 
-    // Create the container builder.
-    var builder = new ContainerBuilder();
-
-    // Register dependencies, populate the services from
-    // the collection, and build the container. If you want
-    // to dispose of the container at the end of the app,
-    // be sure to keep a reference to it as a property or field.
-    builder.RegisterType<MyType>().As<IMyType>();
-    builder.Populate(services);
-    this.ApplicationContainer = builder.Build();
-
-    // Create the IServiceProvider based on the container.
-    return new AutofacServiceProvider(this.ApplicationContainer);
+  // ConfigureContainer is where you can register things directly
+  // with Autofac. This runs after ConfigureServices so the things
+  // here will override registrations made in ConfigureServices.
+  // Don't build the container; that gets done for you. If you
+  // need a reference to the container, you need to use the
+  // "Without ConfigureContainer" mechanism shown later.
+  public void ConfigureContainer(ContainerBuilder builder)
+  {
+      builder.RegisterModule(new AutofacModule());
   }
 
   // Configure is where you add middleware. This is called after
-  // ConfigureServices. You can use IApplicationBuilder.ApplicationServices
+  // ConfigureContainer. You can use IApplicationBuilder.ApplicationServices
   // here if you need to resolve things from the container.
   public void Configure(
     IApplicationBuilder app,
-    ILoggerFactory loggerFactory,
-    IApplicationLifetime appLifetime)
+    ILoggerFactory loggerFactory)
   {
       loggerFactory.AddConsole(this.Configuration.GetSection("Logging"));
       loggerFactory.AddDebug();
-
       app.UseMvc();
-
-      // If you want to dispose of resources that have been resolved in the
-      // application container, register for the "ApplicationStopped" event.
-      appLifetime.ApplicationStopped.Register(() => this.ApplicationContainer.Dispose());
   }
 }
 ```
 
 Our [ASP.NET Core](http://docs.autofac.org/en/latest/integration/aspnetcore.html) integration documentation contains more information about using Autofac with ASP.NET Core.
 
-## Project
+## Get Help
 
-Autofac is licensed under the MIT license, so you can comfortably use it in commercial applications (we still love [contributions](http://autofac.readthedocs.io/en/latest/contributors.html) though).
-
-## Contributing / Pull Requests
-
-Refer to the [Readme for Autofac Developers](https://github.com/autofac/Autofac/blob/master/developers.md)
-for setting up and building Autofac source. We also have a [contributors guide](http://autofac.readthedocs.io/en/latest/contributors.html) to help you get started.
-
+**Need help with Autofac?** We have [a documentation site](http://autofac.readthedocs.io/) as well as [API documentation](http://autofac.org/apidoc/). We're ready to answer your questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/autofac) or check out the [discussion forum](https://groups.google.com/forum/#forum/autofac).
