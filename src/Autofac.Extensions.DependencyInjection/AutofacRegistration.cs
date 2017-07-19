@@ -48,13 +48,38 @@ namespace Autofac.Extensions.DependencyInjection
         /// The set of service descriptors to register in the container.
         /// </param>
         public static void Populate(
-                this ContainerBuilder builder,
-                IEnumerable<ServiceDescriptor> descriptors)
+            this ContainerBuilder builder,
+            IEnumerable<ServiceDescriptor> descriptors)
+        {
+            Populate(builder, descriptors, null);
+        }
+
+        /// <summary>
+        /// Populates the Autofac container builder with the set of registered service descriptors
+        /// and makes <see cref="IServiceProvider"/> and <see cref="IServiceScopeFactory"/>
+        /// available in the container.
+        /// </summary>
+        /// <param name="builder">
+        /// The <see cref="ContainerBuilder"/> into which the registrations should be made.
+        /// </param>
+        /// <param name="descriptors">
+        /// The set of service descriptors to register in the container.
+        /// </param>
+        /// <param name="lifetimeScopeTagForSingletons">
+        /// If provided and not <see langword="null"/> then all registrations with lifetime <see cref="ServiceLifetime.Singleton" /> are registered
+        /// using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.InstancePerMatchingLifetimeScope" />
+        /// with provided <paramref name="lifetimeScopeTagForSingletons"/>
+        /// instead of using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.SingleInstance"/>.
+        /// </param>
+        public static void Populate(
+            this ContainerBuilder builder,
+            IEnumerable<ServiceDescriptor> descriptors,
+            object lifetimeScopeTagForSingletons)
         {
             builder.RegisterType<AutofacServiceProvider>().As<IServiceProvider>();
             builder.RegisterType<AutofacServiceScopeFactory>().As<IServiceScopeFactory>();
 
-            Register(builder, descriptors);
+            Register(builder, descriptors, lifetimeScopeTagForSingletons);
         }
 
         /// <summary>
@@ -64,18 +89,33 @@ namespace Autofac.Extensions.DependencyInjection
         /// <typeparam name="TRegistrationStyle">The object registration style.</typeparam>
         /// <param name="registrationBuilder">The registration being built.</param>
         /// <param name="lifecycleKind">The lifecycle specified on the service registration.</param>
+        /// <param name="lifetimeScopeTagForSingleton">
+        /// If not <see langword="null"/> then all registrations with lifetime <see cref="ServiceLifetime.Singleton" /> are registered
+        /// using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.InstancePerMatchingLifetimeScope" />
+        /// with provided <paramref name="lifetimeScopeTagForSingleton"/>
+        /// instead of using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.SingleInstance"/>.
+        /// </param>
         /// <returns>
         /// The <paramref name="registrationBuilder" />, configured with the proper lifetime scope,
         /// and available for additional configuration.
         /// </returns>
         private static IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> ConfigureLifecycle<TActivatorData, TRegistrationStyle>(
-                this IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> registrationBuilder,
-                ServiceLifetime lifecycleKind)
+            this IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> registrationBuilder,
+            ServiceLifetime lifecycleKind,
+            object lifetimeScopeTagForSingleton)
         {
             switch (lifecycleKind)
             {
                 case ServiceLifetime.Singleton:
-                    registrationBuilder.SingleInstance();
+                    if (lifetimeScopeTagForSingleton == null)
+                    {
+                        registrationBuilder.SingleInstance();
+                    }
+                    else
+                    {
+                        registrationBuilder.InstancePerMatchingLifetimeScope(lifetimeScopeTagForSingleton);
+                    }
+
                     break;
                 case ServiceLifetime.Scoped:
                     registrationBuilder.InstancePerLifetimeScope();
@@ -97,9 +137,16 @@ namespace Autofac.Extensions.DependencyInjection
         /// <param name="descriptors">
         /// The set of service descriptors to register in the container.
         /// </param>
+        /// <param name="lifetimeScopeTagForSingletons">
+        /// If not <see langword="null"/> then all registrations with lifetime <see cref="ServiceLifetime.Singleton" /> are registered
+        /// using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.InstancePerMatchingLifetimeScope" />
+        /// with provided <paramref name="lifetimeScopeTagForSingletons"/>
+        /// instead of using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.SingleInstance"/>.
+        /// </param>
         private static void Register(
-                ContainerBuilder builder,
-                IEnumerable<ServiceDescriptor> descriptors)
+            ContainerBuilder builder,
+            IEnumerable<ServiceDescriptor> descriptors,
+            object lifetimeScopeTagForSingletons)
         {
             foreach (var descriptor in descriptors)
             {
@@ -112,25 +159,25 @@ namespace Autofac.Extensions.DependencyInjection
                         builder
                             .RegisterGeneric(descriptor.ImplementationType)
                             .As(descriptor.ServiceType)
-                            .ConfigureLifecycle(descriptor.Lifetime);
+                            .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
                     }
                     else
                     {
                         builder
                             .RegisterType(descriptor.ImplementationType)
                             .As(descriptor.ServiceType)
-                            .ConfigureLifecycle(descriptor.Lifetime);
+                            .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
                     }
                 }
                 else if (descriptor.ImplementationFactory != null)
                 {
                     var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
-                    {
-                        var serviceProvider = context.Resolve<IServiceProvider>();
-                        return descriptor.ImplementationFactory(serviceProvider);
-                    })
-                    .ConfigureLifecycle(descriptor.Lifetime)
-                    .CreateRegistration();
+                        {
+                            var serviceProvider = context.Resolve<IServiceProvider>();
+                            return descriptor.ImplementationFactory(serviceProvider);
+                        })
+                        .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
+                        .CreateRegistration();
 
                     builder.RegisterComponent(registration);
                 }
@@ -139,7 +186,7 @@ namespace Autofac.Extensions.DependencyInjection
                     builder
                         .RegisterInstance(descriptor.ImplementationInstance)
                         .As(descriptor.ServiceType)
-                        .ConfigureLifecycle(descriptor.Lifetime);
+                        .ConfigureLifecycle(descriptor.Lifetime, null);
                 }
             }
         }
