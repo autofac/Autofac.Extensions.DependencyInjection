@@ -33,6 +33,7 @@ namespace Autofac.Extensions.DependencyInjection
     /// </summary>
     public class AutofacServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
     {
+        private readonly ContainerBuilder _containerBuilder;
         private readonly Action<ContainerBuilder> _configurationAction;
 
         /// <summary>
@@ -42,6 +43,17 @@ namespace Autofac.Extensions.DependencyInjection
         public AutofacServiceProviderFactory(Action<ContainerBuilder> configurationAction = null)
         {
             _configurationAction = configurationAction ?? (builder => { });
+            _containerBuilder = new ContainerBuilder();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AutofacServiceProviderFactory"/> class.
+        /// </summary>
+        /// <param name="containerBuilder">The <see cref="ContainerBuilder"/> to use.</param>
+        public AutofacServiceProviderFactory(ContainerBuilder containerBuilder)
+        {
+            _containerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
+            _configurationAction = builder => { };
         }
 
         /// <summary>
@@ -51,13 +63,10 @@ namespace Autofac.Extensions.DependencyInjection
         /// <returns>A container builder that can be used to create an <see cref="T:System.IServiceProvider" />.</returns>
         public ContainerBuilder CreateBuilder(IServiceCollection services)
         {
-            var builder = new ContainerBuilder();
+            _containerBuilder.Populate(services);
+            _configurationAction(_containerBuilder);
 
-            builder.Populate(services);
-
-            _configurationAction(builder);
-
-            return builder;
+            return _containerBuilder;
         }
 
         /// <summary>

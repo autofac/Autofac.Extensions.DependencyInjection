@@ -40,5 +40,21 @@ namespace Autofac.Extensions.DependencyInjection.Test
             var builder = factory.CreateBuilder(collection);
             Assert.Equal("Foo", builder.Build().Resolve<string>());
         }
+
+        [Fact]
+        public void AddAutofacWithContainerBuilderWillReturnSameBuilderAndRegisterServices()
+        {
+            var originalBuilder = new ContainerBuilder();
+            originalBuilder.Register(c => "Foo");
+
+            var collection = new ServiceCollection();
+            collection.AddAutofac(originalBuilder);
+
+            var serviceProvider = collection.BuildServiceProvider();
+            var factory = (IServiceProviderFactory<ContainerBuilder>)serviceProvider.GetService(typeof(IServiceProviderFactory<ContainerBuilder>));
+            var builder = factory.CreateBuilder(collection);
+            Assert.Same(originalBuilder, builder);
+            Assert.Equal("Foo", builder.Build().Resolve<string>());
+        }
     }
 }
