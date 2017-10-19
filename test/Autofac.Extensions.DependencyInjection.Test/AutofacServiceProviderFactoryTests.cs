@@ -7,6 +7,12 @@ namespace Autofac.Extensions.DependencyInjection.Test
     public class AutofacServiceProviderFactoryTests
     {
         [Fact]
+        public void CtorThrowsWhenNullContainerBuilder()
+        {
+            Assert.Throws<ArgumentNullException>(() => new AutofacServiceProviderFactory((ContainerBuilder)null));
+        }
+
+        [Fact]
         public void CreateBuilderReturnsNewInstance()
         {
             var factory = new AutofacServiceProviderFactory();
@@ -78,6 +84,19 @@ namespace Autofac.Extensions.DependencyInjection.Test
             var serviceProvider = factory.CreateServiceProvider(new ContainerBuilder());
 
             Assert.IsType<AutofacServiceProvider>(serviceProvider);
+        }
+
+        [Fact]
+        public void CreateBuilderReturnsSameContainerBuilderAsTheOneProvidedInCtor()
+        {
+            var originalBuilder = new ContainerBuilder();
+            originalBuilder.Register(c => "Foo");
+            var factory = new AutofacServiceProviderFactory(originalBuilder);
+
+            var builder = factory.CreateBuilder(new ServiceCollection());
+
+            Assert.Same(originalBuilder, builder);
+            Assert.Equal("Foo", builder.Build().Resolve<string>());
         }
     }
 }

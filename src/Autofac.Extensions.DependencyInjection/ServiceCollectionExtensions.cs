@@ -43,5 +43,18 @@ namespace Autofac.Extensions.DependencyInjection
         {
             return services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory(configurationAction));
         }
+
+        /// <summary>
+        /// Adds the <see cref="AutofacServiceProviderFactory"/> to the service collection.
+        /// </summary>
+        /// <param name="services">The service collection to add the factory to.</param>
+        /// <param name="containerBuilder">The <see cref="ContainerBuilder"/> to be used in the ServiceProviderFactory.</param>
+        /// <returns>The service collection.</returns>
+        public static IServiceCollection AddAutofac(this IServiceCollection services, ContainerBuilder containerBuilder)
+        {
+            if (containerBuilder == null) throw new ArgumentNullException(nameof(containerBuilder));
+
+            return services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory(containerBuilder));
+        }
     }
 }
