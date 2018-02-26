@@ -34,6 +34,7 @@ namespace Autofac.Extensions.DependencyInjection
     /// <seealso cref="Microsoft.Extensions.DependencyInjection.IServiceScope" />
     internal class AutofacServiceScope : IServiceScope
     {
+        private bool _disposed;
         private readonly ILifetimeScope _lifetimeScope;
 
         /// <summary>
@@ -61,7 +62,29 @@ namespace Autofac.Extensions.DependencyInjection
         /// </summary>
         public void Dispose()
         {
-            this._lifetimeScope.Dispose();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        /// <see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.
+        /// </param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this._disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                this._lifetimeScope.Dispose();
+            }
+
+            this._disposed = true;
         }
     }
 }

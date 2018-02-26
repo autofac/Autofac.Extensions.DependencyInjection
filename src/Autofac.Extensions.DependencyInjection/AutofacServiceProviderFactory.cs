@@ -29,7 +29,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Autofac.Extensions.DependencyInjection
 {
     /// <summary>
-    /// A factory for creating a <see cref="ContainerBuilder"/> and an <see cref="T:System.IServiceProvider" />.
+    /// A factory for creating a <see cref="ContainerBuilder"/> and an <see cref="IServiceProvider" />.
     /// </summary>
     public class AutofacServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
     {
@@ -45,10 +45,10 @@ namespace Autofac.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Creates a container builder from an <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />.
+        /// Creates a container builder from an <see cref="IServiceCollection" />.
         /// </summary>
         /// <param name="services">The collection of services</param>
-        /// <returns>A container builder that can be used to create an <see cref="T:System.IServiceProvider" />.</returns>
+        /// <returns>A container builder that can be used to create an <see cref="IServiceProvider" />.</returns>
         public ContainerBuilder CreateBuilder(IServiceCollection services)
         {
             var builder = new ContainerBuilder();
@@ -61,10 +61,10 @@ namespace Autofac.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Creates an <see cref="T:System.IServiceProvider" /> from the container builder.
+        /// Creates an <see cref="IServiceProvider" /> from the container builder.
         /// </summary>
         /// <param name="containerBuilder">The container builder</param>
-        /// <returns>An <see cref="T:System.IServiceProvider" /></returns>
+        /// <returns>An <see cref="IServiceProvider" /></returns>
         public IServiceProvider CreateServiceProvider(ContainerBuilder containerBuilder)
         {
             if (containerBuilder == null) throw new ArgumentNullException(nameof(containerBuilder));
