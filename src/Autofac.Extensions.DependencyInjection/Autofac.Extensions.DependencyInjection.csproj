@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Autofac implementation of the interfaces in Microsoft.Extensions.DependencyInjection.Abstractions, the .NET Framework dependency injection abstraction.</Description>
-    <VersionPrefix>4.2.1</VersionPrefix>
+    <VersionPrefix>4.2.2</VersionPrefix>
     <TargetFramework>netstandard1.1</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
