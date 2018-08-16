@@ -35,7 +35,7 @@ namespace Autofac.Extensions.DependencyInjection
     internal class AutofacServiceScope : IServiceScope
     {
         private bool _disposed;
-        private readonly ILifetimeScope _lifetimeScope;
+        private readonly AutofacServiceProvider _serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutofacServiceScope"/> class.
@@ -45,8 +45,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </param>
         public AutofacServiceScope(ILifetimeScope lifetimeScope)
         {
-            this._lifetimeScope = lifetimeScope;
-            this.ServiceProvider = this._lifetimeScope.Resolve<IServiceProvider>();
+            this._serviceProvider = new AutofacServiceProvider(lifetimeScope);
         }
 
         /// <summary>
@@ -55,7 +54,13 @@ namespace Autofac.Extensions.DependencyInjection
         /// <value>
         /// An <see cref="IServiceProvider" /> that can be used to resolve dependencies from the scope.
         /// </value>
-        public IServiceProvider ServiceProvider { get; }
+        public IServiceProvider ServiceProvider
+        {
+            get
+            {
+                return this._serviceProvider;
+            }
+        }
 
         /// <summary>
         /// Disposes of the lifetime scope and resolved disposable services.
@@ -74,17 +79,15 @@ namespace Autofac.Extensions.DependencyInjection
         /// </param>
         protected virtual void Dispose(bool disposing)
         {
-            if (this._disposed)
+            if (!this._disposed)
             {
-                return;
-            }
+                if (disposing)
+                {
+                    this._serviceProvider.Dispose();
+                }
 
-            if (disposing)
-            {
-                this._lifetimeScope.Dispose();
+                this._disposed = true;
             }
-
-            this._disposed = true;
         }
     }
 }
