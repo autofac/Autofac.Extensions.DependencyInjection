@@ -156,6 +156,31 @@ namespace Autofac.Extensions.DependencyInjection.Test
         }
 
         [Fact]
+        public void CanResolveTOptionsFromChildContainer()
+        {
+            ServiceCollection services = new ServiceCollection();
+
+            ContainerBuilder builder = new ContainerBuilder();
+            builder.Populate(services);
+
+            IContainer rootContainer = builder.Build();
+            ILifetimeScope childContainer = rootContainer.BeginLifetimeScope((a) =>
+            {
+                ServiceCollection childServices = new ServiceCollection();
+                childServices.AddOptions();
+                childServices.Configure<TestOptions>((b) =>
+                {
+                    b.Value = 6;
+                });
+                a.Populate(childServices);
+            });
+
+            AutofacServiceProvider childSp = new AutofacServiceProvider(childContainer);
+            IOptions<TestOptions> options = childSp.GetRequiredService<IOptions<TestOptions>>();
+            Assert.Equal(6, options.Value?.Value);
+        }
+
+        [Fact]
         public void RegistrationsAddedAfterPopulateComeLastWhenResolvedWithIEnumerable()
         {
             const string s1 = "s1";
