@@ -158,10 +158,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CanResolveTOptionsFromChildContainer()
         {
-            ServiceCollection services = new ServiceCollection();
-
             ContainerBuilder builder = new ContainerBuilder();
-            builder.Populate(services);
 
             IContainer rootContainer = builder.Build();
             ILifetimeScope childContainer = rootContainer.BeginLifetimeScope((a) =>
