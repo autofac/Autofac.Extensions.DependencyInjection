@@ -77,6 +77,7 @@ function Install-DotNetCli
   # Download the dotnet CLI install script
   if (!(Test-Path .\dotnet\install.ps1))
   {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest "https://dot.net/v1/dotnet-install.ps1" -OutFile ".\.dotnet\dotnet-install.ps1"
   }
 
