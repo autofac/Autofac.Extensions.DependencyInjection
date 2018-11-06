@@ -126,6 +126,28 @@ namespace Autofac.Extensions.DependencyInjection.Test
         }
 
         [Fact]
+        public void CanResolveOptionsFromChildScopeProvider()
+        {
+            // Issue #32: Registering options in a child scope fails to resolve IOptions<T>.
+            var container = new ContainerBuilder().Build();
+            var scope = container.BeginLifetimeScope(b =>
+            {
+                var services = new ServiceCollection();
+                services
+                    .AddOptions()
+                    .Configure<TestOptions>(opt =>
+                    {
+                        opt.Value = 6;
+                    });
+                b.Populate(services);
+            });
+
+            var provider = new AutofacServiceProvider(scope);
+            var options = provider.GetRequiredService<IOptions<TestOptions>>();
+            Assert.Equal(6, options.Value.Value);
+        }
+
+        [Fact]
         public void CanGenerateFactoryService()
         {
             var builder = new ContainerBuilder();
