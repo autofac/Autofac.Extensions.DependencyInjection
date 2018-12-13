@@ -1,19 +1,19 @@
 # Autofac.Extensions.DependencyInjection
 
-Autofac is an [IoC container](http://martinfowler.com/articles/injection.html) for Microsoft .NET. It manages the dependencies between classes so that **applications stay easy to change as they grow** in size and complexity. This is achieved by treating regular .NET classes as *[components](http://autofac.readthedocs.io/en/latest/glossary.html)*.
+Autofac is an [IoC container](http://martinfowler.com/articles/injection.html) for Microsoft .NET. It manages the dependencies between classes so that **applications stay easy to change as they grow** in size and complexity. This is achieved by treating regular .NET classes as *[components](https://autofac.readthedocs.io/en/latest/glossary.html)*.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/1mhkjcqr1ug80lra/branch/develop?svg=true)](https://ci.appveyor.com/project/Autofac/autofac-extensions-dependencyinjection/branch/develop)
 
 Please file issues and pull requests for this package in this repository rather than in the Autofac core repo.
 
-- [Documentation - .NET Core Integration](http://autofac.readthedocs.io/en/latest/integration/netcore.html)
-- [Documentation - ASP.NET Core Integration](http://autofac.readthedocs.io/en/latest/integration/aspnetcore.html)
+- [Documentation - .NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/netcore.html)
+- [Documentation - ASP.NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html)
 - [NuGet](https://www.nuget.org/packages/Autofac.Extensions.DependencyInjection)
-- [Contributing](http://autofac.readthedocs.io/en/latest/contributors.html)
+- [Contributing](https://autofac.readthedocs.io/en/latest/contributors.html)
 
 ## Get Started in ASP.NET Core
 
-This quick start shows how to use the `IServiceProviderFactory{T}` integration that ASP.NET Core supports to help automatically build the root service provider for you. If you want more manual control, [check out the documentation for examples](http://autofac.readthedocs.io/en/latest/integration/aspnetcore.html).
+This quick start shows how to use the `IServiceProviderFactory{T}` integration that ASP.NET Core supports to help automatically build the root service provider for you. If you want more manual control, [check out the documentation for examples](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html).
 
 - Reference the `Autofac.Extensions.DependencyInjection` package from NuGet.
 - In your `Program.Main` method, where you configure the `WebHostBuilder`, call `AddAutofac` to hook Autofac into the startup pipeline.
@@ -92,8 +92,8 @@ public class Startup
 }
 ```
 
-Our [ASP.NET Core](http://docs.autofac.org/en/latest/integration/aspnetcore.html) integration documentation contains more information about using Autofac with ASP.NET Core.
+Our [ASP.NET Core](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html) integration documentation contains more information about using Autofac with ASP.NET Core.
 
 ## Get Help
 
-**Need help with Autofac?** We have [a documentation site](http://autofac.readthedocs.io/) as well as [API documentation](http://autofac.org/apidoc/). We're ready to answer your questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/autofac) or check out the [discussion forum](https://groups.google.com/forum/#forum/autofac).
+**Need help with Autofac?** We have [a documentation site](https://autofac.readthedocs.io/) as well as [API documentation](https://autofac.org/apidoc/). We're ready to answer your questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/autofac) or check out the [discussion forum](https://groups.google.com/forum/#forum/autofac).
