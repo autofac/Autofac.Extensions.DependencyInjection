@@ -32,6 +32,16 @@ namespace Autofac.Extensions.DependencyInjection.Test
         }
 
         [Fact]
+        public void ServiceProviderTypesAreNotTracked()
+        {
+            var builder = new ContainerBuilder();
+            builder.Populate(Enumerable.Empty<ServiceDescriptor>());
+            var container = builder.Build();
+
+            container.AssertOwnership<IServiceProvider>(InstanceOwnership.ExternallyOwned);
+        }
+
+        [Fact]
         public void PopulateRegistersServiceScopeFactory()
         {
             var builder = new ContainerBuilder();
