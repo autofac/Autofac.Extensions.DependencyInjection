@@ -87,7 +87,7 @@ namespace Autofac.Extensions.DependencyInjection
             IEnumerable<ServiceDescriptor> descriptors,
             object lifetimeScopeTagForSingletons)
         {
-            builder.RegisterType<AutofacServiceProvider>().As<IServiceProvider>();
+            builder.RegisterType<AutofacServiceProvider>().As<IServiceProvider>().ExternallyOwned();
             builder.RegisterType<AutofacServiceScopeFactory>().As<IServiceScopeFactory>();
 
             Register(builder, descriptors, lifetimeScopeTagForSingletons);

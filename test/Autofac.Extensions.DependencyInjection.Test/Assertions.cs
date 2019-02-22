@@ -21,28 +21,28 @@ namespace Autofac.Extensions.DependencyInjection.Test
             Assert.IsAssignableFrom<TImplementation>(service);
         }
 
-        public static void AssertSharing<TComponent>(this IComponentContext context, InstanceSharing sharing)
+        public static void AssertSharing<TService>(this IComponentContext context, InstanceSharing sharing)
         {
-            var cr = context.RegistrationFor<TComponent>();
+            var cr = context.RegistrationFor<TService>();
             Assert.Equal(sharing, cr.Sharing);
         }
 
-        public static void AssertLifetime<TComponent, TLifetime>(this IComponentContext context)
+        public static void AssertLifetime<TService, TLifetime>(this IComponentContext context)
         {
-            var cr = context.RegistrationFor<TComponent>();
+            var cr = context.RegistrationFor<TService>();
             Assert.IsType<TLifetime>(cr.Lifetime);
         }
 
-        public static void AssertOwnership<TComponent>(this IComponentContext context, InstanceOwnership ownership)
+        public static void AssertOwnership<TService>(this IComponentContext context, InstanceOwnership ownership)
         {
-            var cr = context.RegistrationFor<TComponent>();
+            var cr = context.RegistrationFor<TService>();
             Assert.Equal(ownership, cr.Ownership);
         }
 
-        public static IComponentRegistration RegistrationFor<TComponent>(this IComponentContext context)
+        public static IComponentRegistration RegistrationFor<TService>(this IComponentContext context)
         {
             IComponentRegistration r;
-            Assert.True(context.ComponentRegistry.TryGetRegistration(new TypedService(typeof(TComponent)), out r));
+            Assert.True(context.ComponentRegistry.TryGetRegistration(new TypedService(typeof(TService)), out r));
             return r;
         }
     }
