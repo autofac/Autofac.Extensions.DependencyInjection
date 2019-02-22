@@ -32,7 +32,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         }
 
         [Fact]
-        public void ServiceProviderTypesAreNotTracked()
+        public void ServiceProviderInstancesAreNotTracked()
         {
             var builder = new ContainerBuilder();
             builder.Populate(Enumerable.Empty<ServiceDescriptor>());
