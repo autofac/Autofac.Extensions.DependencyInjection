@@ -87,6 +87,11 @@ namespace Autofac.Extensions.DependencyInjection
         }
 
         /// <summary>
+        /// Gets the underlying instance of <see cref="ILifetimeScope" />.
+        /// </summary>
+        public ILifetimeScope LifetimeScope => _lifetimeScope;
+
+        /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
         /// <param name="disposing">

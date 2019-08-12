@@ -16,7 +16,7 @@ Please file issues and pull requests for this package in this repository rather 
 This quick start shows how to use the `IServiceProviderFactory{T}` integration that ASP.NET Core supports to help automatically build the root service provider for you. If you want more manual control, [check out the documentation for examples](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html).
 
 - Reference the `Autofac.Extensions.DependencyInjection` package from NuGet.
-- In your `Program.Main` method, where you configure the `WebHostBuilder`, call `AddAutofac` to hook Autofac into the startup pipeline.
+- In your `Program.Main` method, where you configure the `HostBuilder`, call `UseAutofac` to hook Autofac into the startup pipeline.
 - In the `ConfigureServices` method of your `Startup` class register things into the `IServiceCollection` using extension methods provided by other libraries.
 - In the `ConfigureContainer` method of your `Startup` class register things directly into an Autofac `ContainerBuilder`.
 
@@ -26,26 +26,27 @@ The `IServiceProvider` will automatically be created for you, so there's nothing
 ```C#
 public class Program
 {
-  public static void Main(string[] args)
+  public static async Task Main(string[] args)
   {
-    // The ConfigureServices call here allows for
+    // The UseAutofac call here allows for
     // ConfigureContainer to be supported in Startup with
     // a strongly-typed ContainerBuilder.
-    var host = new WebHostBuilder()
-        .UseKestrel()
-        .ConfigureServices(services => services.AddAutofac())
-        .UseContentRoot(Directory.GetCurrentDirectory())
+    var host = Host.CreateDefaultBuilder(args)
+      .UseAutofac()
+      .ConfigureWebHostDefaults(webHostBuilder => {
+        webHostBuilder.UseContentRoot(Directory.GetCurrentDirectory())
         .UseIISIntegration()
         .UseStartup<Startup>()
-        .Build();
+      })
+      .Build();
 
-    host.Run();
+    await host.RunAsync();
   }
 }
 
 public class Startup
 {
-  public Startup(IHostingEnvironment env)
+  public Startup(IWebHostEnvironment env)
   {
     var builder = new ConfigurationBuilder()
         .SetBasePath(env.ContentRootPath)
@@ -55,7 +56,7 @@ public class Startup
     this.Configuration = builder.Build();
   }
 
-  public IConfigurationRoot Configuration { get; private set; }
+  public IConfiguration Configuration { get; private set; }
 
   // ConfigureServices is where you register dependencies. This gets
   // called by the runtime before the ConfigureContainer method, below.
@@ -92,7 +93,7 @@ public class Startup
 }
 ```
 
-Our [ASP.NET Core](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html) integration documentation contains more information about using Autofac with ASP.NET Core.
+Our [ASP.NET Core](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html) integration documentation contains more information about using Autofac with ASP.NET Core. Please also check out the [samples](samples) within this repository.
 
 ## Get Help
 
