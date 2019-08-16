@@ -41,5 +41,27 @@ namespace Autofac.Extensions.DependencyInjection
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
         public static IHostBuilder UseAutofac(this IHostBuilder hostBuilder, Action<ContainerBuilder> configurationAction = null) =>
             hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory(configurationAction));
+
+        /// <summary>
+        /// Register the <see cref="AutofacChildScopeServiceProviderFactory" /> with the Host.
+        /// </summary>
+        /// <param name="hostBuilder">The instance of the <see cref="IHostBuilder"/>.</param>
+        /// <param name="getRootLifetimeScopeFunc">Function to retrieve the root-container instance built using <see cref="ContainerBuilder"/>.</param>
+        /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
+        /// <returns>The instance of the <see cref="IHostBuilder"/>.</returns>
+        public static IHostBuilder UseAutofacChildScopeFactory(this IHostBuilder hostBuilder, Func<ILifetimeScope> getRootLifetimeScopeFunc, Action<ContainerBuilder> configurationAction = null) =>
+            hostBuilder.UseServiceProviderFactory(
+                new AutofacChildScopeServiceProviderFactory(getRootLifetimeScopeFunc, configurationAction));
+
+        /// <summary>
+        /// Register the <see cref="AutofacChildScopeServiceProviderFactory" /> with the Host.
+        /// </summary>
+        /// <param name="hostBuilder">The instance of the <see cref="IHostBuilder"/>.</param>
+        /// <param name="rootLifetimeScope">The root-container instance built using <see cref="ContainerBuilder"/>.</param>
+        /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
+        /// <returns>The instance of the <see cref="IHostBuilder"/>.</returns>
+        public static IHostBuilder UseAutofacChildScopeFactory(this IHostBuilder hostBuilder, ILifetimeScope rootLifetimeScope, Action<ContainerBuilder> configurationAction = null) =>
+            hostBuilder.UseServiceProviderFactory(
+                new AutofacChildScopeServiceProviderFactory(rootLifetimeScope, configurationAction));
     }
 }
