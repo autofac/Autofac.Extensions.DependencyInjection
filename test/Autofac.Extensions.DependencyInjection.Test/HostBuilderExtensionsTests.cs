@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Xunit;
 
 namespace Autofac.Extensions.DependencyInjection.Test
@@ -15,5 +14,29 @@ namespace Autofac.Extensions.DependencyInjection.Test
 
             Assert.IsAssignableFrom<AutofacServiceProvider>(host.Services);
         }
+
+        [Fact]
+        public void UseAutofacChildScopeFactoryWithDelegateAutofacServiceProviderResolveable()
+        {
+            var host = Host.CreateDefaultBuilder(null)
+                .UseAutofacChildScopeFactory(GetRootLifetimeScope)
+                .Build();
+
+            Assert.IsAssignableFrom<AutofacServiceProvider>(host.Services);
+        }
+
+        [Fact]
+        public void UseAutofacChildScopeFactoryWithInstanceAutofacServiceProviderResolveable()
+        {
+            var rootLifetimeScope = GetRootLifetimeScope();
+
+            var host = Host.CreateDefaultBuilder(null)
+                .UseAutofacChildScopeFactory(rootLifetimeScope)
+                .Build();
+
+            Assert.IsAssignableFrom<AutofacServiceProvider>(host.Services);
+        }
+
+        private static ILifetimeScope GetRootLifetimeScope() => new ContainerBuilder().Build();
     }
 }
