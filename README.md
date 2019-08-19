@@ -93,7 +93,7 @@ public class Startup
 }
 ```
 
-Our [ASP.NET Core](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html) integration documentation contains more information about using Autofac with ASP.NET Core. Please also check out the [samples](samples) within this repository.
+Our [ASP.NET Core](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html) integration documentation contains more information about using Autofac with ASP.NET Core.
 
 ## Get Help
 
