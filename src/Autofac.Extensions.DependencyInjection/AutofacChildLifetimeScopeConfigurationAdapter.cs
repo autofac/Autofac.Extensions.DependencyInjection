@@ -29,11 +29,11 @@ using System.Collections.Generic;
 namespace Autofac.Extensions.DependencyInjection
 {
     /// <summary>
-    /// Configuration adapter for <see cref="AutofacChildScopeServiceProviderFactory" />.
+    /// Configuration adapter for <see cref="AutofacChildLifetimeScopeServiceProviderFactory" />.
     /// </summary>
-    public class AutofacChildScopeConfigurationAdapter
+    public class AutofacChildLifetimeScopeConfigurationAdapter
     {
-        private readonly List<Action<ContainerBuilder>> _childScopeConfigurationActions = new List<Action<ContainerBuilder>>();
+        private readonly List<Action<ContainerBuilder>> _configurationActions = new List<Action<ContainerBuilder>>();
 
         /// <summary>
         /// Adds a configuration action that will be executed when the child <see cref="ILifetimeScope"/> is created.
@@ -44,12 +44,12 @@ namespace Autofac.Extensions.DependencyInjection
         {
             if (configurationAction == null) throw new ArgumentNullException(nameof(configurationAction));
 
-            _childScopeConfigurationActions.Add(configurationAction);
+            _configurationActions.Add(configurationAction);
         }
 
         /// <summary>
         /// Gets the list of configuration actions to be executed on the <see cref="ContainerBuilder"/> for the child <see cref="ILifetimeScope"/>.
         /// </summary>
-        public IReadOnlyList<Action<ContainerBuilder>> ChildScopeConfigurationActions => _childScopeConfigurationActions;
+        public IReadOnlyList<Action<ContainerBuilder>> ConfigurationActions => _configurationActions;
     }
 }

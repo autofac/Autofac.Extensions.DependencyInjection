@@ -31,18 +31,18 @@ namespace Autofac.Extensions.DependencyInjection
     /// <summary>
     /// A factory for creating a <see cref="IServiceProvider"/> that wraps a child <see cref="ILifetimeScope"/> created from an existing parent <see cref="ILifetimeScope"/>.
     /// </summary>
-    public class AutofacChildScopeServiceProviderFactory : IServiceProviderFactory<AutofacChildScopeConfigurationAdapter>
+    public class AutofacChildLifetimeScopeServiceProviderFactory : IServiceProviderFactory<AutofacChildLifetimeScopeConfigurationAdapter>
     {
         private readonly Action<ContainerBuilder> _containerConfigurationAction;
         private readonly ILifetimeScope _rootLifetimeScope;
         private static readonly Action<ContainerBuilder> FallbackConfigurationAction = builder => { };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AutofacChildScopeServiceProviderFactory"/> class.
+        /// Initializes a new instance of the <see cref="AutofacChildLifetimeScopeServiceProviderFactory"/> class.
         /// </summary>
         /// <param name="rootLifetimeScopeAccessor">A function to retrieve the root <see cref="ILifetimeScope"/> instance.</param>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
-        public AutofacChildScopeServiceProviderFactory(Func<ILifetimeScope> rootLifetimeScopeAccessor, Action<ContainerBuilder> configurationAction = null)
+        public AutofacChildLifetimeScopeServiceProviderFactory(Func<ILifetimeScope> rootLifetimeScopeAccessor, Action<ContainerBuilder> configurationAction = null)
         {
             if (rootLifetimeScopeAccessor == null) throw new ArgumentNullException(nameof(rootLifetimeScopeAccessor));
 
@@ -51,11 +51,11 @@ namespace Autofac.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AutofacChildScopeServiceProviderFactory"/> class.
+        /// Initializes a new instance of the <see cref="AutofacChildLifetimeScopeServiceProviderFactory"/> class.
         /// </summary>
         /// <param name="rootLifetimeScope">The root <see cref="ILifetimeScope"/> instance.</param>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
-        public AutofacChildScopeServiceProviderFactory(ILifetimeScope rootLifetimeScope, Action<ContainerBuilder> configurationAction = null)
+        public AutofacChildLifetimeScopeServiceProviderFactory(ILifetimeScope rootLifetimeScope, Action<ContainerBuilder> configurationAction = null)
         {
             _rootLifetimeScope = rootLifetimeScope ?? throw new ArgumentNullException(nameof(rootLifetimeScope));
             _containerConfigurationAction = configurationAction ?? FallbackConfigurationAction;
@@ -66,9 +66,9 @@ namespace Autofac.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">The collection of services.</param>
         /// <returns>A container builder that can be used to create an <see cref="IServiceProvider" />.</returns>
-        public AutofacChildScopeConfigurationAdapter CreateBuilder(IServiceCollection services)
+        public AutofacChildLifetimeScopeConfigurationAdapter CreateBuilder(IServiceCollection services)
         {
-            var actions = new AutofacChildScopeConfigurationAdapter();
+            var actions = new AutofacChildLifetimeScopeConfigurationAdapter();
 
             actions.Add(builder => builder.Populate(services));
             actions.Add(builder => _containerConfigurationAction(builder));
@@ -79,15 +79,15 @@ namespace Autofac.Extensions.DependencyInjection
         /// <summary>
         /// Creates an <see cref="IServiceProvider" /> from the container builder.
         /// </summary>
-        /// <param name="autofacChildScopeConfigurationAdapter">The adapter holding configuration applied to <see cref="ContainerBuilder"/> creating the <see cref="IServiceProvider"/>.</param>
+        /// <param name="configurationAdapter">The adapter holding configuration applied to <see cref="ContainerBuilder"/> creating the <see cref="IServiceProvider"/>.</param>
         /// <returns>An <see cref="IServiceProvider" />.</returns>
-        public IServiceProvider CreateServiceProvider(AutofacChildScopeConfigurationAdapter autofacChildScopeConfigurationAdapter)
+        public IServiceProvider CreateServiceProvider(AutofacChildLifetimeScopeConfigurationAdapter configurationAdapter)
         {
-            if (autofacChildScopeConfigurationAdapter == null) throw new ArgumentNullException(nameof(autofacChildScopeConfigurationAdapter));
+            if (configurationAdapter == null) throw new ArgumentNullException(nameof(configurationAdapter));
 
             var scope = _rootLifetimeScope.BeginLifetimeScope(scopeBuilder =>
             {
-                foreach (var action in autofacChildScopeConfigurationAdapter.ChildScopeConfigurationActions)
+                foreach (var action in configurationAdapter.ConfigurationActions)
                 {
                     action(scopeBuilder);
                 }
