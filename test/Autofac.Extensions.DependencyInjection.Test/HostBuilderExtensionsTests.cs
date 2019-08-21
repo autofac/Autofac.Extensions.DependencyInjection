@@ -19,7 +19,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         public void UseAutofacChildScopeFactoryWithDelegateAutofacServiceProviderResolveable()
         {
             var host = Host.CreateDefaultBuilder(null)
-                .UseAutofacChildScopeFactory(GetRootLifetimeScope)
+                .UseAutofacChildLifetimeScopeFactory(GetRootLifetimeScope)
                 .Build();
 
             Assert.IsAssignableFrom<AutofacServiceProvider>(host.Services);
@@ -31,7 +31,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
             var rootLifetimeScope = GetRootLifetimeScope();
 
             var host = Host.CreateDefaultBuilder(null)
-                .UseAutofacChildScopeFactory(rootLifetimeScope)
+                .UseAutofacChildLifetimeScopeFactory(rootLifetimeScope)
                 .Build();
 
             Assert.IsAssignableFrom<AutofacServiceProvider>(host.Services);
