@@ -50,7 +50,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// <param name="rootLifetimeScopeAccessor">A function to retrieve the root <see cref="ILifetimeScope"/> instance.</param>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
         /// <returns>The same instance of the <see cref="IHostBuilder" /> for chaining.</returns>
-        public static IHostBuilder UseAutofacChildScopeFactory(this IHostBuilder hostBuilder, Func<ILifetimeScope> rootLifetimeScopeAccessor, Action<ContainerBuilder> configurationAction = null) =>
+        public static IHostBuilder UseAutofacChildLifetimeScopeFactory(this IHostBuilder hostBuilder, Func<ILifetimeScope> rootLifetimeScopeAccessor, Action<ContainerBuilder> configurationAction = null) =>
             hostBuilder.UseServiceProviderFactory(
                 new AutofacChildLifetimeScopeServiceProviderFactory(rootLifetimeScopeAccessor, configurationAction));
 
@@ -61,7 +61,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// <param name="rootLifetimeScope">The root <see cref="ILifetimeScope"/> instance.</param>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
         /// <returns>The same instance of the <see cref="IHostBuilder" /> for chaining.</returns>
-        public static IHostBuilder UseAutofacChildScopeFactory(this IHostBuilder hostBuilder, ILifetimeScope rootLifetimeScope, Action<ContainerBuilder> configurationAction = null) =>
+        public static IHostBuilder UseAutofacChildLifetimeScopeFactory(this IHostBuilder hostBuilder, ILifetimeScope rootLifetimeScope, Action<ContainerBuilder> configurationAction = null) =>
             hostBuilder.UseServiceProviderFactory(
                 new AutofacChildLifetimeScopeServiceProviderFactory(rootLifetimeScope, configurationAction));
     }
