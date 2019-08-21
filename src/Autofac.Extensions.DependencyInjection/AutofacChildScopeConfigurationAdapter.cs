@@ -36,7 +36,7 @@ namespace Autofac.Extensions.DependencyInjection
         private readonly List<Action<ContainerBuilder>> _childScopeConfigurationActions = new List<Action<ContainerBuilder>>();
 
         /// <summary>
-        /// Adds a configuration-actions to the list of actions that shall be executed when the scope is created.
+        /// Adds a configuration action that will be executed when the child <see cref="ILifetimeScope"/> is created.
         /// </summary>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
         /// <exception cref="ArgumentNullException">Throws when the passed configuration-action is null.</exception>
@@ -48,7 +48,7 @@ namespace Autofac.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Gets the list of configurationActions to be executed on the <see cref="ContainerBuilder"/>.
+        /// Gets the list of configuration actions to be executed on the <see cref="ContainerBuilder"/> for the child <see cref="ILifetimeScope"/>.
         /// </summary>
         public IReadOnlyList<Action<ContainerBuilder>> ChildScopeConfigurationActions => _childScopeConfigurationActions;
     }

@@ -29,7 +29,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Autofac.Extensions.DependencyInjection
 {
     /// <summary>
-    /// A factory for creating a child-scope based on a root-scope using <see cref="ILifetimeScope"/> and producing an <see cref="IServiceProvider" />.
+    /// A factory for creating a <see cref="IServiceProvider"/> that wraps a child <see cref="ILifetimeScope"/> created from an existing parent <see cref="ILifetimeScope"/>.
     /// </summary>
     public class AutofacChildScopeServiceProviderFactory : IServiceProviderFactory<AutofacChildScopeConfigurationAdapter>
     {
@@ -40,25 +40,25 @@ namespace Autofac.Extensions.DependencyInjection
         /// <summary>
         /// Initializes a new instance of the <see cref="AutofacChildScopeServiceProviderFactory"/> class.
         /// </summary>
-        /// <param name="getRootLifetimeScopeFunc">Function to retrieve the root-container instance built using <see cref="ContainerBuilder"/>.</param>
+        /// <param name="rootLifetimeScopeAccessor">A function to retrieve the root <see cref="ILifetimeScope"/> instance.</param>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
-        public AutofacChildScopeServiceProviderFactory(Func<ILifetimeScope> getRootLifetimeScopeFunc, Action<ContainerBuilder> configurationAction = null)
+        public AutofacChildScopeServiceProviderFactory(Func<ILifetimeScope> rootLifetimeScopeAccessor, Action<ContainerBuilder> configurationAction = null)
         {
-            if (getRootLifetimeScopeFunc == null) throw new ArgumentNullException(nameof(getRootLifetimeScopeFunc));
+            if (rootLifetimeScopeAccessor == null) throw new ArgumentNullException(nameof(rootLifetimeScopeAccessor));
 
-            _rootLifetimeScope = getRootLifetimeScopeFunc();
-            _containerConfigurationAction = configurationAction ?? AutofacChildScopeServiceProviderFactory.FallbackConfigurationAction;
+            _rootLifetimeScope = rootLifetimeScopeAccessor();
+            _containerConfigurationAction = configurationAction ?? FallbackConfigurationAction;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutofacChildScopeServiceProviderFactory"/> class.
         /// </summary>
-        /// <param name="rootLifetimeScope">The root-container instance built using <see cref="ContainerBuilder"/>.</param>
+        /// <param name="rootLifetimeScope">The root <see cref="ILifetimeScope"/> instance.</param>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
         public AutofacChildScopeServiceProviderFactory(ILifetimeScope rootLifetimeScope, Action<ContainerBuilder> configurationAction = null)
         {
             _rootLifetimeScope = rootLifetimeScope ?? throw new ArgumentNullException(nameof(rootLifetimeScope));
-            _containerConfigurationAction = configurationAction ?? AutofacChildScopeServiceProviderFactory.FallbackConfigurationAction;
+            _containerConfigurationAction = configurationAction ?? FallbackConfigurationAction;
         }
 
         /// <summary>
