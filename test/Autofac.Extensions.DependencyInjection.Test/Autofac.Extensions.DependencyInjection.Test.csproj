@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0-preview8.19405.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Specification.Tests" Version="3.0.0-preview8.19405.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.0.0-preview8.19405.4" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta007">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="xunit" Version="2.4.1" />

@@ -24,6 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Globalization;
 
 namespace Autofac.Extensions.DependencyInjection
 {
@@ -41,7 +42,7 @@ namespace Autofac.Extensions.DependencyInjection
         public static ILifetimeScope GetAutofacRoot(this IServiceProvider serviceProvider)
         {
             if (!(serviceProvider is AutofacServiceProvider autofacServiceProvider))
-                throw new InvalidOperationException($"Instance of {nameof(serviceProvider)} is not of type {nameof(AutofacServiceProvider)}");
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, ServiceProviderExtensionsResources.WrongProviderType, serviceProvider?.GetType()));
 
             return autofacServiceProvider.LifetimeScope;
         }

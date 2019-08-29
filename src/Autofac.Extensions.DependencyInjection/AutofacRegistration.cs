@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Autofac.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -87,6 +88,11 @@ namespace Autofac.Extensions.DependencyInjection
             IEnumerable<ServiceDescriptor> descriptors,
             object lifetimeScopeTagForSingletons)
         {
+            if (descriptors == null)
+            {
+                throw new ArgumentNullException(nameof(descriptors));
+            }
+
             builder.RegisterType<AutofacServiceProvider>().As<IServiceProvider>().ExternallyOwned();
             builder.RegisterType<AutofacServiceScopeFactory>().As<IServiceScopeFactory>();
 
@@ -154,6 +160,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// with provided <paramref name="lifetimeScopeTagForSingletons"/>
         /// instead of using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.SingleInstance"/>.
         /// </param>
+        [SuppressMessage("CA2000", "CA2000", Justification = "Registrations created here are disposed when the built container is disposed.")]
         private static void Register(
             ContainerBuilder builder,
             IEnumerable<ServiceDescriptor> descriptors,
