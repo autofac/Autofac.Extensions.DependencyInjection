@@ -24,13 +24,11 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using Microsoft.Extensions.Hosting;
 
 namespace Autofac.Extensions.DependencyInjection
 {
     /// <summary>
-    /// Extension method on <see cref="IServiceProvider" /> to get the instance of <see cref="AutofacServiceProvider"/> when it has been registered with <see cref="IHost"/>.
-    /// <seealso cref="HostBuilderExtensions" />
+    /// Extension methods for use with the <see cref="AutofacServiceProvider"/>.
     /// </summary>
     public static class ServiceProviderExtensions
     {
