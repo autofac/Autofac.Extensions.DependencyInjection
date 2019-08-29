@@ -28,15 +28,16 @@ public class Program
 {
   public static async Task Main(string[] args)
   {
-    // The UseAutofac call here allows for
+    // The service provider factory used here allows for
     // ConfigureContainer to be supported in Startup with
     // a strongly-typed ContainerBuilder.
     var host = Host.CreateDefaultBuilder(args)
-      .UseAutofac()
+      .UseServiceProviderFactory(new AutofacServiceProviderFactory())
       .ConfigureWebHostDefaults(webHostBuilder => {
-        webHostBuilder.UseContentRoot(Directory.GetCurrentDirectory())
-        .UseIISIntegration()
-        .UseStartup<Startup>()
+        webHostBuilder
+          .UseContentRoot(Directory.GetCurrentDirectory())
+          .UseIISIntegration()
+          .UseStartup<Startup>()
       })
       .Build();
 
@@ -65,7 +66,7 @@ public class Startup
     // Add services to the collection. Don't build or return
     // any IServiceProvider or the ConfigureContainer method
     // won't get called.
-    services.AddMvc();
+    services.AddOptions();
   }
 
   // ConfigureContainer is where you can register things directly
