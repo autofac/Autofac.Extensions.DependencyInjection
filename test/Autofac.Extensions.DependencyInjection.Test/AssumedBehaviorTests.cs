@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -98,6 +99,22 @@ namespace Autofac.Extensions.DependencyInjection.Test
             Assert.Throws<ObjectDisposedException>(() => rootProvider.GetRequiredService<DisposeTracker>());
         }
 
+        [Fact]
+        public async ValueTask ServiceProviderDisposesAsync()
+        {
+            // You can't resolve things from a service provider
+            // if you dispose it.
+            var services = new ServiceCollection().AddScoped<AsyncDisposeTracker>();
+            var rootProvider = this.CreateServiceProvider(services);
+            var tracker = rootProvider.GetRequiredService<AsyncDisposeTracker>();
+            var asyncDisposer = (IAsyncDisposable)rootProvider;
+
+            await asyncDisposer.DisposeAsync();
+
+            Assert.True(tracker.AsyncDisposed);
+            Assert.False(tracker.SyncDisposed);
+        }
+
         protected abstract IServiceProvider CreateServiceProvider(IServiceCollection serviceCollection);
 
         private class DisposeTracker : IDisposable
@@ -110,6 +127,25 @@ namespace Autofac.Extensions.DependencyInjection.Test
             {
                 this.Disposed = true;
                 this.DisposeCount++;
+            }
+        }
+
+        private class AsyncDisposeTracker : IDisposable, IAsyncDisposable
+        {
+            public bool SyncDisposed { get; set; }
+
+            public bool AsyncDisposed { get; set; }
+
+            public void Dispose()
+            {
+                this.SyncDisposed = true;
+            }
+
+            public async ValueTask DisposeAsync()
+            {
+                await Task.Delay(1);
+
+                this.AsyncDisposed = true;
             }
         }
     }
