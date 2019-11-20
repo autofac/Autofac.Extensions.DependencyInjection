@@ -24,6 +24,8 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection
@@ -33,7 +35,7 @@ namespace Autofac.Extensions.DependencyInjection
     /// </summary>
     /// <seealso cref="System.IServiceProvider" />
     /// <seealso cref="Microsoft.Extensions.DependencyInjection.ISupportRequiredService" />
-    public class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IDisposable
+    public class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IDisposable, IAsyncDisposable
     {
         private readonly ILifetimeScope _lifetimeScope;
 
@@ -102,12 +104,11 @@ namespace Autofac.Extensions.DependencyInjection
         {
             if (!this._disposed)
             {
+                this._disposed = true;
                 if (disposing)
                 {
                     this._lifetimeScope.Dispose();
                 }
-
-                this._disposed = true;
             }
         }
 
@@ -118,6 +119,23 @@ namespace Autofac.Extensions.DependencyInjection
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Performs a dispose operation asynchronously.
+        /// </summary>
+        [SuppressMessage(
+            "Usage",
+            "CA1816:Dispose methods should call SuppressFinalize",
+            Justification = "DisposeAsync should also call SuppressFinalize (see various .NET internal implementations).")]
+        public async ValueTask DisposeAsync()
+        {
+            if (!this._disposed)
+            {
+                this._disposed = true;
+                await this._lifetimeScope.DisposeAsync();
+                GC.SuppressFinalize(this);
+            }
         }
     }
 }

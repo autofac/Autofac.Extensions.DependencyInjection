@@ -24,6 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection
@@ -32,7 +33,7 @@ namespace Autofac.Extensions.DependencyInjection
     /// Autofac implementation of the ASP.NET Core <see cref="IServiceScope"/>.
     /// </summary>
     /// <seealso cref="Microsoft.Extensions.DependencyInjection.IServiceScope" />
-    internal class AutofacServiceScope : IServiceScope
+    internal class AutofacServiceScope : IServiceScope, IAsyncDisposable
     {
         private bool _disposed;
         private readonly AutofacServiceProvider _serviceProvider;
@@ -81,12 +82,21 @@ namespace Autofac.Extensions.DependencyInjection
         {
             if (!this._disposed)
             {
+                this._disposed = true;
+
                 if (disposing)
                 {
                     this._serviceProvider.Dispose();
                 }
+            }
+        }
 
+        public async ValueTask DisposeAsync()
+        {
+            if (!this._disposed)
+            {
                 this._disposed = true;
+                await this._serviceProvider.DisposeAsync();
             }
         }
     }
