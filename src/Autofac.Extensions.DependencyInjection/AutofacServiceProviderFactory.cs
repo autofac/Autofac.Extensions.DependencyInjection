@@ -85,7 +85,7 @@ namespace Autofac.Extensions.DependencyInjection
 
             return this.CreateServiceProvider(container);
         }
-        
+
         /// <summary>
         /// Override this to wrap or intercept the creation of the <see cref="AutofacServiceProvider" />
         /// or inject your own.
