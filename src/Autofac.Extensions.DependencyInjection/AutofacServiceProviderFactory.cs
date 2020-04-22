@@ -50,7 +50,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </summary>
         /// <param name="createFunc">Function that will be called to create the <see cref="ContainerBuilder"/> itself.</param>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
-        public AutofacServiceProviderFactory(Func<ContainerBuilder> createFunc, Action<ContainerBuilder>? configurationAction = null)
+        public AutofacServiceProviderFactory(Func<ContainerBuilder> createFunc, Action<ContainerBuilder> configurationAction = null)
         {
             this._createFunc = createFunc ?? throw new ArgumentNullException(nameof(createFunc));
             this._configurationAction = configurationAction ?? (builder => { });
