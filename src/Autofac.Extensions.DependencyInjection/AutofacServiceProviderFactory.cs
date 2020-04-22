@@ -33,8 +33,8 @@ namespace Autofac.Extensions.DependencyInjection
     /// </summary>
     public class AutofacServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
     {
-        private readonly Func<ContainerBuilder> createFunc;
-        private readonly Action<ContainerBuilder> configurationAction;
+        private readonly Func<ContainerBuilder> _createFunc;
+        private readonly Action<ContainerBuilder> _configurationAction;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutofacServiceProviderFactory"/> class.
@@ -52,8 +52,8 @@ namespace Autofac.Extensions.DependencyInjection
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
         public AutofacServiceProviderFactory(Func<ContainerBuilder> createFunc, Action<ContainerBuilder>? configurationAction = null)
         {
-            this.createFunc = createFunc ?? throw new ArgumentNullException(nameof(createFunc));
-            this.configurationAction = configurationAction ?? (builder => { });
+            this._createFunc = createFunc ?? throw new ArgumentNullException(nameof(createFunc));
+            this._configurationAction = configurationAction ?? (builder => { });
         }
 
         /// <summary>
@@ -63,11 +63,11 @@ namespace Autofac.Extensions.DependencyInjection
         /// <returns>A container builder that can be used to create an <see cref="IServiceProvider" />.</returns>
         public ContainerBuilder CreateBuilder(IServiceCollection services)
         {
-            var builder = this.createFunc();
+            var builder = this._createFunc();
 
             builder.Populate(services);
 
-            this.configurationAction(builder);
+            this._configurationAction(builder);
 
             return builder;
         }
