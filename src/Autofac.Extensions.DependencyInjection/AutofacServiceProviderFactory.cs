@@ -83,6 +83,17 @@ namespace Autofac.Extensions.DependencyInjection
 
             var container = containerBuilder.Build();
 
+            return this.CreateServiceProvider(container);
+        }
+        
+        /// <summary>
+        /// Override this to wrap or intercept the creation of the <see cref="AutofacServiceProvider" />
+        /// or inject your own.
+        /// </summary>
+        /// <param name="container">The container.</param>
+        /// <returns>An <see cref="IServiceProvider" />.</returns>
+        protected virtual IServiceProvider CreateServiceProvider(IContainer container)
+        {
             return new AutofacServiceProvider(container);
         }
     }
