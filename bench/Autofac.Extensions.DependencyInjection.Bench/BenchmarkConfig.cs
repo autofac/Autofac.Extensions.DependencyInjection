@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
@@ -11,9 +12,12 @@ namespace Autofac.Extensions.DependencyInjection.Bench
         {
             Add(DefaultConfig.Instance);
 
+            AddJob(Job.InProcess);
+
+
             var rootFolder = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.LastIndexOf("bin", StringComparison.OrdinalIgnoreCase));
             var runFolder = DateTime.Now.ToString("u").Replace(' ', '_').Replace(':', '-');
-            ArtifactsPath = $"{rootFolder}\\BenchmarkDotNet.Artifacts\\{runFolder}";
+            ArtifactsPath = Path.Join(rootFolder, "BenchmarkDotNet.Artifacts", runFolder);
 
             AddDiagnoser(MemoryDiagnoser.Default);
         }
