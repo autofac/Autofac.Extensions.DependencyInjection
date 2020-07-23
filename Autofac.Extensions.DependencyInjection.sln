@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		appveyor.yml = appveyor.yml
 		global.json = global.json
 		NuGet.Config = NuGet.Config
+		codecov.yml = codecov.yml
+		build.ps1 = build.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Autofac.Extensions.DependencyInjection", "src\Autofac.Extensions.DependencyInjection\Autofac.Extensions.DependencyInjection.csproj", "{513C7F7A-A758-4D48-94F4-891A00F63DA1}"
@@ -26,6 +28,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "projects", "projects", "{7D26E232-3D30-4151-BB0A-C5965419F268}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchProject.AutofacApiServer", "bench\projects\Bench.AutofacApiServer\BenchProject.AutofacApiServer.csproj", "{F835591F-9578-411E-908F-BB46FD4DB00C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{4072A677-5ACA-4CA4-B5EB-9B9DE7D1DD08}"
+ProjectSection(SolutionItems) = preProject
+	build\Analyzers.ruleset = build\Analyzers.ruleset
+	build\Autofac.Build.psd1 = build\Autofac.Build.psd1
+	build\Autofac.Build.psm1 = build\Autofac.Build.psm1
+	build\CodeAnalysisDictionary.xml = build\CodeAnalysisDictionary.xml
+EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
