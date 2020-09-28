@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <Description>Autofac implementation of the interfaces in Microsoft.Extensions.DependencyInjection.Abstractions, the .NET Framework dependency injection abstraction.</Description>
-    <VersionPrefix>6.0.0</VersionPrefix>
+    <!-- Set by AppVeyor -->
+    <VersionPrefix>0.0.1</VersionPrefix>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
