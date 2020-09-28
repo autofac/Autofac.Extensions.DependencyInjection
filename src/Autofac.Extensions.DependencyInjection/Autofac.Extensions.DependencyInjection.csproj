@@ -12,6 +12,7 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>Autofac.Extensions.DependencyInjection</PackageId>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageTags>autofac;di;ioc;dependencyinjection;aspnet;aspnetcore</PackageTags>
     <PackageReleaseNotes>Release notes are at https://github.com/autofac/Autofac.Extensions.DependencyInjection/releases</PackageReleaseNotes>
     <PackageProjectUrl>https://autofac.org</PackageProjectUrl>
