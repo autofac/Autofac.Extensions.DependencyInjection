@@ -1,4 +1,5 @@
 ﻿using System;
+using Autofac.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -78,6 +79,45 @@ namespace Autofac.Extensions.DependencyInjection.Test
             var serviceProvider = factory.CreateServiceProvider(new ContainerBuilder());
 
             Assert.IsType<AutofacServiceProvider>(serviceProvider);
+        }
+
+        [Fact]
+        public void CreateServiceProviderUsesDefaultContainerBuildOptionsWhenNotProvided()
+        {
+            var factory = new AutofacServiceProviderFactory();
+            var services = new ServiceCollection().AddSingleton("Foo");
+            var builder = factory.CreateBuilder(services);
+
+            var serviceProvider = factory.CreateServiceProvider(builder);
+
+            Assert.NotNull(serviceProvider.GetService<Lazy<string>>());
+        }
+
+        [Fact]
+        public void CreateServiceProviderUsesContainerBuildOptionsWhenProvided()
+        {
+            var options = ContainerBuildOptions.ExcludeDefaultModules;
+            var factory = new AutofacServiceProviderFactory(options);
+            var services = new ServiceCollection().AddSingleton("Foo");
+            var builder = factory.CreateBuilder(services);
+
+            var serviceProvider = factory.CreateServiceProvider(builder);
+
+            Assert.Null(serviceProvider.GetService<Lazy<string>>());
+        }
+
+        [Fact]
+        public void CanProvideContainerBuildOptionsAndConfigurationAction()
+        {
+            var factory = new AutofacServiceProviderFactory(
+                ContainerBuildOptions.ExcludeDefaultModules,
+                config => config.Register(c => "Foo"));
+            var builder = factory.CreateBuilder(new ServiceCollection());
+
+            var serviceProvider = factory.CreateServiceProvider(builder);
+
+            Assert.NotNull(serviceProvider.GetService<string>());
+            Assert.Null(serviceProvider.GetService<Lazy<string>>());
         }
     }
 }

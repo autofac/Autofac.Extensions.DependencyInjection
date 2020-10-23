@@ -24,6 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using Autofac.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection
@@ -34,15 +35,25 @@ namespace Autofac.Extensions.DependencyInjection
     public class AutofacServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
     {
         private readonly Action<ContainerBuilder> _configurationAction;
+        private readonly ContainerBuildOptions _containerBuildOptions = ContainerBuildOptions.None;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutofacServiceProviderFactory"/> class.
         /// </summary>
-        /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the conatiner.</param>
-        public AutofacServiceProviderFactory(Action<ContainerBuilder> configurationAction = null)
-        {
+        /// <param name="containerBuildOptions">The container options to use when building the container.</param>
+        /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
+        public AutofacServiceProviderFactory(
+            ContainerBuildOptions containerBuildOptions,
+            Action<ContainerBuilder> configurationAction = null)
+            : this(configurationAction) =>
+            _containerBuildOptions = containerBuildOptions;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AutofacServiceProviderFactory"/> class.
+        /// </summary>
+        /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container..</param>
+        public AutofacServiceProviderFactory(Action<ContainerBuilder> configurationAction = null) =>
             _configurationAction = configurationAction ?? (builder => { });
-        }
 
         /// <summary>
         /// Creates a container builder from an <see cref="IServiceCollection" />.
@@ -69,7 +80,7 @@ namespace Autofac.Extensions.DependencyInjection
         {
             if (containerBuilder == null) throw new ArgumentNullException(nameof(containerBuilder));
 
-            var container = containerBuilder.Build();
+            var container = containerBuilder.Build(_containerBuildOptions);
 
             return new AutofacServiceProvider(container);
         }
