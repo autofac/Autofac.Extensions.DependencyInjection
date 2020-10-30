@@ -68,7 +68,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
             builder.Populate(Enumerable.Empty<ServiceDescriptor>());
             var container = builder.Build();
 
-            Assert.Equal(container.Resolve<IServiceScopeFactory>(), container.Resolve<IServiceScopeFactory>());
+            Assert.Equal(container.BeginLifetimeScope().Resolve<IServiceScopeFactory>(), container.BeginLifetimeScope().Resolve<IServiceScopeFactory>());
         }
 
         [Fact]
