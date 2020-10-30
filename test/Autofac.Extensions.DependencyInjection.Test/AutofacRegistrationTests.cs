@@ -62,6 +62,16 @@ namespace Autofac.Extensions.DependencyInjection.Test
         }
 
         [Fact]
+        public void ServiceScopeFactoryIsSingleton()
+        {
+            var builder = new ContainerBuilder();
+            builder.Populate(Enumerable.Empty<ServiceDescriptor>());
+            var container = builder.Build();
+
+            Assert.Equal(container.Resolve<IServiceScopeFactory>(), container.Resolve<IServiceScopeFactory>());
+        }
+
+        [Fact]
         public void CanRegisterTransientService()
         {
             var builder = new ContainerBuilder();
