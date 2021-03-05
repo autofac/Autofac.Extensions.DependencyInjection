@@ -4,11 +4,12 @@
     <Description>Autofac implementation of the interfaces in Microsoft.Extensions.DependencyInjection.Abstractions, the .NET Framework dependency injection abstraction.</Description>
     <!-- Set by AppVeyor -->
     <VersionPrefix>0.0.1</VersionPrefix>
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Autofac.Extensions.DependencyInjection</AssemblyName>
     <AssemblyOriginatorKeyFile>../../Autofac.snk</AssemblyOriginatorKeyFile>
+    <ContinuousIntegrationBuild Condition="'$(CI)' != '' ">true</ContinuousIntegrationBuild>
     <SignAssembly>true</SignAssembly>
     <PackageId>Autofac.Extensions.DependencyInjection</PackageId>
     <PackageIcon>icon.png</PackageIcon>
