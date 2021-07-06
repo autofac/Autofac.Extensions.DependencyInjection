@@ -79,15 +79,15 @@ namespace Autofac.Extensions.DependencyInjection
         /// <summary>
         /// Creates an <see cref="IServiceProvider" /> from the container builder.
         /// </summary>
-        /// <param name="configurationAdapter">The adapter holding configuration applied to <see cref="ContainerBuilder"/> creating the <see cref="IServiceProvider"/>.</param>
+        /// <param name="containerBuilder">The adapter holding configuration applied to <see cref="ContainerBuilder"/> creating the <see cref="IServiceProvider"/>.</param>
         /// <returns>An <see cref="IServiceProvider" />.</returns>
-        public IServiceProvider CreateServiceProvider(AutofacChildLifetimeScopeConfigurationAdapter configurationAdapter)
+        public IServiceProvider CreateServiceProvider(AutofacChildLifetimeScopeConfigurationAdapter containerBuilder)
         {
-            if (configurationAdapter == null) throw new ArgumentNullException(nameof(configurationAdapter));
+            if (containerBuilder == null) throw new ArgumentNullException(nameof(containerBuilder));
 
             var scope = _rootLifetimeScope.BeginLifetimeScope(scopeBuilder =>
             {
-                foreach (var action in configurationAdapter.ConfigurationActions)
+                foreach (var action in containerBuilder.ConfigurationActions)
                 {
                     action(scopeBuilder);
                 }

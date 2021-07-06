@@ -23,6 +23,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
+using System;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
@@ -32,3 +33,4 @@ using System.Runtime.CompilerServices;
 [assembly: NeutralResourcesLanguage("en-US")]
 [assembly: AssemblyCopyright("Copyright © 2015 Autofac Contributors")]
 [assembly: AssemblyDescription("Autofac implementation of the Microsoft.Extensions.DependencyInjection.Abstraction abstractions.")]
+[assembly: CLSCompliant(false)]

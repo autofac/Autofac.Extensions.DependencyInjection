@@ -96,7 +96,7 @@ namespace Autofac.Extensions.DependencyInjection
             if (!_disposed)
             {
                 _disposed = true;
-                await _serviceProvider.DisposeAsync();
+                await _serviceProvider.DisposeAsync().ConfigureAwait(false);
             }
         }
     }

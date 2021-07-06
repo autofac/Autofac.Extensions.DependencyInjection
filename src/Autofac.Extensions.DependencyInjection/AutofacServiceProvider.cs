@@ -39,7 +39,7 @@ namespace Autofac.Extensions.DependencyInjection
     {
         private readonly ILifetimeScope _lifetimeScope;
 
-        private bool _disposed = false;
+        private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutofacServiceProvider"/> class.
@@ -133,7 +133,7 @@ namespace Autofac.Extensions.DependencyInjection
             if (!_disposed)
             {
                 _disposed = true;
-                await _lifetimeScope.DisposeAsync();
+                await _lifetimeScope.DisposeAsync().ConfigureAwait(false);
                 GC.SuppressFinalize(this);
             }
         }

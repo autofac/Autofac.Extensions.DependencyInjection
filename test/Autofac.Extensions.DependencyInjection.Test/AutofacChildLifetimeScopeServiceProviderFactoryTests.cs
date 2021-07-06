@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -135,10 +136,12 @@ namespace Autofac.Extensions.DependencyInjection.Test
             return containerBuilder.Build();
         }
 
+        [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
         private class DependencyOne
         {
         }
 
+        [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
         private class DependencyTwo
         {
         }
