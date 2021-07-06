@@ -1,0 +1,15 @@
+{
+  "cSpell.words": [
+    "autofac",
+    "xunit"
+  ],
+  "coverage-gutters.coverageBaseDir": "artifacts/coverage",
+  "coverage-gutters.coverageFileNames": [
+    "coverage.net6.0.info"
+  ],
+  "dotnet-test-explorer.runInParallel": true,
+  "dotnet-test-explorer.testProjectPath": "test/**/*.Test.csproj",
+  "files.watcherExclude": {
+    "**/target": true
+  }
+}

@@ -1,0 +1,10 @@
+<Project>
+  <ItemGroup>
+    <TestProjects Include="..\test\**\*.csproj" />
+    <Watch Include="..\**\*.cs" />
+  </ItemGroup>
+  <Target Name="Test">
+    <Exec Command="dotnet test %(TestProjects.FullPath)" />
+  </Target>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft.Common.targets" />
+</Project>
