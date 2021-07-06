@@ -43,7 +43,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// <param name="lifetimeScope">The lifetime scope.</param>
         public AutofacServiceScopeFactory(ILifetimeScope lifetimeScope)
         {
-            this._lifetimeScope = lifetimeScope;
+            _lifetimeScope = lifetimeScope;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </returns>
         public IServiceScope CreateScope()
         {
-            return new AutofacServiceScope(this._lifetimeScope.BeginLifetimeScope());
+            return new AutofacServiceScope(_lifetimeScope.BeginLifetimeScope());
         }
     }
 }

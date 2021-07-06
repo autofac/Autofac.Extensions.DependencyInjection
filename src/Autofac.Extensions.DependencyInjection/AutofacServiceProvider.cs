@@ -49,7 +49,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </param>
         public AutofacServiceProvider(ILifetimeScope lifetimeScope)
         {
-            this._lifetimeScope = lifetimeScope;
+            _lifetimeScope = lifetimeScope;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </exception>
         public object GetRequiredService(Type serviceType)
         {
-            return this._lifetimeScope.Resolve(serviceType);
+            return _lifetimeScope.Resolve(serviceType);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </returns>
         public object GetService(Type serviceType)
         {
-            return this._lifetimeScope.ResolveOptional(serviceType);
+            return _lifetimeScope.ResolveOptional(serviceType);
         }
 
         /// <summary>
@@ -102,12 +102,12 @@ namespace Autofac.Extensions.DependencyInjection
         /// </param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this._disposed)
+            if (!_disposed)
             {
-                this._disposed = true;
+                _disposed = true;
                 if (disposing)
                 {
-                    this._lifetimeScope.Dispose();
+                    _lifetimeScope.Dispose();
                 }
             }
         }
@@ -117,7 +117,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -130,10 +130,10 @@ namespace Autofac.Extensions.DependencyInjection
             Justification = "DisposeAsync should also call SuppressFinalize (see various .NET internal implementations).")]
         public async ValueTask DisposeAsync()
         {
-            if (!this._disposed)
+            if (!_disposed)
             {
-                this._disposed = true;
-                await this._lifetimeScope.DisposeAsync();
+                _disposed = true;
+                await _lifetimeScope.DisposeAsync();
                 GC.SuppressFinalize(this);
             }
         }
