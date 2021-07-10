@@ -1,4 +1,4 @@
-# EXIT CODES
+﻿# EXIT CODES
 # 1: dotnet packaging failure
 # 2: dotnet publishing failure
 # 3: Unit test failure
@@ -67,13 +67,13 @@ function Install-DotNetCli {
             Invoke-WebRequest "https://dot.net/v1/dotnet-install.ps1" -OutFile "./.dotnet/dotnet-install.ps1"
         }
 
-        & ./.dotnet/dotnet-install.ps1 -InstallDir "$installDir" -Version $Version
+        & ./.dotnet/dotnet-install.ps1 -InstallDir "$installDir" -Version $Version -Verbose
     } else {
         if (!(Test-Path ./.dotnet/dotnet-install.sh)) {
             Invoke-WebRequest "https://dot.net/v1/dotnet-install.sh" -OutFile "./.dotnet/dotnet-install.sh"
         }
 
-        & bash ./.dotnet/dotnet-install.sh --install-dir "$installDir" --version $Version
+        & bash ./.dotnet/dotnet-install.sh --install-dir "$installDir" --version $Version -Verbose
     }
 
     Add-Path "$installDir"
