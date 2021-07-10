@@ -67,19 +67,16 @@ function Install-DotNetCli {
             Invoke-WebRequest "https://dot.net/v1/dotnet-install.ps1" -OutFile "./.dotnet/dotnet-install.ps1"
         }
 
-        & ./.dotnet/dotnet-install.ps1 -InstallDir "$installDir" -Version $Version -Verbose
+        & ./.dotnet/dotnet-install.ps1 -InstallDir "$installDir" -Version $Version
     } else {
         if (!(Test-Path ./.dotnet/dotnet-install.sh)) {
             Invoke-WebRequest "https://dot.net/v1/dotnet-install.sh" -OutFile "./.dotnet/dotnet-install.sh"
         }
 
-        & bash ./.dotnet/dotnet-install.sh --install-dir "$installDir" --version $Version -Verbose
+        & bash ./.dotnet/dotnet-install.sh --install-dir "$installDir" --version $Version
     }
 
     Add-Path "$installDir"
-
-    "New Path: "
-    $env:PATH
 }
 
 <#
@@ -95,11 +92,19 @@ function Add-Path {
         [string]
         $Path
     )
-    $pathValues = $env:PATH.Split(";");
+
+    $pathSeparator = ":";
+
+    if ($IsWindows) {
+        $pathSeparator = ";";
+    }
+
+    $pathValues = $env:PATH.Split($pathSeparator);
     if ($pathValues -Contains $Path) {
       return;
     }
-    $env:PATH = "$Path;$env:PATH"
+    
+    $env:PATH = "${Path}${pathSeparator}$env:PATH"
 }
 
 <#
