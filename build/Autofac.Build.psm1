@@ -77,6 +77,9 @@ function Install-DotNetCli {
     }
 
     Add-Path "$installDir"
+
+    "New Path: "
+    $env:PATH
 }
 
 <#
