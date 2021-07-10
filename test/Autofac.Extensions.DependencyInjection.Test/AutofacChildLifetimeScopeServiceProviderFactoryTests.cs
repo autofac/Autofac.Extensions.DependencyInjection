@@ -81,7 +81,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
 
             var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
 
-            Assert.Equal("configurationAdapter", exception.ParamName);
+            Assert.Equal("containerBuilder", exception.ParamName);
         }
 
         [Fact]
