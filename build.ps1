@@ -1,4 +1,4 @@
-########################
+﻿########################
 # THE BUILD!
 ########################
 
@@ -20,8 +20,8 @@ try {
     }
 
     # Install dotnet CLI
-    Write-Message "Installing .NET Core SDK version $sdkVersion"
-    Install-DotNetCli -Version $sdkVersion
+    Write-Message "Installing .NET SDK version $sdkVersion"
+    Install-DotNetCli -Version $sdkVersion -Verbose
 
     foreach ($additional in $globalJson.additionalSdks)
     {
