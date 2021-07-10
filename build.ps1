@@ -18,15 +18,17 @@ try {
         Write-Message "Cleaning $artifactsPath folder"
         Remove-Item $artifactsPath -Force -Recurse
     }
-
-    # Install dotnet CLI
-    Write-Message "Installing .NET SDK version $sdkVersion"
-    Install-DotNetCli -Version $sdkVersion
-
+    
+    # Install additional dotnet CLIs first in case installing a released Version
+    # over a preview overwrites the preview somehow.
     foreach ($additional in $globalJson.additionalSdks)
     {
         Install-DotNetCli -Version $additional;
     }
+
+    # Install dotnet CLI
+    Write-Message "Installing .NET SDK version $sdkVersion"
+    Install-DotNetCli -Version $sdkVersion
 
     # Write out dotnet information
     & dotnet --info
