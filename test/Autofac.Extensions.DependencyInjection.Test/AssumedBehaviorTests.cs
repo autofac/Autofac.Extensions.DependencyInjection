@@ -116,6 +116,31 @@ namespace Autofac.Extensions.DependencyInjection.Test
             Assert.False(tracker.SyncDisposed);
         }
 
+#if NET6_0_OR_GREATER
+
+        [Fact]
+        public async ValueTask ServiceScopeDisposesAsync()
+        {
+            // You can't resolve things from a service provider
+            // if you dispose it.
+            var services = new ServiceCollection().AddScoped<AsyncDisposeTracker>();
+            var rootProvider = CreateServiceProvider(services);
+
+            AsyncDisposeTracker tracker;
+
+            // Try out the new "CreateAsyncScope" method.
+            var scope = rootProvider.CreateAsyncScope();
+            await using (scope.ConfigureAwait(false))
+            {
+                tracker = scope.ServiceProvider.GetRequiredService<AsyncDisposeTracker>();
+            }
+
+            Assert.True(tracker.AsyncDisposed);
+            Assert.False(tracker.SyncDisposed);
+        }
+
+#endif
+
         protected abstract IServiceProvider CreateServiceProvider(IServiceCollection serviceCollection);
 
         [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
