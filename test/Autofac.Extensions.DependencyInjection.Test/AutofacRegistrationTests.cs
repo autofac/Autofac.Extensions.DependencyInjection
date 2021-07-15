@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
@@ -152,7 +153,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
                 b.Populate(services);
             });
 
-            var provider = new AutofacServiceProvider(scope);
+            using var provider = new AutofacServiceProvider(scope);
             var options = provider.GetRequiredService<IOptions<TestOptions>>();
             Assert.Equal(6, options.Value.Value);
         }
@@ -231,15 +232,16 @@ namespace Autofac.Extensions.DependencyInjection.Test
             Assert.Equal(resolved, new[] { s1, s2, s3, s4 });
         }
 
-        public class Service : IService
+        private class Service : IService
         {
         }
 
-        public interface IService
+        private interface IService
         {
         }
 
-        public class TestOptions
+        [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
+        private class TestOptions
         {
             public int Value { get; set; }
         }

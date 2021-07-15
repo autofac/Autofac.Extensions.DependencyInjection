@@ -42,7 +42,7 @@ namespace Autofac.Extensions.DependencyInjection
         public static ILifetimeScope GetAutofacRoot(this IServiceProvider serviceProvider)
         {
             if (!(serviceProvider is AutofacServiceProvider autofacServiceProvider))
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, ServiceProviderExtensionsResources.WrongProviderType, serviceProvider?.GetType()));
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, ServiceProviderExtensionsResources.WrongProviderType, serviceProvider?.GetType()));
 
             return autofacServiceProvider.LifetimeScope;
         }

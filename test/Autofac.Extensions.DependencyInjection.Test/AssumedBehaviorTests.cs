@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -17,7 +18,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
             // You can't resolve things from a scope's service provider
             // if you dispose the scope.
             var services = new ServiceCollection().AddScoped<DisposeTracker>();
-            var rootProvider = this.CreateServiceProvider(services);
+            var rootProvider = CreateServiceProvider(services);
             var scope = rootProvider.CreateScope();
             Assert.NotNull(scope.ServiceProvider.GetRequiredService<DisposeTracker>());
             scope.Dispose();
@@ -30,7 +31,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
             // Disposing the service provider and then the scope only
             // runs one disposal on the resolved objects.
             var services = new ServiceCollection().AddScoped<DisposeTracker>();
-            var rootProvider = this.CreateServiceProvider(services);
+            var rootProvider = CreateServiceProvider(services);
             var scope = rootProvider.CreateScope();
             var tracker = scope.ServiceProvider.GetRequiredService<DisposeTracker>();
             ((IDisposable)scope.ServiceProvider).Dispose();
@@ -45,8 +46,8 @@ namespace Autofac.Extensions.DependencyInjection.Test
         {
             // You can't create a new child scope if you've disposed of
             // the parent scope service provider.
-            var rootProvider = this.CreateServiceProvider(new ServiceCollection());
-            var scope = rootProvider.CreateScope();
+            var rootProvider = CreateServiceProvider(new ServiceCollection());
+            using var scope = rootProvider.CreateScope();
             ((IDisposable)scope.ServiceProvider).Dispose();
             Assert.Throws<ObjectDisposedException>(() => scope.ServiceProvider.CreateScope());
         }
@@ -57,8 +58,8 @@ namespace Autofac.Extensions.DependencyInjection.Test
             // You can't resolve things from a scope if you dispose the
             // scope's service provider.
             var services = new ServiceCollection().AddScoped<DisposeTracker>();
-            var rootProvider = this.CreateServiceProvider(services);
-            var scope = rootProvider.CreateScope();
+            var rootProvider = CreateServiceProvider(services);
+            using var scope = rootProvider.CreateScope();
             Assert.NotNull(scope.ServiceProvider.GetRequiredService<DisposeTracker>());
             ((IDisposable)scope.ServiceProvider).Dispose();
             Assert.Throws<ObjectDisposedException>(() => scope.ServiceProvider.GetRequiredService<DisposeTracker>());
@@ -69,7 +70,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         {
             // Resolving a provider from another provider yields a new object.
             // (It's not just returning "this" - it's a different IServiceProvider.)
-            var parent = this.CreateServiceProvider(new ServiceCollection());
+            var parent = CreateServiceProvider(new ServiceCollection());
             var resolved = parent.GetRequiredService<IServiceProvider>();
             Assert.NotSame(parent, resolved);
         }
@@ -80,8 +81,8 @@ namespace Autofac.Extensions.DependencyInjection.Test
             // Resolving a provider from another provider will still resolve
             // items from the same scope.
             var services = new ServiceCollection().AddScoped<DisposeTracker>();
-            var root = this.CreateServiceProvider(services);
-            var scope = root.CreateScope();
+            var root = CreateServiceProvider(services);
+            using var scope = root.CreateScope();
             var parent = scope.ServiceProvider;
             var resolved = parent.GetRequiredService<IServiceProvider>();
             Assert.Same(parent.GetRequiredService<DisposeTracker>(), resolved.GetRequiredService<DisposeTracker>());
@@ -93,7 +94,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
             // You can't resolve things from a service provider
             // if you dispose it.
             var services = new ServiceCollection().AddScoped<DisposeTracker>();
-            var rootProvider = this.CreateServiceProvider(services);
+            var rootProvider = CreateServiceProvider(services);
             Assert.NotNull(rootProvider.GetRequiredService<DisposeTracker>());
             ((IDisposable)rootProvider).Dispose();
             Assert.Throws<ObjectDisposedException>(() => rootProvider.GetRequiredService<DisposeTracker>());
@@ -105,18 +106,44 @@ namespace Autofac.Extensions.DependencyInjection.Test
             // You can't resolve things from a service provider
             // if you dispose it.
             var services = new ServiceCollection().AddScoped<AsyncDisposeTracker>();
-            var rootProvider = this.CreateServiceProvider(services);
+            var rootProvider = CreateServiceProvider(services);
             var tracker = rootProvider.GetRequiredService<AsyncDisposeTracker>();
             var asyncDisposer = (IAsyncDisposable)rootProvider;
 
-            await asyncDisposer.DisposeAsync();
+            await asyncDisposer.DisposeAsync().ConfigureAwait(false);
 
             Assert.True(tracker.AsyncDisposed);
             Assert.False(tracker.SyncDisposed);
         }
 
+#if NET6_0_OR_GREATER
+
+        [Fact]
+        public async ValueTask ServiceScopeDisposesAsync()
+        {
+            // You can't resolve things from a service provider
+            // if you dispose it.
+            var services = new ServiceCollection().AddScoped<AsyncDisposeTracker>();
+            var rootProvider = CreateServiceProvider(services);
+
+            AsyncDisposeTracker tracker;
+
+            // Try out the new "CreateAsyncScope" method.
+            var scope = rootProvider.CreateAsyncScope();
+            await using (scope.ConfigureAwait(false))
+            {
+                tracker = scope.ServiceProvider.GetRequiredService<AsyncDisposeTracker>();
+            }
+
+            Assert.True(tracker.AsyncDisposed);
+            Assert.False(tracker.SyncDisposed);
+        }
+
+#endif
+
         protected abstract IServiceProvider CreateServiceProvider(IServiceCollection serviceCollection);
 
+        [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
         private class DisposeTracker : IDisposable
         {
             public int DisposeCount { get; set; }
@@ -125,11 +152,12 @@ namespace Autofac.Extensions.DependencyInjection.Test
 
             public void Dispose()
             {
-                this.Disposed = true;
-                this.DisposeCount++;
+                Disposed = true;
+                DisposeCount++;
             }
         }
 
+        [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
         private class AsyncDisposeTracker : IDisposable, IAsyncDisposable
         {
             public bool SyncDisposed { get; set; }
@@ -138,14 +166,14 @@ namespace Autofac.Extensions.DependencyInjection.Test
 
             public void Dispose()
             {
-                this.SyncDisposed = true;
+                SyncDisposed = true;
             }
 
             public async ValueTask DisposeAsync()
             {
-                await Task.Delay(1);
+                await Task.Delay(1).ConfigureAwait(false);
 
-                this.AsyncDisposed = true;
+                AsyncDisposed = true;
             }
         }
     }

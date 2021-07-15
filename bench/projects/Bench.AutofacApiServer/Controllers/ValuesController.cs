@@ -11,11 +11,11 @@ namespace BenchProject.AutofacApiServer.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        private readonly A service;
+        private readonly A _service;
 
         public ValuesController(A service)
         {
-            this.service = service;
+            _service = service;
         }
 
         [HttpGet]

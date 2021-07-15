@@ -4,7 +4,7 @@
     <Description>Autofac implementation of the interfaces in Microsoft.Extensions.DependencyInjection.Abstractions, the .NET Framework dependency injection abstraction.</Description>
     <!-- Set by AppVeyor -->
     <VersionPrefix>0.0.1</VersionPrefix>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Autofac.Extensions.DependencyInjection</AssemblyName>
@@ -27,10 +27,11 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedAllSources>true</EmbedAllSources>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <Features>IOperation</Features>
     <Authors>Autofac Contributors</Authors>
     <Company>Autofac</Company>
     <Product>Autofac</Product>
+    <LangVersion>latest</LangVersion>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,21 +44,31 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.4">
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" Condition="Exists('$(MSBuildThisFileDirectory)../../.git')">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>All</PrivateAssets>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+
+    <!-- Conditional references of the MEDI abstractions depending on runtime target. -->
+    <PackageReference Condition=" '$(TargetFramework)' == 'net6.0' "
+                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0-preview.6.21352.12" />
+
+    <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.0' "
+                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
+
+    <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.1' "
+                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
+
+    <PackageReference Condition=" '$(TargetFramework)' == 'net5.0' "
+                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+
   </ItemGroup>
 
   <ItemGroup>

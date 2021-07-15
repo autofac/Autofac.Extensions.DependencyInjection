@@ -1,4 +1,4 @@
-// This software is part of the Autofac IoC container
+﻿// This software is part of the Autofac IoC container
 // Copyright © 2015 Autofac Contributors
 // https://autofac.org
 //
@@ -93,7 +93,15 @@ namespace Autofac.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(descriptors));
             }
 
-            builder.RegisterType<AutofacServiceProvider>().As<IServiceProvider>().ExternallyOwned();
+            var serviceProviderRegistration = builder.RegisterType<AutofacServiceProvider>()
+                                                     .As<IServiceProvider>()
+                                                     .ExternallyOwned();
+
+#if NET6_0_OR_GREATER
+            // Add the additional registration if needed.
+            serviceProviderRegistration.As<IServiceProviderIsService>();
+#endif
+
             builder.RegisterType<AutofacServiceScopeFactory>().As<IServiceScopeFactory>();
 
             Register(builder, descriptors, lifetimeScopeTagForSingletons);
