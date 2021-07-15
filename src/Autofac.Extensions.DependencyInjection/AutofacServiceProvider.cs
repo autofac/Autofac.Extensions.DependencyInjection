@@ -26,6 +26,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection
@@ -35,7 +36,7 @@ namespace Autofac.Extensions.DependencyInjection
     /// </summary>
     /// <seealso cref="System.IServiceProvider" />
     /// <seealso cref="Microsoft.Extensions.DependencyInjection.ISupportRequiredService" />
-    public class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IDisposable, IAsyncDisposable
+    public partial class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IDisposable, IAsyncDisposable
     {
         private readonly ILifetimeScope _lifetimeScope;
 
