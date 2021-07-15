@@ -4,7 +4,7 @@
     <Description>Autofac implementation of the interfaces in Microsoft.Extensions.DependencyInjection.Abstractions, the .NET Framework dependency injection abstraction.</Description>
     <!-- Set by AppVeyor -->
     <VersionPrefix>0.0.1</VersionPrefix>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Autofac.Extensions.DependencyInjection</AssemblyName>
@@ -57,18 +57,18 @@
     </PackageReference>
 
     <!-- Conditional references of the MEDI abstractions depending on runtime target. -->
-    <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.0' "
-                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
-    
-    <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.1' "
-                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
-    
-    <PackageReference Condition=" '$(TargetFramework)' == 'net5.0' "
-                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
-    
     <PackageReference Condition=" '$(TargetFramework)' == 'net6.0' "
                       Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0-preview.6.21352.12" />
-    
+
+    <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.0' "
+                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
+
+    <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.1' "
+                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
+
+    <PackageReference Condition=" '$(TargetFramework)' == 'net5.0' "
+                      Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+
   </ItemGroup>
 
   <ItemGroup>
