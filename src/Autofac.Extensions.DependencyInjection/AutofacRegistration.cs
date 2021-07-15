@@ -93,7 +93,9 @@ namespace Autofac.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(descriptors));
             }
 
-            var serviceProviderRegistration = builder.RegisterType<AutofacServiceProvider>().As<IServiceProvider>().ExternallyOwned();
+            var serviceProviderRegistration = builder.RegisterType<AutofacServiceProvider>()
+                                                     .As<IServiceProvider>()
+                                                     .ExternallyOwned();
 
 #if NET6_0_OR_GREATER
             // Add the additional registration if needed.
