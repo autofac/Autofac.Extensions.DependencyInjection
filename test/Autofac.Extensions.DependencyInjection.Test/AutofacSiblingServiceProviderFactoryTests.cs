@@ -1,18 +1,17 @@
 ﻿using System;
 using Autofac.Builder;
 using Autofac.Core;
-using Autofac.Core.Lifetime;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Autofac.Extensions.DependencyInjection.Test
 {
-    public class AutofacServiceProviderFactoryTests
+    public class AutofacSiblingServiceProviderFactoryTests
     {
         [Fact]
         public void CreateBuilderReturnsNewInstance()
         {
-            var factory = new AutofacServiceProviderFactory();
+            var factory = new AutofacSiblingServiceProviderFactory();
 
             var builder = factory.CreateBuilder(new ServiceCollection());
 
@@ -22,7 +21,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateBuilderExecutesConfigurationActionWhenProvided()
         {
-            var factory = new AutofacServiceProviderFactory(config => config.Register(c => "Foo"));
+            var factory = new AutofacSiblingServiceProviderFactory(config => config.Register(c => "Foo"));
 
             var builder = factory.CreateBuilder(new ServiceCollection());
 
@@ -32,7 +31,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateBuilderAllowsForNullConfigurationAction()
         {
-            var factory = new AutofacServiceProviderFactory();
+            var factory = new AutofacSiblingServiceProviderFactory();
 
             var builder = factory.CreateBuilder(new ServiceCollection());
 
@@ -42,7 +41,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateBuilderReturnsInstanceWithServicesPopulated()
         {
-            var factory = new AutofacServiceProviderFactory();
+            var factory = new AutofacSiblingServiceProviderFactory();
             var services = new ServiceCollection();
             services.AddTransient<object>();
 
@@ -54,7 +53,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateServiceProviderBuildsServiceProviderUsingContainerBuilder()
         {
-            var factory = new AutofacServiceProviderFactory();
+            var factory = new AutofacSiblingServiceProviderFactory();
             var services = new ServiceCollection().AddTransient<object>();
             var builder = factory.CreateBuilder(services);
 
@@ -66,7 +65,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateServiceProviderThrowsWhenProvidedNullContainerBuilder()
         {
-            var factory = new AutofacServiceProviderFactory();
+            var factory = new AutofacSiblingServiceProviderFactory();
 
             var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
 
@@ -76,7 +75,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateServiceProviderReturnsAutofacServiceProvider()
         {
-            var factory = new AutofacServiceProviderFactory();
+            var factory = new AutofacSiblingServiceProviderFactory();
 
             var serviceProvider = factory.CreateServiceProvider(new ContainerBuilder());
 
@@ -86,7 +85,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateServiceProviderUsesDefaultContainerBuildOptionsWhenNotProvided()
         {
-            var factory = new AutofacServiceProviderFactory();
+            var factory = new AutofacSiblingServiceProviderFactory();
             var services = new ServiceCollection().AddSingleton("Foo");
             var builder = factory.CreateBuilder(services);
 
@@ -99,7 +98,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         public void CreateServiceProviderUsesContainerBuildOptionsWhenProvided()
         {
             var options = ContainerBuildOptions.ExcludeDefaultModules;
-            var factory = new AutofacServiceProviderFactory(options);
+            var factory = new AutofacSiblingServiceProviderFactory(options);
             var services = new ServiceCollection().AddSingleton("Foo");
             var builder = factory.CreateBuilder(services);
 
@@ -111,7 +110,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CanProvideContainerBuildOptionsAndConfigurationAction()
         {
-            var factory = new AutofacServiceProviderFactory(
+            var factory = new AutofacSiblingServiceProviderFactory(
                 ContainerBuildOptions.ExcludeDefaultModules,
                 config => config.Register(c => "Foo"));
             var builder = factory.CreateBuilder(new ServiceCollection());
@@ -123,17 +122,23 @@ namespace Autofac.Extensions.DependencyInjection.Test
         }
 
         [Fact]
-        public void CreateScopeShouldBeChildScope()
+        public void CreateScopeShouldBeSilingScope()
         {
-            var factory = new AutofacServiceProviderFactory();
+            var factory = new AutofacSiblingServiceProviderFactory();
 
             var builder = factory.CreateBuilder(new ServiceCollection());
 
-            using var serviceProvider = factory.CreateServiceProvider(builder).CreateScope();
+            var serviceProvider = factory.CreateServiceProvider(builder);
 
-            using var subScope = serviceProvider.ServiceProvider.CreateScope();
+            using var subScope = serviceProvider.CreateScope();
 
-            Assert.Same(serviceProvider.ServiceProvider.GetAutofacRoot(), ((ISharingLifetimeScope)subScope.ServiceProvider.GetAutofacRoot()).ParentLifetimeScope);
+            Assert.Same(serviceProvider.GetRequiredService<ILifetimeScope>(), ((ISharingLifetimeScope)subScope.ServiceProvider.GetAutofacRoot()).ParentLifetimeScope);
+
+            using var subScope2 = subScope.ServiceProvider.CreateScope();
+
+            Assert.Same(subScope.ServiceProvider.GetRequiredService<IServiceScopeFactory>(), subScope2.ServiceProvider.GetRequiredService<IServiceScopeFactory>());
+
+            Assert.Same(((ISharingLifetimeScope)subScope.ServiceProvider.GetAutofacRoot()).ParentLifetimeScope, ((ISharingLifetimeScope)subScope2.ServiceProvider.GetAutofacRoot()).ParentLifetimeScope);
         }
     }
 }
