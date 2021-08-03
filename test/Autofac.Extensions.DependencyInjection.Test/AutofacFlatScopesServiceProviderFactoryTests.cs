@@ -6,12 +6,12 @@ using Xunit;
 
 namespace Autofac.Extensions.DependencyInjection.Test
 {
-    public class AutofacSiblingServiceProviderFactoryTests
+    public class AutofacFlatScopesServiceProviderFactoryTests
     {
         [Fact]
         public void CreateBuilderReturnsNewInstance()
         {
-            var factory = new AutofacSiblingServiceProviderFactory();
+            var factory = new AutofacFlatScopesServiceProviderFactory();
 
             var builder = factory.CreateBuilder(new ServiceCollection());
 
@@ -21,7 +21,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateBuilderExecutesConfigurationActionWhenProvided()
         {
-            var factory = new AutofacSiblingServiceProviderFactory(config => config.Register(c => "Foo"));
+            var factory = new AutofacFlatScopesServiceProviderFactory(config => config.Register(c => "Foo"));
 
             var builder = factory.CreateBuilder(new ServiceCollection());
 
@@ -31,7 +31,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateBuilderAllowsForNullConfigurationAction()
         {
-            var factory = new AutofacSiblingServiceProviderFactory();
+            var factory = new AutofacFlatScopesServiceProviderFactory();
 
             var builder = factory.CreateBuilder(new ServiceCollection());
 
@@ -41,7 +41,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateBuilderReturnsInstanceWithServicesPopulated()
         {
-            var factory = new AutofacSiblingServiceProviderFactory();
+            var factory = new AutofacFlatScopesServiceProviderFactory();
             var services = new ServiceCollection();
             services.AddTransient<object>();
 
@@ -53,7 +53,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateServiceProviderBuildsServiceProviderUsingContainerBuilder()
         {
-            var factory = new AutofacSiblingServiceProviderFactory();
+            var factory = new AutofacFlatScopesServiceProviderFactory();
             var services = new ServiceCollection().AddTransient<object>();
             var builder = factory.CreateBuilder(services);
 
@@ -65,7 +65,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateServiceProviderThrowsWhenProvidedNullContainerBuilder()
         {
-            var factory = new AutofacSiblingServiceProviderFactory();
+            var factory = new AutofacFlatScopesServiceProviderFactory();
 
             var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
 
@@ -75,7 +75,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateServiceProviderReturnsAutofacServiceProvider()
         {
-            var factory = new AutofacSiblingServiceProviderFactory();
+            var factory = new AutofacFlatScopesServiceProviderFactory();
 
             var serviceProvider = factory.CreateServiceProvider(new ContainerBuilder());
 
@@ -85,7 +85,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateServiceProviderUsesDefaultContainerBuildOptionsWhenNotProvided()
         {
-            var factory = new AutofacSiblingServiceProviderFactory();
+            var factory = new AutofacFlatScopesServiceProviderFactory();
             var services = new ServiceCollection().AddSingleton("Foo");
             var builder = factory.CreateBuilder(services);
 
@@ -98,7 +98,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         public void CreateServiceProviderUsesContainerBuildOptionsWhenProvided()
         {
             var options = ContainerBuildOptions.ExcludeDefaultModules;
-            var factory = new AutofacSiblingServiceProviderFactory(options);
+            var factory = new AutofacFlatScopesServiceProviderFactory(options);
             var services = new ServiceCollection().AddSingleton("Foo");
             var builder = factory.CreateBuilder(services);
 
@@ -110,7 +110,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CanProvideContainerBuildOptionsAndConfigurationAction()
         {
-            var factory = new AutofacSiblingServiceProviderFactory(
+            var factory = new AutofacFlatScopesServiceProviderFactory(
                 ContainerBuildOptions.ExcludeDefaultModules,
                 config => config.Register(c => "Foo"));
             var builder = factory.CreateBuilder(new ServiceCollection());
@@ -124,7 +124,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
         [Fact]
         public void CreateScopeShouldBeSilingScope()
         {
-            var factory = new AutofacSiblingServiceProviderFactory();
+            var factory = new AutofacFlatScopesServiceProviderFactory();
 
             var builder = factory.CreateBuilder(new ServiceCollection());
 

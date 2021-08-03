@@ -109,7 +109,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// with provided <paramref name="lifetimeScopeTagForSingletons"/>
         /// instead of using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.SingleInstance"/>.
         /// </param>
-        /// <param name="scopeFactoryAsSingleton">Make AutofacServiceProviderFactory as Singleton, CreateScope behavior as like as Microsoft.Extensions.DependencyInjection.</param>
+        /// <param name="flatScopes">if value is true, make AutofacServiceProviderFactory as Singleton, CreateScope behavior as like as Microsoft.Extensions.DependencyInjection.</param>
         /// <remarks>
         /// <para>
         /// Specifying a <paramref name="lifetimeScopeTagForSingletons"/> addresses a specific case where you have
@@ -124,7 +124,7 @@ namespace Autofac.Extensions.DependencyInjection
             this ContainerBuilder builder,
             IEnumerable<ServiceDescriptor> descriptors,
             object lifetimeScopeTagForSingletons,
-            bool scopeFactoryAsSingleton)
+            bool flatScopes)
         {
             if (descriptors == null)
             {
@@ -142,7 +142,7 @@ namespace Autofac.Extensions.DependencyInjection
 
             var serviceScopeFactoryRegistration = builder.RegisterType<AutofacServiceScopeFactory>().As<IServiceScopeFactory>();
 
-            if (scopeFactoryAsSingleton)
+            if (flatScopes)
             {
                 serviceScopeFactoryRegistration.ConfigureLifecycle(ServiceLifetime.Singleton, lifetimeScopeTagForSingletons);
             }
