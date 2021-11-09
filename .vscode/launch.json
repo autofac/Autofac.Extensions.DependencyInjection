@@ -1,0 +1,23 @@
+{
+  "configurations": [
+    {
+      "args": [
+      ],
+      "console": "internalConsole",
+      "cwd": "${workspaceFolder}/test/Autofac.Extensions.DependencyInjection.Test",
+      "name": "Launch Tests",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/test/Autofac.Extensions.DependencyInjection.Test/bin/Debug/net6.0/Autofac.Extensions.DependencyInjection.Test.dll",
+      "request": "launch",
+      "stopAtEntry": false,
+      "type": "coreclr"
+    },
+    {
+      "name": ".NET Core Attach",
+      "processId": "${command:pickProcess}",
+      "request": "attach",
+      "type": "coreclr"
+    }
+  ],
+  "version": "0.2.0"
+}

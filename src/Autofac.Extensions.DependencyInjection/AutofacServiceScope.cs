@@ -46,7 +46,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </param>
         public AutofacServiceScope(ILifetimeScope lifetimeScope)
         {
-            this._serviceProvider = new AutofacServiceProvider(lifetimeScope);
+            _serviceProvider = new AutofacServiceProvider(lifetimeScope);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Autofac.Extensions.DependencyInjection
         {
             get
             {
-                return this._serviceProvider;
+                return _serviceProvider;
             }
         }
 
@@ -68,7 +68,7 @@ namespace Autofac.Extensions.DependencyInjection
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -80,23 +80,23 @@ namespace Autofac.Extensions.DependencyInjection
         /// </param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this._disposed)
+            if (!_disposed)
             {
-                this._disposed = true;
+                _disposed = true;
 
                 if (disposing)
                 {
-                    this._serviceProvider.Dispose();
+                    _serviceProvider.Dispose();
                 }
             }
         }
 
         public async ValueTask DisposeAsync()
         {
-            if (!this._disposed)
+            if (!_disposed)
             {
-                this._disposed = true;
-                await this._serviceProvider.DisposeAsync();
+                _disposed = true;
+                await _serviceProvider.DisposeAsync().ConfigureAwait(false);
             }
         }
     }

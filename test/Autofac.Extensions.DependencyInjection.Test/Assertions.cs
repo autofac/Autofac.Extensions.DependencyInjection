@@ -41,8 +41,7 @@ namespace Autofac.Extensions.DependencyInjection.Test
 
         public static IComponentRegistration RegistrationFor<TService>(this IComponentContext context)
         {
-            IComponentRegistration r;
-            Assert.True(context.ComponentRegistry.TryGetRegistration(new TypedService(typeof(TService)), out r));
+            Assert.True(context.ComponentRegistry.TryGetRegistration(new TypedService(typeof(TService)), out IComponentRegistration r));
             return r;
         }
     }
