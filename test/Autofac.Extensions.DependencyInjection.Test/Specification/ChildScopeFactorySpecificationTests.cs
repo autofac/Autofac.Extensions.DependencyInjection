@@ -8,6 +8,10 @@ namespace Autofac.Extensions.DependencyInjection.Test.Specification;
 
 public class ChildScopeFactorySpecificationTests : DependencyInjectionSpecificationTests
 {
+#if NET6_0_OR_GREATER
+    public override bool SupportsIServiceProviderIsService => true;
+#endif
+
     protected override IServiceProvider CreateServiceProvider(IServiceCollection serviceCollection)
     {
         var container = new ContainerBuilder().Build();
