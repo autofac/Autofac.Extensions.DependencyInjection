@@ -2,7 +2,7 @@
   "cSpell.words": [
     "autofac",
     "cref",
-    "Diagnoser",
+    "diagnoser",
     "xunit"
   ],
   "coverage-gutters.coverageBaseDir": "artifacts/coverage",
