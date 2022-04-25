@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿// Copyright (c) Autofac Project. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 
 namespace Autofac.Extensions.DependencyInjection.Bench
@@ -8,6 +11,7 @@ namespace Autofac.Extensions.DependencyInjection.Bench
     {
         protected override IHost CreateHost(IHostBuilder builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
             return base.CreateHost(builder);

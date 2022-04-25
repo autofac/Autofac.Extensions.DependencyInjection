@@ -1,5 +1,6 @@
-﻿using System;
-using System.IO;
+﻿// Copyright (c) Autofac Project. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
@@ -13,7 +14,6 @@ namespace Autofac.Extensions.DependencyInjection.Bench
             Add(DefaultConfig.Instance);
 
             AddJob(Job.InProcess);
-
 
             var rootFolder = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.LastIndexOf("bin", StringComparison.OrdinalIgnoreCase));
             var runFolder = DateTime.Now.ToString("u").Replace(' ', '_').Replace(':', '-');
