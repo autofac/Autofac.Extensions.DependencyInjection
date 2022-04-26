@@ -77,7 +77,11 @@ namespace Autofac.Extensions.DependencyInjection
             serviceProviderRegistration.As<IServiceProviderIsService>();
 #endif
 
-            builder.RegisterType<AutofacServiceScopeFactory>().As<IServiceScopeFactory>();
+            // Issue #83: IServiceScopeFactory must be a singleton and scopes must be flat, not hierarchical.
+            builder
+                .RegisterType<AutofacServiceScopeFactory>()
+                .As<IServiceScopeFactory>()
+                .SingleInstance();
 
             Register(builder, descriptors, lifetimeScopeTagForSingletons);
         }
