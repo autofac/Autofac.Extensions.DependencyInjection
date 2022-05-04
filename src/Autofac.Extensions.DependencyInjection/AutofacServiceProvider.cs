@@ -25,8 +25,10 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac.Core;
+using Autofac.Core.Lifetime;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection
@@ -71,7 +73,8 @@ namespace Autofac.Extensions.DependencyInjection
         /// </exception>
         public object GetRequiredService(Type serviceType)
         {
-            return _lifetimeScope.Resolve(serviceType);
+            var scope = GetPerRequestScope();
+            return scope.Resolve(serviceType);
         }
 
         /// <summary>
@@ -86,13 +89,30 @@ namespace Autofac.Extensions.DependencyInjection
         /// </returns>
         public object GetService(Type serviceType)
         {
-            return _lifetimeScope.ResolveOptional(serviceType);
+            var scope = GetPerRequestScope();
+            return scope.ResolveOptional(serviceType);
         }
 
         /// <summary>
         /// Gets the underlying instance of <see cref="ILifetimeScope" />.
         /// </summary>
         public ILifetimeScope LifetimeScope => _lifetimeScope;
+
+        private ILifetimeScope GetPerRequestScope()
+        {
+            var perRequestScope = _lifetimeScope.BeginLifetimeScope(builder =>
+            {
+                var perRequestModuleAccessor = _lifetimeScope.ResolveOptional<IPerRequestModuleAccessor>();
+                if (perRequestModuleAccessor.Modules != null && perRequestModuleAccessor.Modules.Any())
+                {
+                    foreach (var module in perRequestModuleAccessor.Modules)
+                    {
+                        builder.RegisterModule(module);
+                    }
+                }
+            });
+            return perRequestScope;
+        }
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
