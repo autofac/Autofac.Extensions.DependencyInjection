@@ -3,43 +3,42 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Autofac.Extensions.DependencyInjection.Test
+namespace Autofac.Extensions.DependencyInjection.Test;
+
+public sealed class ServiceCollectionExtensionsTests
 {
-    public sealed class ServiceCollectionExtensionsTests
+    [Fact]
+    public void AddAutofacReturnsProvidedServiceCollection()
     {
-        [Fact]
-        public void AddAutofacReturnsProvidedServiceCollection()
-        {
-            var collection = new ServiceCollection();
+        var collection = new ServiceCollection();
 
-            var returnedCollection = collection.AddAutofac();
+        var returnedCollection = collection.AddAutofac();
 
-            Assert.Same(collection, returnedCollection);
-        }
+        Assert.Same(collection, returnedCollection);
+    }
 
-        [Fact]
-        public void AddAutofacAddsAutofacServiceProviderFactoryToCollection()
-        {
-            var collection = new ServiceCollection();
+    [Fact]
+    public void AddAutofacAddsAutofacServiceProviderFactoryToCollection()
+    {
+        var collection = new ServiceCollection();
 
-            collection.AddAutofac();
+        collection.AddAutofac();
 
-            var service = collection.FirstOrDefault(s => s.ServiceType == typeof(IServiceProviderFactory<ContainerBuilder>));
-            Assert.NotNull(service);
-            Assert.Equal(ServiceLifetime.Singleton, service.Lifetime);
-        }
+        var service = collection.FirstOrDefault(s => s.ServiceType == typeof(IServiceProviderFactory<ContainerBuilder>));
+        Assert.NotNull(service);
+        Assert.Equal(ServiceLifetime.Singleton, service.Lifetime);
+    }
 
-        [Fact]
-        public void AddAutofacPassesConfigurationActionToAutofacServiceProviderFactory()
-        {
-            var collection = new ServiceCollection();
+    [Fact]
+    public void AddAutofacPassesConfigurationActionToAutofacServiceProviderFactory()
+    {
+        var collection = new ServiceCollection();
 
-            collection.AddAutofac(config => config.Register(c => "Foo"));
+        collection.AddAutofac(config => config.Register(c => "Foo"));
 
-            var serviceProvider = collection.BuildServiceProvider();
-            var factory = (IServiceProviderFactory<ContainerBuilder>)serviceProvider.GetService(typeof(IServiceProviderFactory<ContainerBuilder>));
-            var builder = factory.CreateBuilder(collection);
-            Assert.Equal("Foo", builder.Build().Resolve<string>());
-        }
+        var serviceProvider = collection.BuildServiceProvider();
+        var factory = (IServiceProviderFactory<ContainerBuilder>)serviceProvider.GetService(typeof(IServiceProviderFactory<ContainerBuilder>));
+        var builder = factory.CreateBuilder(collection);
+        Assert.Equal("Foo", builder.Build().Resolve<string>());
     }
 }

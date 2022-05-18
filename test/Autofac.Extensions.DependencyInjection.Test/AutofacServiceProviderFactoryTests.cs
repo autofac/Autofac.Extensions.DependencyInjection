@@ -4,121 +4,120 @@
 using Autofac.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Autofac.Extensions.DependencyInjection.Test
+namespace Autofac.Extensions.DependencyInjection.Test;
+
+public class AutofacServiceProviderFactoryTests
 {
-    public class AutofacServiceProviderFactoryTests
+    [Fact]
+    public void CreateBuilderReturnsNewInstance()
     {
-        [Fact]
-        public void CreateBuilderReturnsNewInstance()
-        {
-            var factory = new AutofacServiceProviderFactory();
+        var factory = new AutofacServiceProviderFactory();
 
-            var builder = factory.CreateBuilder(new ServiceCollection());
+        var builder = factory.CreateBuilder(new ServiceCollection());
 
-            Assert.NotNull(builder);
-        }
+        Assert.NotNull(builder);
+    }
 
-        [Fact]
-        public void CreateBuilderExecutesConfigurationActionWhenProvided()
-        {
-            var factory = new AutofacServiceProviderFactory(config => config.Register(c => "Foo"));
+    [Fact]
+    public void CreateBuilderExecutesConfigurationActionWhenProvided()
+    {
+        var factory = new AutofacServiceProviderFactory(config => config.Register(c => "Foo"));
 
-            var builder = factory.CreateBuilder(new ServiceCollection());
+        var builder = factory.CreateBuilder(new ServiceCollection());
 
-            Assert.Equal("Foo", builder.Build().Resolve<string>());
-        }
+        Assert.Equal("Foo", builder.Build().Resolve<string>());
+    }
 
-        [Fact]
-        public void CreateBuilderAllowsForNullConfigurationAction()
-        {
-            var factory = new AutofacServiceProviderFactory();
+    [Fact]
+    public void CreateBuilderAllowsForNullConfigurationAction()
+    {
+        var factory = new AutofacServiceProviderFactory();
 
-            var builder = factory.CreateBuilder(new ServiceCollection());
+        var builder = factory.CreateBuilder(new ServiceCollection());
 
-            Assert.NotNull(builder);
-        }
+        Assert.NotNull(builder);
+    }
 
-        [Fact]
-        public void CreateBuilderReturnsInstanceWithServicesPopulated()
-        {
-            var factory = new AutofacServiceProviderFactory();
-            var services = new ServiceCollection();
-            services.AddTransient<object>();
+    [Fact]
+    public void CreateBuilderReturnsInstanceWithServicesPopulated()
+    {
+        var factory = new AutofacServiceProviderFactory();
+        var services = new ServiceCollection();
+        services.AddTransient<object>();
 
-            var builder = factory.CreateBuilder(services);
+        var builder = factory.CreateBuilder(services);
 
-            Assert.True(builder.Build().IsRegistered<object>());
-        }
+        Assert.True(builder.Build().IsRegistered<object>());
+    }
 
-        [Fact]
-        public void CreateServiceProviderBuildsServiceProviderUsingContainerBuilder()
-        {
-            var factory = new AutofacServiceProviderFactory();
-            var services = new ServiceCollection().AddTransient<object>();
-            var builder = factory.CreateBuilder(services);
+    [Fact]
+    public void CreateServiceProviderBuildsServiceProviderUsingContainerBuilder()
+    {
+        var factory = new AutofacServiceProviderFactory();
+        var services = new ServiceCollection().AddTransient<object>();
+        var builder = factory.CreateBuilder(services);
 
-            var serviceProvider = factory.CreateServiceProvider(builder);
+        var serviceProvider = factory.CreateServiceProvider(builder);
 
-            Assert.NotNull(serviceProvider.GetService(typeof(object)));
-        }
+        Assert.NotNull(serviceProvider.GetService(typeof(object)));
+    }
 
-        [Fact]
-        public void CreateServiceProviderThrowsWhenProvidedNullContainerBuilder()
-        {
-            var factory = new AutofacServiceProviderFactory();
+    [Fact]
+    public void CreateServiceProviderThrowsWhenProvidedNullContainerBuilder()
+    {
+        var factory = new AutofacServiceProviderFactory();
 
-            var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
+        var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
 
-            Assert.Equal("containerBuilder", exception.ParamName);
-        }
+        Assert.Equal("containerBuilder", exception.ParamName);
+    }
 
-        [Fact]
-        public void CreateServiceProviderReturnsAutofacServiceProvider()
-        {
-            var factory = new AutofacServiceProviderFactory();
+    [Fact]
+    public void CreateServiceProviderReturnsAutofacServiceProvider()
+    {
+        var factory = new AutofacServiceProviderFactory();
 
-            var serviceProvider = factory.CreateServiceProvider(new ContainerBuilder());
+        var serviceProvider = factory.CreateServiceProvider(new ContainerBuilder());
 
-            Assert.IsType<AutofacServiceProvider>(serviceProvider);
-        }
+        Assert.IsType<AutofacServiceProvider>(serviceProvider);
+    }
 
-        [Fact]
-        public void CreateServiceProviderUsesDefaultContainerBuildOptionsWhenNotProvided()
-        {
-            var factory = new AutofacServiceProviderFactory();
-            var services = new ServiceCollection().AddSingleton("Foo");
-            var builder = factory.CreateBuilder(services);
+    [Fact]
+    public void CreateServiceProviderUsesDefaultContainerBuildOptionsWhenNotProvided()
+    {
+        var factory = new AutofacServiceProviderFactory();
+        var services = new ServiceCollection().AddSingleton("Foo");
+        var builder = factory.CreateBuilder(services);
 
-            var serviceProvider = factory.CreateServiceProvider(builder);
+        var serviceProvider = factory.CreateServiceProvider(builder);
 
-            Assert.NotNull(serviceProvider.GetService<Lazy<string>>());
-        }
+        Assert.NotNull(serviceProvider.GetService<Lazy<string>>());
+    }
 
-        [Fact]
-        public void CreateServiceProviderUsesContainerBuildOptionsWhenProvided()
-        {
-            var options = ContainerBuildOptions.ExcludeDefaultModules;
-            var factory = new AutofacServiceProviderFactory(options);
-            var services = new ServiceCollection().AddSingleton("Foo");
-            var builder = factory.CreateBuilder(services);
+    [Fact]
+    public void CreateServiceProviderUsesContainerBuildOptionsWhenProvided()
+    {
+        var options = ContainerBuildOptions.ExcludeDefaultModules;
+        var factory = new AutofacServiceProviderFactory(options);
+        var services = new ServiceCollection().AddSingleton("Foo");
+        var builder = factory.CreateBuilder(services);
 
-            var serviceProvider = factory.CreateServiceProvider(builder);
+        var serviceProvider = factory.CreateServiceProvider(builder);
 
-            Assert.Null(serviceProvider.GetService<Lazy<string>>());
-        }
+        Assert.Null(serviceProvider.GetService<Lazy<string>>());
+    }
 
-        [Fact]
-        public void CanProvideContainerBuildOptionsAndConfigurationAction()
-        {
-            var factory = new AutofacServiceProviderFactory(
-                ContainerBuildOptions.ExcludeDefaultModules,
-                config => config.Register(c => "Foo"));
-            var builder = factory.CreateBuilder(new ServiceCollection());
+    [Fact]
+    public void CanProvideContainerBuildOptionsAndConfigurationAction()
+    {
+        var factory = new AutofacServiceProviderFactory(
+            ContainerBuildOptions.ExcludeDefaultModules,
+            config => config.Register(c => "Foo"));
+        var builder = factory.CreateBuilder(new ServiceCollection());
 
-            var serviceProvider = factory.CreateServiceProvider(builder);
+        var serviceProvider = factory.CreateServiceProvider(builder);
 
-            Assert.NotNull(serviceProvider.GetService<string>());
-            Assert.Null(serviceProvider.GetService<Lazy<string>>());
-        }
+        Assert.NotNull(serviceProvider.GetService<string>());
+        Assert.Null(serviceProvider.GetService<Lazy<string>>());
     }
 }

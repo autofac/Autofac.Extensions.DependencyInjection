@@ -5,21 +5,20 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 
-namespace Autofac.Extensions.DependencyInjection.Bench
+namespace Autofac.Extensions.DependencyInjection.Bench;
+
+internal class BenchmarkConfig : ManualConfig
 {
-    internal class BenchmarkConfig : ManualConfig
+    internal BenchmarkConfig()
     {
-        internal BenchmarkConfig()
-        {
-            Add(DefaultConfig.Instance);
+        Add(DefaultConfig.Instance);
 
-            AddJob(Job.InProcess);
+        AddJob(Job.InProcess);
 
-            var rootFolder = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.LastIndexOf("bin", StringComparison.OrdinalIgnoreCase));
-            var runFolder = DateTime.Now.ToString("u").Replace(' ', '_').Replace(':', '-');
-            ArtifactsPath = Path.Join(rootFolder, "BenchmarkDotNet.Artifacts", runFolder);
+        var rootFolder = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.LastIndexOf("bin", StringComparison.OrdinalIgnoreCase));
+        var runFolder = DateTime.Now.ToString("u").Replace(' ', '_').Replace(':', '-');
+        ArtifactsPath = Path.Join(rootFolder, "BenchmarkDotNet.Artifacts", runFolder);
 
-            AddDiagnoser(MemoryDiagnoser.Default);
-        }
+        AddDiagnoser(MemoryDiagnoser.Default);
     }
 }

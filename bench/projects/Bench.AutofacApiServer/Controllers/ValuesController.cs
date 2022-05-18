@@ -3,23 +3,22 @@
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace BenchProject.AutofacApiServer.Controllers
+namespace BenchProject.AutofacApiServer.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class ValuesController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ValuesController : ControllerBase
+    private readonly A _service;
+
+    public ValuesController(A service)
     {
-        private readonly A _service;
+        _service = service;
+    }
 
-        public ValuesController(A service)
-        {
-            _service = service;
-        }
-
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(200);
-        }
+    [HttpGet]
+    public IActionResult Get()
+    {
+        return Ok(200);
     }
 }

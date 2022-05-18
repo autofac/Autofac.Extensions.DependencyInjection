@@ -4,147 +4,146 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Autofac.Extensions.DependencyInjection.Test
+namespace Autofac.Extensions.DependencyInjection.Test;
+
+public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
 {
-    public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
+    [Fact]
+    public void CreateBuilderReturnsNewInstance()
     {
-        [Fact]
-        public void CreateBuilderReturnsNewInstance()
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+
+        var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
+
+        Assert.NotNull(configurationAdapter);
+    }
+
+    [Fact]
+    public void CreateBuilderExecutesConfigurationActionWhenProvided()
+    {
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope, b => b.Register(c => "Foo"));
+
+        var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
+
+        var builder = new ContainerBuilder();
+
+        foreach (var action in configurationAdapter.ConfigurationActions)
         {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
-
-            var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
-
-            Assert.NotNull(configurationAdapter);
+            action(builder);
         }
 
-        [Fact]
-        public void CreateBuilderExecutesConfigurationActionWhenProvided()
+        Assert.Equal("Foo", builder.Build().Resolve<string>());
+    }
+
+    [Fact]
+    public void CreateBuilderAllowsForNullConfigurationAction()
+    {
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+
+        var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
+
+        Assert.NotNull(configurationAdapter);
+    }
+
+    [Fact]
+    public void CreateBuilderReturnsInstanceWithServicesPopulated()
+    {
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+        var services = new ServiceCollection().AddTransient<object>();
+
+        var configurationAdapter = factory.CreateBuilder(services);
+
+        var builder = new ContainerBuilder();
+
+        foreach (var action in configurationAdapter.ConfigurationActions)
         {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope, b => b.Register(c => "Foo"));
-
-            var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
-
-            var builder = new ContainerBuilder();
-
-            foreach (var action in configurationAdapter.ConfigurationActions)
-            {
-                action(builder);
-            }
-
-            Assert.Equal("Foo", builder.Build().Resolve<string>());
+            action(builder);
         }
 
-        [Fact]
-        public void CreateBuilderAllowsForNullConfigurationAction()
-        {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+        Assert.True(builder.Build().IsRegistered<object>());
+    }
 
-            var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
+    [Fact]
+    public void CreateServiceProviderBuildsServiceProviderUsingAdapter()
+    {
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+        var services = new ServiceCollection().AddTransient<object>();
+        var configurationAdapter = factory.CreateBuilder(services);
 
-            Assert.NotNull(configurationAdapter);
-        }
+        var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
 
-        [Fact]
-        public void CreateBuilderReturnsInstanceWithServicesPopulated()
-        {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
-            var services = new ServiceCollection().AddTransient<object>();
+        Assert.NotNull(serviceProvider.GetService(typeof(object)));
+    }
 
-            var configurationAdapter = factory.CreateBuilder(services);
+    [Fact]
+    public void CreateServiceProviderThrowsWhenProvidedNullAdapter()
+    {
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
 
-            var builder = new ContainerBuilder();
+        var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
 
-            foreach (var action in configurationAdapter.ConfigurationActions)
-            {
-                action(builder);
-            }
+        Assert.Equal("containerBuilder", exception.ParamName);
+    }
 
-            Assert.True(builder.Build().IsRegistered<object>());
-        }
+    [Fact]
+    public void CreateServiceProviderReturnsAutofacServiceProvider()
+    {
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
 
-        [Fact]
-        public void CreateServiceProviderBuildsServiceProviderUsingAdapter()
-        {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
-            var services = new ServiceCollection().AddTransient<object>();
-            var configurationAdapter = factory.CreateBuilder(services);
+        var serviceProvider = factory.CreateServiceProvider(new AutofacChildLifetimeScopeConfigurationAdapter());
 
-            var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
+        Assert.IsType<AutofacServiceProvider>(serviceProvider);
+    }
 
-            Assert.NotNull(serviceProvider.GetService(typeof(object)));
-        }
+    [Fact]
+    public void CreateServiceProviderAddDepToServiceCollectionAndAddConfigurationTypesResolvable()
+    {
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
 
-        [Fact]
-        public void CreateServiceProviderThrowsWhenProvidedNullAdapter()
-        {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+        var services = new ServiceCollection().AddTransient<DependencyOne>();
 
-            var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
+        var configurationAdapter = factory.CreateBuilder(services);
 
-            Assert.Equal("containerBuilder", exception.ParamName);
-        }
+        configurationAdapter.Add(builder => builder.RegisterType<DependencyTwo>());
 
-        [Fact]
-        public void CreateServiceProviderReturnsAutofacServiceProvider()
-        {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+        var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
 
-            var serviceProvider = factory.CreateServiceProvider(new AutofacChildLifetimeScopeConfigurationAdapter());
+        serviceProvider.GetRequiredService<DependencyOne>();
+        serviceProvider.GetRequiredService<DependencyTwo>();
+    }
 
-            Assert.IsType<AutofacServiceProvider>(serviceProvider);
-        }
+    [Fact]
+    public void CreateServiceProviderAddDepToRootContainerResolvable()
+    {
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScopeWithDependency<DependencyOne>(typeof(DependencyOne)));
 
-        [Fact]
-        public void CreateServiceProviderAddDepToServiceCollectionAndAddConfigurationTypesResolveable()
-        {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+        var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
 
-            var services = new ServiceCollection().AddTransient<DependencyOne>();
+        var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
 
-            var configurationAdapter = factory.CreateBuilder(services);
+        serviceProvider.GetRequiredService<DependencyOne>();
+    }
 
-            configurationAdapter.Add(builder => builder.RegisterType<DependencyTwo>());
+    private static ILifetimeScope GetRootLifetimeScope() => new ContainerBuilder().Build();
 
-            var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
+    private static ILifetimeScope GetRootLifetimeScopeWithDependency<TAs>(Type type)
+    {
+        var containerBuilder = new ContainerBuilder();
 
-            serviceProvider.GetRequiredService<DependencyOne>();
-            serviceProvider.GetRequiredService<DependencyTwo>();
-        }
+        containerBuilder
+            .RegisterType(type)
+            .As<TAs>();
 
-        [Fact]
-        public void CreateServiceProviderAddDepToRootContainerResolveable()
-        {
-            var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScopeWithDependency<DependencyOne>(typeof(DependencyOne)));
+        return containerBuilder.Build();
+    }
 
-            var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
+    [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
+    private class DependencyOne
+    {
+    }
 
-            var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
-
-            serviceProvider.GetRequiredService<DependencyOne>();
-        }
-
-        private static ILifetimeScope GetRootLifetimeScope() => new ContainerBuilder().Build();
-
-        private static ILifetimeScope GetRootLifetimeScopeWithDependency<TAs>(Type type)
-        {
-            var containerBuilder = new ContainerBuilder();
-
-            containerBuilder
-                .RegisterType(type)
-                .As<TAs>();
-
-            return containerBuilder.Build();
-        }
-
-        [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
-        private class DependencyOne
-        {
-        }
-
-        [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
-        private class DependencyTwo
-        {
-        }
+    [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
+    private class DependencyTwo
+    {
     }
 }

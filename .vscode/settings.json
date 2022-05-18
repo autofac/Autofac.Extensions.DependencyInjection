@@ -3,6 +3,13 @@
     "autofac",
     "cref",
     "diagnoser",
+    "diagnosers",
+    "inheritdoc",
+    "langword",
+    "paramref",
+    "seealso",
+    "typeparam",
+    "unmanaged",
     "xunit"
   ],
   "coverage-gutters.coverageBaseDir": "artifacts/coverage",

@@ -3,25 +3,24 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Autofac.Extensions.DependencyInjection.Test
+namespace Autofac.Extensions.DependencyInjection.Test;
+
+public sealed class ServiceProviderExtensionsTests
 {
-    public sealed class ServiceProviderExtensionsTests
+    [Fact]
+    public void GetAutofacRootReturnsLifetimeScope()
     {
-        [Fact]
-        public void GetAutofacRootReturnsLifetimeScope()
-        {
-            var containerBuilder = new ContainerBuilder();
-            containerBuilder.Populate(new ServiceCollection());
+        var containerBuilder = new ContainerBuilder();
+        containerBuilder.Populate(new ServiceCollection());
 
-            var container = containerBuilder.Build();
-            var serviceProvider = container.Resolve<IServiceProvider>();
+        var container = containerBuilder.Build();
+        var serviceProvider = container.Resolve<IServiceProvider>();
 
-            Assert.NotNull(serviceProvider.GetAutofacRoot());
-        }
-
-        [Fact]
-        public void GetAutofacRootServiceProviderNotAutofacServiceProviderThrows()
-            => Assert.Throws<InvalidOperationException>(() =>
-                new ServiceCollection().BuildServiceProvider().GetAutofacRoot());
+        Assert.NotNull(serviceProvider.GetAutofacRoot());
     }
+
+    [Fact]
+    public void GetAutofacRootServiceProviderNotAutofacServiceProviderThrows()
+        => Assert.Throws<InvalidOperationException>(() =>
+            new ServiceCollection().BuildServiceProvider().GetAutofacRoot());
 }
