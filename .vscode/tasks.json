@@ -25,6 +25,8 @@
         "--results-directory",
         "\"artifacts/coverage\"",
         "--logger:trx",
+        "--filter",
+        "FullyQualifiedName!~Bench"
         "/p:CoverletOutput=\"${workspaceFolder}/artifacts/coverage/\"",
         "/p:CollectCoverage=true",
         "/p:CoverletOutputFormat=lcov",

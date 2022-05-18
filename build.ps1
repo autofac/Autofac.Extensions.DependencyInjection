@@ -2,6 +2,10 @@
 # THE BUILD!
 ########################
 
+param (
+    [switch]$Bench = $false
+)
+
 Push-Location $PSScriptRoot
 try {
     Import-Module $PSScriptRoot/build/Autofac.Build.psd1 -Force
@@ -18,14 +22,18 @@ try {
         Write-Message "Cleaning $artifactsPath folder"
         Remove-Item $artifactsPath -Force -Recurse
     }
-    
-    # Install dotnet CLI
-    Write-Message "Installing .NET SDK version $sdkVersion"
-    Install-DotNetCli -Version $sdkVersion
-    
-    foreach ($additional in $globalJson.additionalSdks)
-    {
-        Install-DotNetCli -Version $additional;
+
+    # Install dotnet SDK versions during CI. In a local build we assume you have
+    # everything installed; on CI we'll force the install. If you install _any_
+    # SDKs, you have to install _all_ of them because you can't install SDKs in
+    # two different locations. dotnet CLI locates SDKs relative to the
+    # executable.
+    if ($Null -ne $env:APPVEYOR_BUILD_NUMBER) {
+        Install-DotNetCli -Version $sdkVersion
+        foreach ($additional in $globalJson.additionalSdks)
+        {
+            Install-DotNetCli -Version $additional;
+        }
     }
 
     # Write out dotnet information
@@ -46,16 +54,31 @@ try {
     Write-Message "Building projects and packages"
     Get-DotNetProjectDirectory -RootPath $PSScriptRoot\src | Invoke-DotNetPack -PackagesPath $packagesPath -VersionSuffix $versionSuffix
 
-
     # Test
     Write-Message "Executing unit tests"
     Get-DotNetProjectDirectory -RootPath $PSScriptRoot\test | Invoke-Test
 
+    # Benchmark
+    if ($Bench) {
+        Get-DotNetProjectDirectory -RootPath $PSScriptRoot\bench | Invoke-Test
+        Get-ChildItem -Path $PSScriptRoot\bench -Filter "BenchmarkDotNet.Artifacts" -Directory -Recurse | Move-Item -Destination "$PSScriptRoot\artifacts\benchmarks"
+    }
+
     if ($env:CI -eq "true") {
         # Generate Coverage Report
+        Write-Message "Downloading and verifying Codecov Uploader"
+        $ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://keybase.io/codecovsecurity/pgp_keys.asc -OutFile codecov.asc
+        gpg --no-default-keyring --keyring trustedkeys.gpg --import codecov.asc
+        Invoke-WebRequest -Uri https://uploader.codecov.io/latest/linux/codecov -Outfile codecov
+        Invoke-WebRequest -Uri https://uploader.codecov.io/latest/linux/codecov.SHA256SUM -Outfile codecov.SHA256SUM
+        Invoke-WebRequest -Uri https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig -Outfile codecov.SHA256SUM.sig
+        gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+        shasum -a 256 -c codecov.SHA256SUM
+        chmod +x codecov
+
         Write-Message "Generating Codecov Report"
-        Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
-        & bash codecov.sh -f "artifacts/coverage/*/coverage*.info"
+        & ./codecov -f "artifacts/coverage/*/coverage*.info"
     }
 
     # Finished

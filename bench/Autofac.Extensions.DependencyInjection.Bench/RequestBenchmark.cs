@@ -1,15 +1,17 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿// Copyright (c) Autofac Project. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using BenchProject.AutofacApiServer;
 using Microsoft.AspNetCore.Mvc.Testing;
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Autofac.Extensions.DependencyInjection.Bench
 {
+    [SuppressMessage("CA1001", "CA1001", Justification = "Benchmark disposal happens in a global cleanup method.")]
     public class RequestBenchmark
     {
+        private static readonly Uri ValuesUri = new("/api/values", UriKind.Relative);
         private WebApplicationFactory<DefaultStartup> _defaultFactory;
         private WebApplicationFactory<DefaultStartup> _autofacFactory;
         private HttpClient _defaultClient;
@@ -26,9 +28,9 @@ namespace Autofac.Extensions.DependencyInjection.Bench
         }
 
         [Benchmark(Baseline = true)]
-        public async Task Request_DefaultDI()
+        public async Task RequestDefaultDI()
         {
-            var response = await _defaultClient.GetAsync("/api/values");
+            var response = await _defaultClient.GetAsync(ValuesUri).ConfigureAwait(false);
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -37,9 +39,9 @@ namespace Autofac.Extensions.DependencyInjection.Bench
         }
 
         [Benchmark]
-        public async Task Request_AutofacDI()
+        public async Task RequestAutofacDI()
         {
-            var response = await _autofacClient.GetAsync("/api/values");
+            var response = await _autofacClient.GetAsync(ValuesUri).ConfigureAwait(false);
 
             if (response.StatusCode != HttpStatusCode.OK)
             {

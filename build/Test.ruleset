@@ -6,6 +6,10 @@
     <Rule Id="CA1032" Action="None" />
     <!-- Change names to avoid reserved word overlaps (e.g., Delegate, GetType, etc.) - too many of these in the public API, we'd break if we fixed it. -->
     <Rule Id="CA1716" Action="None" />
+    <!-- Change Dispose() to call GC.SuppressFinalize - in tests we don't really care and it can impact readability. -->
+    <Rule Id="CA1816" Action="None" />
+    <!-- Mark members static - test methods may not access member data but also can't be static. -->
+    <Rule Id="CA1822" Action="None" />
     <!-- Implement serialization constructors - false positive when building .NET Core -->
     <Rule Id="CA2229" Action="None" />
     <!-- Mark ISerializable types with SerializableAttribute - false positive when building .NET Core -->
@@ -34,6 +38,10 @@
     <Rule Id="SA1309" Action="None" />
     <!-- Suppressions must have a justification -->
     <Rule Id="SA1404" Action="None" />
+    <!-- Elements should be documented -->
+    <Rule Id="SA1600" Action="None" />
+    <!-- Enuemration items should be documented -->
+    <Rule Id="SA1602" Action="None" />
     <!-- Parameter documentation must be in the right order -->
     <Rule Id="SA1612" Action="None" />
     <!-- Return value must be documented -->
@@ -46,5 +54,11 @@
     <Rule Id="SA1627" Action="None" />
     <!-- Enable XML documentation output-->
     <Rule Id="SA1652" Action="None" />
+    <!-- Private member is unused - tests for reflection require members that may not get used. -->
+    <Rule Id="IDE0051" Action="None" />
+    <!-- Private member assigned value never read - tests for reflection require values that may not get used. -->
+    <Rule Id="IDE0052" Action="None" />
+    <!-- Remove unused parameter - tests for reflection require parameters that may not get used. -->
+    <Rule Id="IDE0060" Action="None" />
   </Rules>
 </RuleSet>

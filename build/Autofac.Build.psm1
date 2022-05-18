@@ -5,11 +5,11 @@
 # 4: dotnet / NuGet package restore failure
 
 <#
- .SYNOPSIS
-  Gets the set of directories in which projects are available for compile/processing.
+.SYNOPSIS
+    Gets the set of directories in which projects are available for compile/processing.
 
- .PARAMETER RootPath
-  Path where searching for project directories should begin.
+.PARAMETER RootPath
+    Path where searching for project directories should begin.
 #>
 function Get-DotNetProjectDirectory {
     [CmdletBinding()]
@@ -34,25 +34,6 @@ function Install-DotNetCli {
         [string]
         $Version = "Latest"
     )
-
-    if ($null -ne (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
-        $installedVersions = dotnet --list-sdks
-        foreach ($sdkListLine in $installedVersions)
-        {
-            $splitParts = $sdkListLine.Split(" ");
-
-            $versionPart = $splitParts[0];
-            $globalInstallLocation = $splitParts[1].Replace("[", "").Replace("]", "")
-
-            if ($versionPart -eq $Version)
-            {
-                Write-Message ".NET Core SDK version $Version is already installed in $globalInstallLocation"
-                Add-Path "$globalInstallLocation"
-                return;
-            }
-        }
-    }
-
     Write-Message "Installing .NET SDK version $Version"
 
     $callerPath = Split-Path $MyInvocation.PSCommandPath
@@ -103,7 +84,7 @@ function Add-Path {
     if ($pathValues -Contains $Path) {
       return;
     }
-    
+
     $env:PATH = "${Path}${pathSeparator}$env:PATH"
 }
 
@@ -134,17 +115,17 @@ function Invoke-DotNetBuild {
 }
 
 <#
- .SYNOPSIS
-  Invokes the dotnet utility to package a project.
+.SYNOPSIS
+    Invokes the dotnet utility to package a project.
 
- .PARAMETER ProjectDirectory
-  Path to the directory containing the project to package.
+.PARAMETER ProjectDirectory
+    Path to the directory containing the project to package.
 
- .PARAMETER PackagesPath
-  Path to the "artifacts/packages" folder where packages should go.
+.PARAMETER PackagesPath
+    Path to the "artifacts/packages" folder where packages should go.
 
- .PARAMETER VersionSuffix
-  The version suffix to use for the NuGet package version.
+.PARAMETER VersionSuffix
+    The version suffix to use for the NuGet package version.
 #>
 function Invoke-DotNetPack {
     [CmdletBinding()]
