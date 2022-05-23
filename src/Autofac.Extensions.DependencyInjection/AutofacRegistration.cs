@@ -70,10 +70,8 @@ public static class AutofacRegistration
 
         var serviceProviderRegistration = builder.RegisterType<AutofacServiceProvider>()
                                                  .As<IServiceProvider>()
+                                                 .As<IServiceProviderIsService>()
                                                  .ExternallyOwned();
-
-        // Add the additional registration if needed.
-        serviceProviderRegistration.As<IServiceProviderIsService>();
 
         // Issue #83: IServiceScopeFactory must be a singleton and scopes must be flat, not hierarchical.
         builder
