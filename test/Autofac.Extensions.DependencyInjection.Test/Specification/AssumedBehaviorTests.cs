@@ -116,8 +116,6 @@ public abstract class AssumedBehaviorTests
         Assert.False(tracker.SyncDisposed);
     }
 
-#if NET6_0_OR_GREATER
-
     [Fact]
     public async ValueTask ServiceScopeDisposesAsync()
     {
@@ -138,8 +136,6 @@ public abstract class AssumedBehaviorTests
         Assert.True(tracker.AsyncDisposed);
         Assert.False(tracker.SyncDisposed);
     }
-
-#endif
 
     [Fact]
     public void ServiceScopeFactoryIsSingleton()

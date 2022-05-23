@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 /// <seealso cref="System.IServiceProvider" />
 /// <seealso cref="Microsoft.Extensions.DependencyInjection.ISupportRequiredService" />
-public partial class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IDisposable, IAsyncDisposable
+public partial class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IServiceProviderIsService, IDisposable, IAsyncDisposable
 {
     private readonly ILifetimeScope _lifetimeScope;
 
@@ -47,6 +48,9 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     {
         return _lifetimeScope.Resolve(serviceType);
     }
+
+    /// <inheritdoc />
+    public bool IsService(Type serviceType) => _lifetimeScope.ComponentRegistry.IsRegistered(new TypedService(serviceType));
 
     /// <summary>
     /// Gets the service object of the specified type.
@@ -99,10 +103,6 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// <summary>
     /// Performs a dispose operation asynchronously.
     /// </summary>
-    [SuppressMessage(
-        "Usage",
-        "CA1816:Dispose methods should call SuppressFinalize",
-        Justification = "DisposeAsync should also call SuppressFinalize (see various .NET internal implementations).")]
     public async ValueTask DisposeAsync()
     {
         if (!_disposed)
