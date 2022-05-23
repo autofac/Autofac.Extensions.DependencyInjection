@@ -56,7 +56,7 @@ try {
 
     # Test
     Write-Message "Executing unit tests"
-    Get-DotNetProjectDirectory -RootPath $PSScriptRoot\test | Invoke-Test
+    Get-DotNetProjectDirectory -RootPath $PSScriptRoot\test | Where-Object { $_ -inotlike "*/Integration.*" } | Invoke-Test
 
     # Benchmark
     if ($Bench) {
