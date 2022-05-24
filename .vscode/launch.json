@@ -3,19 +3,56 @@
     {
       "args": [
       ],
-      "console": "internalConsole",
-      "cwd": "${workspaceFolder}/test/Autofac.Extensions.DependencyInjection.Test",
-      "name": "Launch Tests",
+      "cwd": "${workspaceFolder}/test/Integration.Net6",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "name": "Launch .NET 6 Integration Site",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/test/Autofac.Extensions.DependencyInjection.Test/bin/Debug/net6.0/Autofac.Extensions.DependencyInjection.Test.dll",
+      "program": "${workspaceFolder}/test/Integration.Net6/bin/Debug/net6.0/Integration.Net6.dll",
       "request": "launch",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/date"
+      },
       "stopAtEntry": false,
       "type": "coreclr"
     },
     {
-      "name": ".NET Core Attach",
-      "processId": "${command:pickProcess}",
-      "request": "attach",
+      "args": [],
+      "cwd": "${workspaceFolder}/test/Integration.Net5",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "name": "Launch .NET 5 Integration Site",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/test/Integration.Net5/bin/Debug/net5.0/Integration.Net5.dll",
+      "request": "launch",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/date"
+      },
+      "stopAtEntry": false,
+      "type": "coreclr"
+    },
+    {
+      "args": [],
+      "cwd": "${workspaceFolder}/test/Integration.Net3_1",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "name": "Launch .NET Core 3.1 Integration Site",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/test/Integration.Net3_1/bin/Debug/netcoreapp3.1/Integration.Net3_1.dll",
+      "request": "launch",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/date"
+      },
+      "stopAtEntry": false,
       "type": "coreclr"
     }
   ],

@@ -68,14 +68,10 @@ public static class AutofacRegistration
             throw new ArgumentNullException(nameof(descriptors));
         }
 
-        var serviceProviderRegistration = builder.RegisterType<AutofacServiceProvider>()
-                                                 .As<IServiceProvider>()
-                                                 .ExternallyOwned();
-
-#if NET6_0_OR_GREATER
-        // Add the additional registration if needed.
-        serviceProviderRegistration.As<IServiceProviderIsService>();
-#endif
+        builder.RegisterType<AutofacServiceProvider>()
+               .As<IServiceProvider>()
+               .As<IServiceProviderIsService>()
+               .ExternallyOwned();
 
         // Issue #83: IServiceScopeFactory must be a singleton and scopes must be flat, not hierarchical.
         builder
