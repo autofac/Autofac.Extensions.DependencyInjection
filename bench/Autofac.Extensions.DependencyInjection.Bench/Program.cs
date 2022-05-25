@@ -1,10 +1,12 @@
-﻿using BenchmarkDotNet.Running;
+﻿// Copyright (c) Autofac Project. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
-namespace Autofac.Extensions.DependencyInjection.Bench
+using BenchmarkDotNet.Running;
+
+namespace Autofac.Extensions.DependencyInjection.Bench;
+
+internal static class Program
 {
-    internal static class Program
-    {
-        internal static void Main(string[] args) =>
-            new BenchmarkSwitcher(Benchmarks.All).Run(args, new BenchmarkConfig());
-    }
+    internal static void Main(string[] args) =>
+        new BenchmarkSwitcher(Benchmarks.All).Run(args, new BenchmarkConfig());
 }
