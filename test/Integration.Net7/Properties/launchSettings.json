@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "Integration.Net6": {
+      "applicationUrl": "https://localhost:7154;http://localhost:7155",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "launchBrowser": true
+    }
+  }
+}

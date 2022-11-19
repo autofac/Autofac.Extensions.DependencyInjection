@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
+#if NET7_0
+using Integration.Net7;
+#endif
 #if NET6_0
 using Integration.Net6;
 #endif
