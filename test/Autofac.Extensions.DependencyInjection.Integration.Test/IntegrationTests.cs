@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
-#if NET6_0
+#if NET8_0
 using Integration.Net6;
 #endif
-#if NET5_0
-using Integration.Net5;
+#if NET7_0
+using Integration.Net6;
 #endif
-#if NETCOREAPP3_1
-using Integration.Net3_1;
+#if NET6_0
+using Integration.Net6;
 #endif
 
 namespace Autofac.Extensions.DependencyInjection.Integration.Test;

@@ -27,14 +27,14 @@
     <ProjectReference Include="..\Integration.Net6\Integration.Net6.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="5.0.17" />
-    <ProjectReference Include="..\Integration.Net5\Integration.Net5.csproj" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.9" />
+    <ProjectReference Include="..\Integration.Net6\Integration.Net6.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.32" />
-    <ProjectReference Include="..\Integration.Net3_1\Integration.Net3_1.csproj" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0-preview.6.23329.11" />
+    <ProjectReference Include="..\Integration.Net6\Integration.Net6.csproj" />
   </ItemGroup>
 
   <ItemGroup>

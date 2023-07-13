@@ -101,7 +101,7 @@ public abstract class AssumedBehaviorTests
     }
 
     [Fact]
-    public async ValueTask ServiceProviderDisposesAsync()
+    public async Task ServiceProviderDisposesAsync()
     {
         // You can't resolve things from a service provider
         // if you dispose it.
@@ -117,7 +117,7 @@ public abstract class AssumedBehaviorTests
     }
 
     [Fact]
-    public async ValueTask ServiceScopeDisposesAsync()
+    public async Task ServiceScopeDisposesAsync()
     {
         // You can't resolve things from a service provider
         // if you dispose it.

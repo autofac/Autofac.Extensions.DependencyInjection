@@ -10,6 +10,8 @@
     <Rule Id="CA1816" Action="None" />
     <!-- Mark members static - test methods may not access member data but also can't be static. -->
     <Rule Id="CA1822" Action="None" />
+    <!-- Seal internal types - tests use internal types for stubs and performance isn't a problem; this causes unnecessary ceremony. -->
+    <Rule Id="CA1852" Action="None" />
     <!-- Implement serialization constructors - false positive when building .NET Core -->
     <Rule Id="CA2229" Action="None" />
     <!-- Mark ISerializable types with SerializableAttribute - false positive when building .NET Core -->

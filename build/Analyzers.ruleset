@@ -4,6 +4,8 @@
   <Rules AnalyzerId="Microsoft.Usage" RuleNamespace="Microsoft.Usage">
     <!-- Implement standard exception constructors - not all of the exception constructors (e.g., parameterless) are desired in our system. -->
     <Rule Id="CA1032" Action="None" />
+    <!-- Use ArgumentNullException.ThrowIfNull instead of if/throw - netstandard2.0 and netstandard2.1 don't have ArgumentNullException.ThrowIfNull. -->
+    <Rule Id="CA1510" Action="None" />
     <!-- Change names to avoid reserved word overlaps (e.g., Delegate, GetType, etc.) - too many of these in the public API, we'd break if we fixed it. -->
     <Rule Id="CA1716" Action="None" />
     <!-- Implement serialization constructors - false positive when building .NET Core -->
