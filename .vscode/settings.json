@@ -19,6 +19,7 @@
   ],
   "dotnet-test-explorer.runInParallel": true,
   "dotnet-test-explorer.testProjectPath": "test/**/*.Test.csproj",
+  "dotnet.defaultSolution": "Autofac.Extensions.DependencyInjection.sln",
   "files.watcherExclude": {
     "**/target": true
   }
