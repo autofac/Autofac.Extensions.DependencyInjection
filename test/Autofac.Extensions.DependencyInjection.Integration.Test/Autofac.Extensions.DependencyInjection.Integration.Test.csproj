@@ -29,12 +29,12 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.9" />
-    <ProjectReference Include="..\Integration.Net6\Integration.Net6.csproj" />
+    <ProjectReference Include="..\Integration.Net7\Integration.Net7.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0-preview.6.23329.11" />
-    <ProjectReference Include="..\Integration.Net6\Integration.Net6.csproj" />
+    <ProjectReference Include="..\Integration.Net8\Integration.Net8.csproj" />
   </ItemGroup>
 
   <ItemGroup>

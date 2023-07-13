@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 #if NET8_0
-using Integration.Net6;
+using Integration.Net8;
 #endif
 #if NET7_0
-using Integration.Net6;
+using Integration.Net7;
 #endif
 #if NET6_0
 using Integration.Net6;
