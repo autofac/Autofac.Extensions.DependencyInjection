@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection to add the factory to.</param>
     /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
     /// <returns>The service collection.</returns>
-    public static IServiceCollection AddAutofac(this IServiceCollection services, Action<ContainerBuilder> configurationAction = null)
+    public static IServiceCollection AddAutofac(this IServiceCollection services, Action<ContainerBuilder>? configurationAction = null)
     {
         return services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory(configurationAction));
     }

@@ -61,7 +61,7 @@ public static class AutofacRegistration
     public static void Populate(
         this ContainerBuilder builder,
         IEnumerable<ServiceDescriptor> descriptors,
-        object lifetimeScopeTagForSingletons)
+        object? lifetimeScopeTagForSingletons)
     {
         if (descriptors == null)
         {
@@ -102,7 +102,7 @@ public static class AutofacRegistration
     private static IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> ConfigureLifecycle<TActivatorData, TRegistrationStyle>(
         this IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> registrationBuilder,
         ServiceLifetime lifecycleKind,
-        object lifetimeScopeTagForSingleton)
+        object? lifetimeScopeTagForSingleton)
     {
         switch (lifecycleKind)
         {
@@ -147,7 +147,7 @@ public static class AutofacRegistration
     private static void Register(
         ContainerBuilder builder,
         IEnumerable<ServiceDescriptor> descriptors,
-        object lifetimeScopeTagForSingletons)
+        object? lifetimeScopeTagForSingletons)
     {
         foreach (var descriptor in descriptors)
         {
@@ -185,7 +185,7 @@ public static class AutofacRegistration
             else
             {
                 builder
-                    .RegisterInstance(descriptor.ImplementationInstance)
+                    .RegisterInstance(descriptor.ImplementationInstance!)
                     .As(descriptor.ServiceType)
                     .ConfigureLifecycle(descriptor.Lifetime, null);
             }

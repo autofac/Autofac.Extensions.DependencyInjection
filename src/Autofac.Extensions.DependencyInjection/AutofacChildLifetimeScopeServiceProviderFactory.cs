@@ -19,7 +19,7 @@ public class AutofacChildLifetimeScopeServiceProviderFactory : IServiceProviderF
     /// </summary>
     /// <param name="rootLifetimeScopeAccessor">A function to retrieve the root <see cref="ILifetimeScope"/> instance.</param>
     /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
-    public AutofacChildLifetimeScopeServiceProviderFactory(Func<ILifetimeScope> rootLifetimeScopeAccessor, Action<ContainerBuilder> configurationAction = null)
+    public AutofacChildLifetimeScopeServiceProviderFactory(Func<ILifetimeScope> rootLifetimeScopeAccessor, Action<ContainerBuilder>? configurationAction = null)
     {
         if (rootLifetimeScopeAccessor == null)
         {
@@ -35,7 +35,7 @@ public class AutofacChildLifetimeScopeServiceProviderFactory : IServiceProviderF
     /// </summary>
     /// <param name="rootLifetimeScope">The root <see cref="ILifetimeScope"/> instance.</param>
     /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
-    public AutofacChildLifetimeScopeServiceProviderFactory(ILifetimeScope rootLifetimeScope, Action<ContainerBuilder> configurationAction = null)
+    public AutofacChildLifetimeScopeServiceProviderFactory(ILifetimeScope rootLifetimeScope, Action<ContainerBuilder>? configurationAction = null)
     {
         _rootLifetimeScope = rootLifetimeScope ?? throw new ArgumentNullException(nameof(rootLifetimeScope));
         _containerConfigurationAction = configurationAction ?? FallbackConfigurationAction;
