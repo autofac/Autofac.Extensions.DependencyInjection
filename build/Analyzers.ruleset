@@ -8,6 +8,8 @@
     <Rule Id="CA1510" Action="None" />
     <!-- Change names to avoid reserved word overlaps (e.g., Delegate, GetType, etc.) - too many of these in the public API, we'd break if we fixed it. -->
     <Rule Id="CA1716" Action="None" />
+    <!-- Cache a 'CompositeFormat' for repeated use in formatting - we only format exception messages and this isn't supported in other .NET targets, so it's not interesting to optimize. -->
+    <Rule Id="CA1863" Action="None" />
     <!-- Implement serialization constructors - false positive when building .NET Core -->
     <Rule Id="CA2229" Action="None" />
     <!-- Mark ISerializable types with SerializableAttribute - false positive when building .NET Core -->
