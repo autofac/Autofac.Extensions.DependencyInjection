@@ -3,6 +3,7 @@
 
 using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
+using KeyedService = Autofac.Core.KeyedService;
 
 namespace Autofac.Extensions.DependencyInjection;
 
@@ -11,7 +12,7 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 /// <seealso cref="IServiceProvider" />
 /// <seealso cref="ISupportRequiredService" />
-public partial class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IServiceProviderIsService, IDisposable, IAsyncDisposable
+public partial class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IKeyedServiceProvider, IServiceProviderIsService, IServiceProviderIsKeyedService, IDisposable, IAsyncDisposable
 {
     private readonly ILifetimeScope _lifetimeScope;
 
@@ -26,6 +27,60 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     public AutofacServiceProvider(ILifetimeScope lifetimeScope)
     {
         _lifetimeScope = lifetimeScope;
+    }
+
+    /// <summary>
+    /// Gets the service object of the specified type.
+    /// </summary>
+    /// <param name="serviceType">
+    /// An object that specifies the type of service object to get.
+    /// </param>
+    /// <param name="serviceKey">
+    /// An object that specifies the key of service object to get.
+    /// </param>
+    /// <returns>
+    /// A service object of type <paramref name="serviceType" />; or <see langword="null" />
+    /// if there is no service object of type <paramref name="serviceType" />.
+    /// </returns>
+    public object? GetKeyedService(Type serviceType, object? serviceKey)
+    {
+        // Autofac doesn't support null service keys.
+        if (serviceKey == null)
+        {
+            throw new ArgumentNullException(nameof(serviceKey));
+        }
+
+        return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
+    }
+
+    /// <summary>
+    /// Gets service of type <paramref name="serviceType" /> from the
+    /// <see cref="AutofacServiceProvider" /> and requires it be present.
+    /// </summary>
+    /// <param name="serviceType">
+    /// An object that specifies the type of service object to get.
+    /// </param>
+    /// <param name="serviceKey">
+    /// An object that specifies the key of service object to get.
+    /// </param>
+    /// <returns>
+    /// A service object of type <paramref name="serviceType" />.
+    /// </returns>
+    /// <exception cref="Autofac.Core.Registration.ComponentNotRegisteredException">
+    /// Thrown if the <paramref name="serviceType" /> isn't registered with the container.
+    /// </exception>
+    /// <exception cref="Autofac.Core.DependencyResolutionException">
+    /// Thrown if the object can't be resolved from the container.
+    /// </exception>
+    public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
+    {
+        // Autofac doesn't support null service keys.
+        if (serviceKey == null)
+        {
+            throw new ArgumentNullException(nameof(serviceKey));
+        }
+
+        return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
     }
 
     /// <summary>
@@ -47,6 +102,18 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     public object GetRequiredService(Type serviceType)
     {
         return _lifetimeScope.Resolve(serviceType);
+    }
+
+    /// <inheritdoc />
+    public bool IsKeyedService(Type serviceType, object? serviceKey)
+    {
+        // Autofac doesn't support null service keys.
+        if (serviceKey == null)
+        {
+            throw new ArgumentNullException(nameof(serviceKey));
+        }
+
+        return _lifetimeScope.ComponentRegistry.IsRegistered(new KeyedService(serviceKey, serviceType));
     }
 
     /// <inheritdoc />
