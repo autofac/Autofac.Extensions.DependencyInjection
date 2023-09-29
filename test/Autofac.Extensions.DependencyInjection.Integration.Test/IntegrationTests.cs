@@ -31,7 +31,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Startup>>
     public async Task GetDate()
     {
         var client = AppFactory.CreateClient();
-        var response = await client.GetAsync(new Uri("/Date", UriKind.Relative)).ConfigureAwait(false);
+        var response = await client.GetAsync(new Uri("/Date", UriKind.Relative));
         response.EnsureSuccessStatusCode();
     }
 }

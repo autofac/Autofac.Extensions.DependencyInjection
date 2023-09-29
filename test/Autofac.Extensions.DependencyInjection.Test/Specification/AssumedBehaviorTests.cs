@@ -110,7 +110,7 @@ public abstract class AssumedBehaviorTests
         var tracker = rootProvider.GetRequiredService<AsyncDisposeTracker>();
         var asyncDisposer = (IAsyncDisposable)rootProvider;
 
-        await asyncDisposer.DisposeAsync().ConfigureAwait(false);
+        await asyncDisposer.DisposeAsync();
 
         Assert.True(tracker.AsyncDisposed);
         Assert.False(tracker.SyncDisposed);
