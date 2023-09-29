@@ -15,6 +15,9 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)' == 'Arm64'">
+    <PlatformTarget>arm64</PlatformTarget>
+  </PropertyGroup>
 
   <ItemGroup>
     <Using Include="BenchmarkDotNet.Attributes" />
