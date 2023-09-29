@@ -9,7 +9,6 @@ namespace Autofac.Extensions.DependencyInjection;
 /// Autofac implementation of the ASP.NET Core <see cref="IServiceScopeFactory"/>.
 /// </summary>
 /// <seealso cref="IServiceScopeFactory" />
-[SuppressMessage("Microsoft.ApiDesignGuidelines", "CA2213", Justification = "The creator of the root service lifetime scope is responsible for disposal.")]
 internal class AutofacServiceScopeFactory : IServiceScopeFactory
 {
     private readonly ILifetimeScope _lifetimeScope;
