@@ -151,6 +151,15 @@ public static class AutofacRegistration
     {
         foreach (var descriptor in descriptors)
         {
+            // TODO: Update to register keyed services.
+            // Check to see if descriptor.IsKeyedService. There are now mirrored
+            // properties for keyed vs. un-keyed - KeyedImplementationType vs.
+            // ImplementationType, KeyedServiceType vs. ServiceType. If you
+            // access the wrong one, ServiceDescriptor throws an exception.
+            //
+            // Registration for a delegate also passes the key along with the
+            // delegate, so the KeyedImplementationFactory vs.
+            // ImplementationFactory method signatures are different.
             if (descriptor.ImplementationType != null)
             {
                 // Test if the an open generic type is being registered
