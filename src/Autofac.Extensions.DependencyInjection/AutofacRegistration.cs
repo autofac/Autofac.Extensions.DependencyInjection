@@ -101,8 +101,7 @@ public static class AutofacRegistration
         {
             if (descriptor.ServiceKey is null)
             {
-                // TODO: Localize this message.
-                throw new NotSupportedException("Null service keys are not supported.");
+                throw new NotSupportedException(AutofacRegistrationResources.NullKeyNotSupported);
             }
 
             registrationBuilder.Keyed(descriptor.ServiceKey, descriptor.ServiceType);

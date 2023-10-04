@@ -66,18 +66,21 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0-rtm.23478.17" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="ServiceProviderExtensionsResources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ServiceProviderExtensionsResources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+  <ItemDefinitionGroup>
+    <EmbeddedResource>
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedFileName>$(IntermediateOutputPath)%(Filename).Designer.cs</StronglyTypedFileName>
+      <StronglyTypedClassName>%(Filename)</StronglyTypedClassName>
+    </EmbeddedResource>
+  </ItemDefinitionGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="AutofacRegistrationResources.resx">
+      <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
+    </EmbeddedResource>
     <EmbeddedResource Update="ServiceProviderExtensionsResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ServiceProviderExtensionsResources.Designer.cs</LastGenOutput>
+      <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
     </EmbeddedResource>
   </ItemGroup>
 </Project>
