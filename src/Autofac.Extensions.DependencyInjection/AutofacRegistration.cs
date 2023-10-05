@@ -97,14 +97,17 @@ public static class AutofacRegistration
         this IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> registrationBuilder,
         ServiceDescriptor descriptor)
     {
+        // TODO: Does KeyedService.AnyKey come into play here?
         if (descriptor.IsKeyedService)
         {
             if (descriptor.ServiceKey is null)
             {
-                throw new NotSupportedException(AutofacRegistrationResources.NullKeyNotSupported);
+                registrationBuilder.Keyed(ServiceKey.Null, descriptor.ServiceType).As(descriptor.ServiceType);
             }
-
-            registrationBuilder.Keyed(descriptor.ServiceKey, descriptor.ServiceType);
+            else
+            {
+                registrationBuilder.Keyed(descriptor.ServiceKey, descriptor.ServiceType);
+            }
         }
         else
         {
@@ -209,15 +212,7 @@ public static class AutofacRegistration
     {
         foreach (var descriptor in descriptors)
         {
-            // TODO: Update to register keyed services.
-            // Check to see if descriptor.IsKeyedService. There are now mirrored
-            // properties for keyed vs. un-keyed - KeyedImplementationType vs.
-            // ImplementationType, KeyedServiceType vs. ServiceType. If you
-            // access the wrong one, ServiceDescriptor throws an exception.
-            //
-            // Registration for a delegate also passes the key along with the
-            // delegate, so the KeyedImplementationFactory vs.
-            // ImplementationFactory method signatures are different.
+            // TODO: Unsure what to do when the key is KeyedService.AnyKey.
             var implementationType = descriptor.NormalizedImplementationType();
             if (implementationType != null)
             {
@@ -243,9 +238,13 @@ public static class AutofacRegistration
                 continue;
             }
 
-            if (descriptor.ImplementationFactory != null)
+            if (descriptor.IsKeyedService && descriptor.KeyedImplementationFactory != null)
             {
-                // TODO: Unsure what to do about the delegate for keyed services right now.
+                // TODO: Unsure what to do about the delegate for keyed services - Func<IServiceProvider, object?, object?> - where the key gets passed in. Maybe this is a new kind of registration source?
+                continue;
+            }
+            else if (!descriptor.IsKeyedService && descriptor.ImplementationFactory != null)
+            {
                 var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
                     {
                         var serviceProvider = context.Resolve<IServiceProvider>();
