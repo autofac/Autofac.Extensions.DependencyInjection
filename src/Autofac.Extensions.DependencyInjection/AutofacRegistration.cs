@@ -71,6 +71,8 @@ public static class AutofacRegistration
         builder.RegisterType<AutofacServiceProvider>()
                .As<IServiceProvider>()
                .As<IServiceProviderIsService>()
+               .As<IKeyedServiceProvider>()
+               .As<IServiceProviderIsKeyedService>()
                .ExternallyOwned();
 
         // Issue #83: IServiceScopeFactory must be a singleton and scopes must be flat, not hierarchical.
@@ -100,14 +102,8 @@ public static class AutofacRegistration
         // TODO: Does KeyedService.AnyKey come into play here?
         if (descriptor.IsKeyedService)
         {
-            if (descriptor.ServiceKey is null)
-            {
-                registrationBuilder.Keyed(ServiceKey.Null, descriptor.ServiceType).As(descriptor.ServiceType);
-            }
-            else
-            {
-                registrationBuilder.Keyed(descriptor.ServiceKey, descriptor.ServiceType);
-            }
+            // If it's keyed, the service key won't be null. A null key results in it _not_ being a keyed service.
+            registrationBuilder.Keyed(descriptor.ServiceKey!, descriptor.ServiceType);
         }
         else
         {
