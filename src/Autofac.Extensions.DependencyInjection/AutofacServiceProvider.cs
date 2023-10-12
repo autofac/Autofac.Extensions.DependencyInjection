@@ -44,8 +44,15 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </returns>
     public object? GetKeyedService(Type serviceType, object? serviceKey)
     {
-        serviceKey ??= ServiceKey.Null;
-        return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
+        if (serviceKey is null)
+        {
+            // A null key equates to "not keyed."
+            return _lifetimeScope.ResolveOptional(serviceType);
+        }
+        else
+        {
+            return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
+        }
     }
 
     /// <summary>
@@ -69,8 +76,15 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </exception>
     public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
     {
-        serviceKey ??= ServiceKey.Null;
-        return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
+        if (serviceKey is null)
+        {
+            // A null key equates to "not keyed."
+            return _lifetimeScope.Resolve(serviceType);
+        }
+        else
+        {
+            return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
+        }
     }
 
     /// <summary>
