@@ -3,6 +3,8 @@
 
 using System.Reflection;
 using Autofac.Builder;
+using Autofac.Core;
+using Autofac.Core.Resolving.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection;
@@ -172,17 +174,15 @@ public static class AutofacRegistration
             this IRegistrationBuilder<TLimit, TReflectionActivatorData, TRegistrationStyle> builder)
         where TReflectionActivatorData : ReflectionActivatorData
     {
-        return builder.WithParameter(
-            (p, c) =>
-            {
-                var filter = p.GetCustomAttributes<FromKeyedServicesAttribute>(true).FirstOrDefault();
-                return filter is not null && filter.CanResolveParameter(p, c);
-            },
-            (p, c) =>
-            {
-                var filter = p.GetCustomAttributes<FromKeyedServicesAttribute>(true).First();
-                return filter.ResolveParameter(p, c);
-            });
+        if (builder == null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
+        // Using middleware here instead of .WithParameter because some of the
+        // Microsoft attributes require access to resolve context info like the
+        // service key.
+        return builder.ConfigurePipeline(p => p.Use(new MicrosoftAttributeMiddleware(), MiddlewareInsertionMode.StartOfPhase));
     }
 
     /// <summary>
