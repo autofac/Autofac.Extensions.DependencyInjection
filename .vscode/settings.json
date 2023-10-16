@@ -21,6 +21,20 @@
   "dotnet-test-explorer.testProjectPath": "test/**/*.Test.csproj",
   "dotnet.defaultSolution": "Autofac.Extensions.DependencyInjection.sln",
   "dotnet.preferRuntimeFromSDK": true,
+  "dotnet.unitTestDebuggingOptions": {
+    "enableStepFiltering": false,
+    "justMyCode": false,
+    "requireExactSource": false,
+    "sourceLinkOptions": {
+      "*": {
+        "enabled": true
+      }
+    },
+    "suppressJITOptimizations": true,
+    "symbolOptions": {
+      "searchNuGetOrgSymbolServer": true
+    }
+  },
   "files.watcherExclude": {
     "**/target": true
   }
