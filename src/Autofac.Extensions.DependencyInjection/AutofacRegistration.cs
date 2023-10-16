@@ -3,7 +3,6 @@
 
 using System.Reflection;
 using Autofac.Builder;
-using Autofac.Core;
 using Autofac.Core.Resolving.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -82,6 +81,9 @@ public static class AutofacRegistration
             .RegisterType<AutofacServiceScopeFactory>()
             .As<IServiceScopeFactory>()
             .SingleInstance();
+
+        // Shim for keyed service compatibility.
+        builder.RegisterServiceMiddlewareSource(new KeyedServiceMiddlewareSource());
 
         Register(builder, descriptors, lifetimeScopeTagForSingletons);
     }
@@ -162,30 +164,6 @@ public static class AutofacRegistration
     }
 
     /// <summary>
-    /// Applies attribute-based filtering on constructor dependencies for use with M.E.DI attributes.
-    /// </summary>
-    /// <typeparam name="TLimit">The type of the registration limit.</typeparam>
-    /// <typeparam name="TReflectionActivatorData">Activator data type.</typeparam>
-    /// <typeparam name="TRegistrationStyle">Registration style type.</typeparam>
-    /// <param name="builder">The registration builder containing registration data.</param>
-    /// <returns>Registration builder allowing the registration to be configured.</returns>
-    public static IRegistrationBuilder<TLimit, TReflectionActivatorData, TRegistrationStyle>
-        WithMicrosoftAttributeFiltering<TLimit, TReflectionActivatorData, TRegistrationStyle>(
-            this IRegistrationBuilder<TLimit, TReflectionActivatorData, TRegistrationStyle> builder)
-        where TReflectionActivatorData : ReflectionActivatorData
-    {
-        if (builder == null)
-        {
-            throw new ArgumentNullException(nameof(builder));
-        }
-
-        // Using middleware here instead of .WithParameter because some of the
-        // Microsoft attributes require access to resolve context info like the
-        // service key.
-        return builder.ConfigurePipeline(p => p.Use(new MicrosoftAttributeMiddleware(), MiddlewareInsertionMode.StartOfPhase));
-    }
-
-    /// <summary>
     /// Populates the Autofac container builder with the set of registered service descriptors.
     /// </summary>
     /// <param name="builder">
@@ -208,7 +186,6 @@ public static class AutofacRegistration
     {
         foreach (var descriptor in descriptors)
         {
-            // TODO: Unsure what to do when the key is KeyedService.AnyKey.
             var implementationType = descriptor.NormalizedImplementationType();
             if (implementationType != null)
             {
@@ -219,16 +196,14 @@ public static class AutofacRegistration
                     builder
                         .RegisterGeneric(implementationType)
                         .ConfigureServiceType(descriptor)
-                        .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
-                        .WithMicrosoftAttributeFiltering();
+                        .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
                 }
                 else
                 {
                     builder
                         .RegisterType(implementationType)
                         .ConfigureServiceType(descriptor)
-                        .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
-                        .WithMicrosoftAttributeFiltering();
+                        .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
                 }
 
                 continue;

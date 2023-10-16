@@ -9,12 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Autofac.Extensions.DependencyInjection;
 
 /// <summary>
-/// Middleware that supports the Microsoft-specific injection and filtering attributes for registrations.
+/// Middleware that supports keyed service compatibility.
 /// </summary>
-internal class MicrosoftAttributeMiddleware : IResolveMiddleware
+internal class KeyedServiceMiddleware : IResolveMiddleware
 {
     /// <inheritdoc />
-    public PipelinePhase Phase => PipelinePhase.ParameterSelection;
+    public PipelinePhase Phase => PipelinePhase.ResolveRequestStart;
 
     /// <inheritdoc />
     public void Execute(ResolveRequestContext context, Action<ResolveRequestContext> next)
@@ -49,11 +49,30 @@ internal class MicrosoftAttributeMiddleware : IResolveMiddleware
                         },
                         (p, c) =>
                         {
-                            return key;
+                            // TODO: Gotcha with AnyKey - resolving with AnyKey will still pass in the ORIGINAL key that was tried.
+                            // If the key is an object but the constructor takes
+                            // a string, we need to safely convert that. This is
+                            // particularly interesting in the AnyKey scenario.
+                            return TypeManipulation.ChangeToCompatibleType(key, p.ParameterType, p);
                         }),
                 }));
-        }
 
-        next(context);
+            try
+            {
+                next(context);
+                if (context.Instance is null)
+                {
+                    throw new DependencyResolutionException("KEYED INSTANCE IS NULL.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new DependencyResolutionException("PROBLEM RESOLVING KEYED INSTANCE.", ex);
+            }
+        }
+        else
+        {
+            next(context);
+        }
     }
 }
