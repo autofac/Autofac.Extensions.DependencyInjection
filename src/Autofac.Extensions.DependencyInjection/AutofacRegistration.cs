@@ -84,6 +84,7 @@ public static class AutofacRegistration
 
         // Shim for keyed service compatibility.
         builder.RegisterServiceMiddlewareSource(new KeyedServiceMiddlewareSource());
+        builder.RegisterSource<AnyKeyRegistrationSource>();
 
         Register(builder, descriptors, lifetimeScopeTagForSingletons);
     }
@@ -103,7 +104,6 @@ public static class AutofacRegistration
         this IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> registrationBuilder,
         ServiceDescriptor descriptor)
     {
-        // TODO: Does KeyedService.AnyKey come into play here?
         if (descriptor.IsKeyedService)
         {
             // If it's keyed, the service key won't be null. A null key results in it _not_ being a keyed service.

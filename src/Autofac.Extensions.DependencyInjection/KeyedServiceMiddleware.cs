@@ -56,23 +56,8 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
                             return TypeManipulation.ChangeToCompatibleType(key, p.ParameterType, p);
                         }),
                 }));
+        }
 
-            try
-            {
-                next(context);
-                if (context.Instance is null)
-                {
-                    throw new DependencyResolutionException("KEYED INSTANCE IS NULL.");
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new DependencyResolutionException("PROBLEM RESOLVING KEYED INSTANCE.", ex);
-            }
-        }
-        else
-        {
-            next(context);
-        }
+        next(context);
     }
 }
