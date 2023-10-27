@@ -1,8 +1,8 @@
-// Copyright (c) Autofac Project. All rights reserved.
+﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Autofac.Builder;
 using Autofac.Core;
+using Autofac.Core.Registration;
 
 namespace Autofac.Extensions.DependencyInjection;
 
@@ -34,13 +34,24 @@ public class AnyKeyRegistrationSource : IRegistrationSource
         }
 
         var anyKeyService = new KeyedService(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey, keyedService.ServiceType);
-        var anyKeyRegistration = registrationAccessor(anyKeyService).ToArray();
-        if (anyKeyRegistration.Length == 0)
+        var anyKeyRegistrationSet = registrationAccessor(anyKeyService).ToArray();
+        if (anyKeyRegistrationSet.Length == 0)
         {
             return Enumerable.Empty<IComponentRegistration>();
         }
 
+        var anyKeyRegistration = anyKeyRegistrationSet[0];
+
+        var registrationMappedToOriginalService = new ComponentRegistration(
+            Guid.NewGuid(),
+            anyKeyRegistration.Registration.Activator,
+            anyKeyRegistration.Registration.Lifetime,
+            anyKeyRegistration.Registration.Sharing,
+            anyKeyRegistration.Registration.Ownership,
+            new[] { service },
+            anyKeyRegistration.Registration.Metadata);
+
         // TODO: Something up here where I can't just return an existing registration. When DefaultRegisteredServicesTracker.TryGetServiceRegistration calls ServiceRegistrationInfo.TryGetRegistration, it isn't found. Something is not initialized right.
-        return new[] { anyKeyRegistration[0].Registration };
+        return new[] { registrationMappedToOriginalService };
     }
 }
