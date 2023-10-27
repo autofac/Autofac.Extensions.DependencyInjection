@@ -27,9 +27,9 @@ public class AnyKeyRegistrationSource : IRegistrationSource
             throw new ArgumentNullException(nameof(registrationAccessor));
         }
 
-        if (service is not KeyedService keyedService || registrationAccessor(service).Any())
+        if (service is not KeyedService keyedService)
         {
-            // It's not a keyed service or there's already a service specifically registered for that key.
+            // It's not a keyed service, bail. If it is, we ALWAYS have to look for an AnyKey service.
             return Enumerable.Empty<IComponentRegistration>();
         }
 
@@ -42,6 +42,8 @@ public class AnyKeyRegistrationSource : IRegistrationSource
 
         var anyKeyRegistration = anyKeyRegistrationSet[0];
 
+        // TODO: This gets messed up with singletons and lifetime scope sharing - we need to make sure a singleton registration doesn't get used multiple times in a single activation request.
+        // The provided instance of 'Microsoft.Extensions.DependencyInjection.Specification.Fakes.FakeService' has already been used in an activation request. Did you combine a provided instance with non-root/single-instance lifetime/sharing?
         var registrationMappedToOriginalService = new ComponentRegistration(
             Guid.NewGuid(),
             anyKeyRegistration.Registration.Activator,
@@ -51,7 +53,6 @@ public class AnyKeyRegistrationSource : IRegistrationSource
             new[] { service },
             anyKeyRegistration.Registration.Metadata);
 
-        // TODO: Something up here where I can't just return an existing registration. When DefaultRegisteredServicesTracker.TryGetServiceRegistration calls ServiceRegistrationInfo.TryGetRegistration, it isn't found. Something is not initialized right.
         return new[] { registrationMappedToOriginalService };
     }
 }
