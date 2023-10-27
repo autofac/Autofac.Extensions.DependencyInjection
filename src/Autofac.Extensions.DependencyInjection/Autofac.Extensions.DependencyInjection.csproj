@@ -82,5 +82,8 @@
     <EmbeddedResource Update="ServiceProviderExtensionsResources.resx">
       <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
     </EmbeddedResource>
+    <EmbeddedResource Update="TypeManipulationResources.resx">
+      <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
