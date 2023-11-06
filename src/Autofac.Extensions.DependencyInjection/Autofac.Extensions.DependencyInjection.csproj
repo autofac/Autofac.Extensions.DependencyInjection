@@ -79,10 +79,13 @@
     <EmbeddedResource Update="AutofacRegistrationResources.resx">
       <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
     </EmbeddedResource>
-    <EmbeddedResource Update="ServiceProviderExtensionsResources.resx">
+    <EmbeddedResource Update="KeyTypeConversionExceptionResources.resx">
       <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
     </EmbeddedResource>
-    <EmbeddedResource Update="TypeManipulationResources.resx">
+    <EmbeddedResource Update="KeyTypeManipulationResources.resx">
+      <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Update="ServiceProviderExtensionsResources.resx">
       <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
     </EmbeddedResource>
   </ItemGroup>

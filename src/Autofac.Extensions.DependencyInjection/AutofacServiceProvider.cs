@@ -51,7 +51,17 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         }
         else
         {
-            return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
+            try
+            {
+                return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
+            }
+            catch (DependencyResolutionException ex) when (ex.InnerException is KeyTypeConversionException conversionException)
+            {
+                // If the issue was with converting the specified key type to
+                // match a [ServiceKey] parameter type, the M.E.DI contract is
+                // that it must be an InvalidOperationException.
+                throw new InvalidOperationException(conversionException.Message, conversionException);
+            }
         }
     }
 
@@ -83,7 +93,17 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         }
         else
         {
-            return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
+            try
+            {
+                return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
+            }
+            catch (DependencyResolutionException ex) when (ex.InnerException is KeyTypeConversionException conversionException)
+            {
+                // If the issue was with converting the specified key type to
+                // match a [ServiceKey] parameter type, the M.E.DI contract is
+                // that it must be an InvalidOperationException.
+                throw new InvalidOperationException(conversionException.Message, conversionException);
+            }
         }
     }
 

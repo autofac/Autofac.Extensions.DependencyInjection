@@ -8,12 +8,12 @@ using System.Reflection;
 namespace Autofac.Extensions.DependencyInjection;
 
 /// <summary>
-/// Utilities for converting string configuration values into strongly-typed
-/// objects. This originally came from Autofac.Configuration but there isn't a
-/// good "shared dependency" location for things like this other than core
-/// Autofac.
+/// Utilities for converting keyed service key values into compatible types for
+/// injection using the <see cref="Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute"/>.
+/// This logic originally came from Autofac.Configuration but there isn't a good
+/// "shared dependency" location for things like this other than core Autofac.
 /// </summary>
-internal class TypeManipulation
+internal class KeyTypeManipulation
 {
     /// <summary>
     /// Converts an object to a type compatible with a given parameter.
@@ -105,7 +105,15 @@ internal class TypeManipulation
         // Try to get custom type converter information.
         if (converterAttribute != null && !string.IsNullOrEmpty(converterAttribute.ConverterTypeName))
         {
-            converter = GetTypeConverterFromName(converterAttribute.ConverterTypeName);
+            try
+            {
+                converter = GetTypeConverterFromName(converterAttribute.ConverterTypeName);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new KeyTypeConversionException(value.GetType(), destinationType, ex);
+            }
+
             if (converter.CanConvertFrom(value.GetType()))
             {
                 return converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
@@ -142,7 +150,7 @@ internal class TypeManipulation
             }
         }
 
-        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, TypeManipulationResources.TypeConversionUnsupported, value.GetType(), destinationType));
+        throw new KeyTypeConversionException(value.GetType(), destinationType);
     }
 
     /// <summary>
@@ -162,7 +170,7 @@ internal class TypeManipulation
     {
         var converterType = Type.GetType(converterTypeName, true);
         return Activator.CreateInstance(converterType!) is not TypeConverter converter
-            ? throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, TypeManipulationResources.TypeConverterAttributeTypeNotConverter, converterTypeName))
+            ? throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, KeyTypeManipulationResources.TypeConverterAttributeTypeNotConverter, converterTypeName))
             : converter;
     }
 }

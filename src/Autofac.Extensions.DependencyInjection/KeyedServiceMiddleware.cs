@@ -53,7 +53,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
                             // If the key is an object but the constructor takes
                             // a string, we need to safely convert that. This is
                             // particularly interesting in the AnyKey scenario.
-                            return TypeManipulation.ChangeToCompatibleType(key, p.ParameterType, p);
+                            return KeyTypeManipulation.ChangeToCompatibleType(key, p.ParameterType, p);
                         }),
                 }));
         }

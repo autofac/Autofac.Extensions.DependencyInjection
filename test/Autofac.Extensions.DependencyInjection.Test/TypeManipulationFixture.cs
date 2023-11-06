@@ -14,7 +14,7 @@ public class TypeManipulationFixture
     public void ChangeToCompatibleTypeLooksForTryParseMethod()
     {
         var address = "127.0.0.1";
-        var value = TypeManipulation.ChangeToCompatibleType(address, typeof(IPAddress));
+        var value = KeyTypeManipulation.ChangeToCompatibleType(address, typeof(IPAddress));
         Assert.Equal(value, IPAddress.Parse(address));
     }
 
@@ -23,7 +23,7 @@ public class TypeManipulationFixture
     {
         var ctor = typeof(HasTypeConverterAttributes).GetConstructor(new Type[] { typeof(Convertible) });
         var member = ctor.GetParameters().First();
-        var actual = TypeManipulation.ChangeToCompatibleType("25", typeof(Convertible), member) as Convertible;
+        var actual = KeyTypeManipulation.ChangeToCompatibleType("25", typeof(Convertible), member) as Convertible;
         Assert.NotNull(actual);
         Assert.Equal(25, actual.Value);
     }
@@ -32,7 +32,7 @@ public class TypeManipulationFixture
     public void ChangeToCompatibleTypeUsesTypeConverterOnProperty()
     {
         var member = typeof(HasTypeConverterAttributes).GetProperty("Property");
-        var actual = TypeManipulation.ChangeToCompatibleType("25", typeof(Convertible), member) as Convertible;
+        var actual = KeyTypeManipulation.ChangeToCompatibleType("25", typeof(Convertible), member) as Convertible;
         Assert.NotNull(actual);
         Assert.Equal(25, actual.Value);
     }
@@ -40,21 +40,21 @@ public class TypeManipulationFixture
     [Fact]
     public void ChangeToCompatibleTypeNullReferenceType()
     {
-        var actual = TypeManipulation.ChangeToCompatibleType(null, typeof(string));
+        var actual = KeyTypeManipulation.ChangeToCompatibleType(null, typeof(string));
         Assert.Null(actual);
     }
 
     [Fact]
     public void ChangeToCompatibleTypeNullValueType()
     {
-        var actual = TypeManipulation.ChangeToCompatibleType(null, typeof(int));
+        var actual = KeyTypeManipulation.ChangeToCompatibleType(null, typeof(int));
         Assert.Equal(0, actual);
     }
 
     [Fact]
     public void ChangeToCompatibleTypeNoConversionNeeded()
     {
-        var actual = TypeManipulation.ChangeToCompatibleType(15, typeof(int));
+        var actual = KeyTypeManipulation.ChangeToCompatibleType(15, typeof(int));
         Assert.Equal(15, actual);
     }
 
@@ -66,7 +66,7 @@ public class TypeManipulationFixture
             culture,
             () =>
             {
-                var actual = TypeManipulation.ChangeToCompatibleType("123.456", typeof(double));
+                var actual = KeyTypeManipulation.ChangeToCompatibleType("123.456", typeof(double));
                 Assert.Equal(123.456, actual);
             });
     }

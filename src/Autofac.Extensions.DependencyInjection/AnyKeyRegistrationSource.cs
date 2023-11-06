@@ -45,7 +45,7 @@ public class AnyKeyRegistrationSource : IRegistrationSource
         // TODO: This gets messed up with singletons and lifetime scope sharing - we need to make sure a singleton registration doesn't get used multiple times in a single activation request.
         // The provided instance of 'Microsoft.Extensions.DependencyInjection.Specification.Fakes.FakeService' has already been used in an activation request. Did you combine a provided instance with non-root/single-instance lifetime/sharing?
         var registrationMappedToOriginalService = new ComponentRegistration(
-            Guid.NewGuid(),
+            anyKeyRegistration.Registration.Id,
             anyKeyRegistration.Registration.Activator,
             anyKeyRegistration.Registration.Lifetime,
             anyKeyRegistration.Registration.Sharing,
