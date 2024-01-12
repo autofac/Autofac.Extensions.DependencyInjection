@@ -40,11 +40,12 @@ public class AnyKeyRegistrationSource : IRegistrationSource
             return Enumerable.Empty<IComponentRegistration>();
         }
 
+        // Use collection checks borrowed (without caching) from core Autofac.
         if (IsCollection(keyedService.ServiceType))
         {
             // We don't want to look for an anykey equivalent service when the target of the resolve is an enumerable.
             // It will always return something, meaning we'll generate a result collection for 'anykey' instead of for the actual key.
-            // The normal collection registration source will do the work and call back into this source without the collection type.
+            // The normal collection registration source will do the work and call back into this source having stripped the collection type.
             return Enumerable.Empty<IComponentRegistration>();
         }
 
@@ -57,8 +58,6 @@ public class AnyKeyRegistrationSource : IRegistrationSource
 
         var anyKeyRegistration = anyKeyRegistrationSet[0];
 
-        // TODO: This gets messed up with singletons and lifetime scope sharing - we need to make sure a singleton registration doesn't get used multiple times in a single activation request.
-        // The provided instance of 'Microsoft.Extensions.DependencyInjection.Specification.Fakes.FakeService' has already been used in an activation request. Did you combine a provided instance with non-root/single-instance lifetime/sharing?
         // Use a fresh Guid so activated instances aren't shared.
         var registrationMappedToOriginalService = new ComponentRegistration(
             Guid.NewGuid(),
