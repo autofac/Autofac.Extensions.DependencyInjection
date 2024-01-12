@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Autofac.Builder;
 using Autofac.Core.Resolving.Pipeline;
@@ -106,8 +107,10 @@ public static class AutofacRegistration
     {
         if (descriptor.IsKeyedService)
         {
+            var key = descriptor.ServiceKey!;
+
             // If it's keyed, the service key won't be null. A null key results in it _not_ being a keyed service.
-            registrationBuilder.Keyed(descriptor.ServiceKey!, descriptor.ServiceType);
+            registrationBuilder.Keyed(key, descriptor.ServiceType);
         }
         else
         {
@@ -212,6 +215,24 @@ public static class AutofacRegistration
             if (descriptor.IsKeyedService && descriptor.KeyedImplementationFactory != null)
             {
                 // TODO: Unsure what to do about the delegate for keyed services - Func<IServiceProvider, object?, object?> - where the key gets passed in. Maybe this is a new kind of registration source?
+                var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
+                {
+                    var requestContext = (ResolveRequestContext)context;
+
+                    var serviceProvider = context.Resolve<IServiceProvider>();
+
+                    var keyedService = (Autofac.Core.KeyedService)requestContext.Service;
+
+                    var key = keyedService.ServiceKey;
+
+                    return descriptor.KeyedImplementationFactory(serviceProvider, key);
+                })
+                .ConfigureServiceType(descriptor)
+                .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
+                .CreateRegistration();
+
+                builder.RegisterComponent(registration);
+
                 continue;
             }
             else if (!descriptor.IsKeyedService && descriptor.ImplementationFactory != null)
@@ -221,6 +242,7 @@ public static class AutofacRegistration
                         var serviceProvider = context.Resolve<IServiceProvider>();
                         return descriptor.ImplementationFactory(serviceProvider);
                     })
+                    .ConfigureServiceType(descriptor)
                     .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
                     .CreateRegistration();
 

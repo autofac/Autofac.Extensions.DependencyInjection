@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Extensions.DependencyInjection;
@@ -434,6 +434,22 @@ namespace Autofac.Extensions.DependencyInjection.Test
             Assert.NotSame(serviceA1, serviceA2);
             Assert.NotSame(serviceB1, serviceB2);
             Assert.NotSame(serviceA1, serviceB1);
+        }
+
+        [Fact]
+        public void NonKeyedServiceWithIsKeyedService()
+        {
+            // Arrange
+            var collection = new ServiceCollection();
+            collection.AddKeyedTransient(typeof(IFakeService), null, typeof(FakeService));
+            var provider = CreateServiceProvider(collection);
+
+            // Act
+            var serviceProviderIsService = provider.GetService<IServiceProviderIsKeyedService>();
+
+            // Assert
+            Assert.NotNull(serviceProviderIsService);
+            Assert.True(serviceProviderIsService.IsKeyedService(typeof(IFakeService), null));
         }
 
         internal interface IService { }

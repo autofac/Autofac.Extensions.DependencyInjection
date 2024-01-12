@@ -131,10 +131,10 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// <inheritdoc />
     public bool IsKeyedService(Type serviceType, object? serviceKey)
     {
-        // Autofac doesn't support null service keys.
+        // Null service key means non-keyed.
         if (serviceKey == null)
         {
-            throw new ArgumentNullException(nameof(serviceKey));
+            return IsService(serviceType);
         }
 
         return _lifetimeScope.ComponentRegistry.IsRegistered(new KeyedService(serviceKey, serviceType));
