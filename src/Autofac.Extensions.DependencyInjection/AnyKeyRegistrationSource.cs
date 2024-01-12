@@ -67,8 +67,7 @@ public class AnyKeyRegistrationSource : IRegistrationSource
             anyKeyRegistration.Registration.Sharing,
             anyKeyRegistration.Registration.Ownership,
             new[] { service },
-            anyKeyRegistration.Registration.Metadata,
-            RegistrationOptions.ExcludeFromCollections);
+            anyKeyRegistration.Registration.Metadata);
 
         return new[] { registrationMappedToOriginalService };
     }
