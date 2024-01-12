@@ -214,9 +214,9 @@ public static class AutofacRegistration
 
             if (descriptor.IsKeyedService && descriptor.KeyedImplementationFactory != null)
             {
-                // TODO: Unsure what to do about the delegate for keyed services - Func<IServiceProvider, object?, object?> - where the key gets passed in. Maybe this is a new kind of registration source?
                 var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
                 {
+                    // At this point the context is always a ResolveRequestContext, which will expose the actual service type.
                     var requestContext = (ResolveRequestContext)context;
 
                     var serviceProvider = context.Resolve<IServiceProvider>();
