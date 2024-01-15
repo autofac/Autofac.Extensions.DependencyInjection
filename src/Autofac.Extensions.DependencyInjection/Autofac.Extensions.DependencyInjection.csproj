@@ -76,9 +76,6 @@
   </ItemDefinitionGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="AutofacRegistrationResources.resx">
-      <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
-    </EmbeddedResource>
     <EmbeddedResource Update="KeyTypeConversionExceptionResources.resx">
       <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
     </EmbeddedResource>
