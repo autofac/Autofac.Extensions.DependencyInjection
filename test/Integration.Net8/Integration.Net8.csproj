@@ -16,7 +16,7 @@
     <ProjectReference Include="..\..\src\Autofac.Extensions.DependencyInjection\Autofac.Extensions.DependencyInjection.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
