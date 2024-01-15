@@ -81,7 +81,7 @@ public static class AutofacRegistration
             .As<IServiceScopeFactory>()
             .SingleInstance();
 
-        // Shim for keyed service compatibility.
+        // Shims for keyed service compatibility.
         builder.RegisterServiceMiddlewareSource(new KeyedServiceMiddlewareSource());
         builder.RegisterSource<AnyKeyRegistrationSource>();
 
