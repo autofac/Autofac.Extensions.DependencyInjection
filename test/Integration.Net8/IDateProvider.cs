@@ -3,10 +3,9 @@
 
 using System;
 
-namespace Integration.Net3_1
+namespace Integration.Net8;
+
+public interface IDateProvider
 {
-    public interface IDateProvider
-    {
-        DateTimeOffset GetDate();
-    }
+    DateTimeOffset GetDate();
 }

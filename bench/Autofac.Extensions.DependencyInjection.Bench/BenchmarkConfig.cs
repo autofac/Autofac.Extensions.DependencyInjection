@@ -7,7 +7,7 @@ using BenchmarkDotNet.Jobs;
 
 namespace Autofac.Extensions.DependencyInjection.Bench;
 
-internal class BenchmarkConfig : ManualConfig
+internal sealed class BenchmarkConfig : ManualConfig
 {
     internal BenchmarkConfig()
     {

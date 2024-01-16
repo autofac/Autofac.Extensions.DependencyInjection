@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
+#if NET8_0
+using Integration.Net8;
+#endif
+#if NET7_0
+using Integration.Net7;
+#endif
 #if NET6_0
 using Integration.Net6;
-#endif
-#if NET5_0
-using Integration.Net5;
-#endif
-#if NETCOREAPP3_1
-using Integration.Net3_1;
 #endif
 
 namespace Autofac.Extensions.DependencyInjection.Integration.Test;
@@ -31,7 +31,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Startup>>
     public async Task GetDate()
     {
         var client = AppFactory.CreateClient();
-        var response = await client.GetAsync(new Uri("/Date", UriKind.Relative)).ConfigureAwait(false);
+        var response = await client.GetAsync(new Uri("/Date", UriKind.Relative));
         response.EnsureSuccessStatusCode();
     }
 }

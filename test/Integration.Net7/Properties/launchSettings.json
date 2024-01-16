@@ -1,7 +1,7 @@
 ﻿{
   "profiles": {
     "Integration.Net6": {
-      "applicationUrl": "https://localhost:7150;http://localhost:7151",
+      "applicationUrl": "https://localhost:7154;http://localhost:7155",
       "commandName": "Project",
       "dotnetRunMessages": true,
       "environmentVariables": {

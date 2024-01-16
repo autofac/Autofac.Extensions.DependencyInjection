@@ -14,11 +14,13 @@
     <SignAssembly>true</SignAssembly>
     <NeutralLanguage>en-US</NeutralLanguage>
     <!-- Frameworks and language features -->
-    <TargetFrameworks>net6.0;net5.0;netstandard2.1;netstandard2.0;</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1;netstandard2.0;</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <CodeAnalysisRuleSet>../../build/Analyzers.ruleset</CodeAnalysisRuleSet>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Packaging -->
@@ -28,6 +30,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://autofac.org</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/autofac/Autofac.Extensions.DependencyInjection</RepositoryUrl>
     <ContinuousIntegrationBuild Condition="'$(CI)' != '' ">true</ContinuousIntegrationBuild>
@@ -35,6 +38,8 @@
     <EmbedAllSources>true</EmbedAllSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- OmniSharp/VS Code resource generation -->
+    <CoreCompileDependsOn>PrepareResources;$(CompileDependsOn)</CoreCompileDependsOn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,6 +48,7 @@
 
   <ItemGroup>
     <None Include="..\..\build\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,34 +56,34 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="6.4.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3">
+    <PackageReference Include="Autofac" Version="7.1.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" Condition="Exists('$(MSBuildThisFileDirectory)../../.git')">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" Condition="Exists('$(MSBuildThisFileDirectory)../../.git')">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="ServiceProviderExtensionsResources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ServiceProviderExtensionsResources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+  <ItemDefinitionGroup>
+    <EmbeddedResource>
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedFileName>$(IntermediateOutputPath)%(Filename).Designer.cs</StronglyTypedFileName>
+      <StronglyTypedClassName>%(Filename)</StronglyTypedClassName>
+    </EmbeddedResource>
+  </ItemDefinitionGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="KeyTypeConversionExceptionResources.resx">
+      <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Update="KeyTypeManipulationResources.resx">
+      <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
+    </EmbeddedResource>
     <EmbeddedResource Update="ServiceProviderExtensionsResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ServiceProviderExtensionsResources.Designer.cs</LastGenOutput>
+      <StronglyTypedNamespace>Autofac.Extensions.DependencyInjection</StronglyTypedNamespace>
     </EmbeddedResource>
   </ItemGroup>
 </Project>

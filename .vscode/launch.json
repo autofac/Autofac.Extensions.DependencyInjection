@@ -20,14 +20,15 @@
       "type": "coreclr"
     },
     {
-      "args": [],
-      "cwd": "${workspaceFolder}/test/Integration.Net5",
+      "args": [
+      ],
+      "cwd": "${workspaceFolder}/test/Integration.Net7",
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "name": "Launch .NET 5 Integration Site",
+      "name": "Launch .NET 7 Integration Site",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/test/Integration.Net5/bin/Debug/net5.0/Integration.Net5.dll",
+      "program": "${workspaceFolder}/test/Integration.Net7/bin/Debug/net7.0/Integration.Net7.dll",
       "request": "launch",
       "serverReadyAction": {
         "action": "openExternally",
@@ -38,14 +39,15 @@
       "type": "coreclr"
     },
     {
-      "args": [],
-      "cwd": "${workspaceFolder}/test/Integration.Net3_1",
+      "args": [
+      ],
+      "cwd": "${workspaceFolder}/test/Integration.Net8",
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "name": "Launch .NET Core 3.1 Integration Site",
+      "name": "Launch .NET 8 Integration Site",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/test/Integration.Net3_1/bin/Debug/netcoreapp3.1/Integration.Net3_1.dll",
+      "program": "${workspaceFolder}/test/Integration.Net8/bin/Debug/net8.0/Integration.Net8.dll",
       "request": "launch",
       "serverReadyAction": {
         "action": "openExternally",

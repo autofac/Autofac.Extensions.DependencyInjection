@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
-
 using System.Reflection;
 using Autofac.Builder;
+using Autofac.Core.Resolving.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autofac.Extensions.DependencyInjection;
@@ -61,7 +61,7 @@ public static class AutofacRegistration
     public static void Populate(
         this ContainerBuilder builder,
         IEnumerable<ServiceDescriptor> descriptors,
-        object lifetimeScopeTagForSingletons)
+        object? lifetimeScopeTagForSingletons)
     {
         if (descriptors == null)
         {
@@ -71,6 +71,8 @@ public static class AutofacRegistration
         builder.RegisterType<AutofacServiceProvider>()
                .As<IServiceProvider>()
                .As<IServiceProviderIsService>()
+               .As<IKeyedServiceProvider>()
+               .As<IServiceProviderIsKeyedService>()
                .ExternallyOwned();
 
         // Issue #83: IServiceScopeFactory must be a singleton and scopes must be flat, not hierarchical.
@@ -79,7 +81,41 @@ public static class AutofacRegistration
             .As<IServiceScopeFactory>()
             .SingleInstance();
 
+        // Shims for keyed service compatibility.
+        builder.RegisterServiceMiddlewareSource(new KeyedServiceMiddlewareSource());
+        builder.RegisterSource<AnyKeyRegistrationSource>();
+
         Register(builder, descriptors, lifetimeScopeTagForSingletons);
+    }
+
+    /// <summary>
+    /// Configures the exposed service type on a service registration.
+    /// </summary>
+    /// <typeparam name="TActivatorData">The activator data type.</typeparam>
+    /// <typeparam name="TRegistrationStyle">The object registration style.</typeparam>
+    /// <param name="registrationBuilder">The registration being built.</param>
+    /// <param name="descriptor">The service descriptor with service type and key information.</param>
+    /// <returns>
+    /// The <paramref name="registrationBuilder" />, configured with the proper service type,
+    /// and available for additional configuration.
+    /// </returns>
+    private static IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> ConfigureServiceType<TActivatorData, TRegistrationStyle>(
+        this IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> registrationBuilder,
+        ServiceDescriptor descriptor)
+    {
+        if (descriptor.IsKeyedService)
+        {
+            var key = descriptor.ServiceKey!;
+
+            // If it's keyed, the service key won't be null. A null key results in it _not_ being a keyed service.
+            registrationBuilder.Keyed(key, descriptor.ServiceType);
+        }
+        else
+        {
+            registrationBuilder.As(descriptor.ServiceType);
+        }
+
+        return registrationBuilder;
     }
 
     /// <summary>
@@ -102,7 +138,7 @@ public static class AutofacRegistration
     private static IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> ConfigureLifecycle<TActivatorData, TRegistrationStyle>(
         this IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> registrationBuilder,
         ServiceLifetime lifecycleKind,
-        object lifetimeScopeTagForSingleton)
+        object? lifetimeScopeTagForSingleton)
     {
         switch (lifecycleKind)
         {
@@ -147,48 +183,76 @@ public static class AutofacRegistration
     private static void Register(
         ContainerBuilder builder,
         IEnumerable<ServiceDescriptor> descriptors,
-        object lifetimeScopeTagForSingletons)
+        object? lifetimeScopeTagForSingletons)
     {
         foreach (var descriptor in descriptors)
         {
-            if (descriptor.ImplementationType != null)
+            var implementationType = descriptor.NormalizedImplementationType();
+            if (implementationType != null)
             {
                 // Test if the an open generic type is being registered
                 var serviceTypeInfo = descriptor.ServiceType.GetTypeInfo();
                 if (serviceTypeInfo.IsGenericTypeDefinition)
                 {
                     builder
-                        .RegisterGeneric(descriptor.ImplementationType)
-                        .As(descriptor.ServiceType)
+                        .RegisterGeneric(implementationType)
+                        .ConfigureServiceType(descriptor)
                         .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
                 }
                 else
                 {
                     builder
-                        .RegisterType(descriptor.ImplementationType)
-                        .As(descriptor.ServiceType)
+                        .RegisterType(implementationType)
+                        .ConfigureServiceType(descriptor)
                         .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
                 }
+
+                continue;
             }
-            else if (descriptor.ImplementationFactory != null)
+
+            if (descriptor.IsKeyedService && descriptor.KeyedImplementationFactory != null)
+            {
+                var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
+                {
+                    // At this point the context is always a ResolveRequestContext, which will expose the actual service type.
+                    var requestContext = (ResolveRequestContext)context;
+
+                    var serviceProvider = context.Resolve<IServiceProvider>();
+
+                    var keyedService = (Autofac.Core.KeyedService)requestContext.Service;
+
+                    var key = keyedService.ServiceKey;
+
+                    return descriptor.KeyedImplementationFactory(serviceProvider, key);
+                })
+                .ConfigureServiceType(descriptor)
+                .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
+                .CreateRegistration();
+
+                builder.RegisterComponent(registration);
+
+                continue;
+            }
+            else if (!descriptor.IsKeyedService && descriptor.ImplementationFactory != null)
             {
                 var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
                     {
                         var serviceProvider = context.Resolve<IServiceProvider>();
                         return descriptor.ImplementationFactory(serviceProvider);
                     })
+                    .ConfigureServiceType(descriptor)
                     .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
                     .CreateRegistration();
 
                 builder.RegisterComponent(registration);
+                continue;
             }
-            else
-            {
-                builder
-                    .RegisterInstance(descriptor.ImplementationInstance)
-                    .As(descriptor.ServiceType)
-                    .ConfigureLifecycle(descriptor.Lifetime, null);
-            }
+
+            // It's not a type or factory, so it must be an instance.
+            builder
+                .RegisterInstance(descriptor.NormalizedImplementationInstance()!)
+                .ConfigureServiceType(descriptor)
+                .ConfigureLifecycle(descriptor.Lifetime, null);
         }
     }
 }

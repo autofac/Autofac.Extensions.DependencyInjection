@@ -3,10 +3,9 @@
 
 using System;
 
-namespace Integration.Net3_1
+namespace Integration.Net7;
+
+public class DateProvider : IDateProvider
 {
-    public class DateProvider : IDateProvider
-    {
-        public DateTimeOffset GetDate() => DateTimeOffset.UtcNow;
-    }
+    public DateTimeOffset GetDate() => DateTimeOffset.UtcNow;
 }

@@ -21,7 +21,7 @@ public class AutofacServiceProviderFactory : IServiceProviderFactory<ContainerBu
     /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container.</param>
     public AutofacServiceProviderFactory(
         ContainerBuildOptions containerBuildOptions,
-        Action<ContainerBuilder> configurationAction = null)
+        Action<ContainerBuilder>? configurationAction = null)
         : this(configurationAction) =>
         _containerBuildOptions = containerBuildOptions;
 
@@ -29,7 +29,7 @@ public class AutofacServiceProviderFactory : IServiceProviderFactory<ContainerBu
     /// Initializes a new instance of the <see cref="AutofacServiceProviderFactory"/> class.
     /// </summary>
     /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container..</param>
-    public AutofacServiceProviderFactory(Action<ContainerBuilder> configurationAction = null) =>
+    public AutofacServiceProviderFactory(Action<ContainerBuilder>? configurationAction = null) =>
         _configurationAction = configurationAction ?? (builder => { });
 
     /// <summary>
