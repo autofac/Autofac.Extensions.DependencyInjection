@@ -22,6 +22,18 @@ public class AutofacRegistrationTests
     }
 
     [Fact]
+    public void PopulateThrowsForNullBuilder()
+    {
+        Assert.Throws<ArgumentNullException>(() => AutofacRegistration.Populate(null, Enumerable.Empty<ServiceDescriptor>()));
+    }
+
+    [Fact]
+    public void PopulateThrowsForNullDescriptors()
+    {
+        Assert.Throws<ArgumentNullException>(() => new ContainerBuilder().Populate(null));
+    }
+
+    [Fact]
     public void CorrectServiceProviderIsRegistered()
     {
         var builder = new ContainerBuilder();

@@ -134,8 +134,11 @@ public static class AutofacRegistration
         }
         else if (e.ComponentRegistration.Activator is DelegateActivator)
         {
-            // With non-reflection activation, there are very few paths that would let the FromKeyedServicesAttribute
-            // actually work.
+            // For delegate activation there are very few paths that would let the FromKeyedServicesAttribute
+            // actually work, and none that MSDI supports directly.
+            // We're explicitly choosing here not to support [FromKeyedServices] on the Autofac-specific generic
+            // delegate resolve methods, to improve performance for the 99% case of other delegates that only
+            // receive an IComponentContext or an IServiceProvider.
             needFromKeyedServiceParameter = false;
         }
         else if (e.ComponentRegistration.Activator is InstanceActivator)
