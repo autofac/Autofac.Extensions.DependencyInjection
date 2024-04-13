@@ -3,6 +3,8 @@
 using System.Reflection;
 using Autofac.Builder;
 using Autofac.Core;
+using Autofac.Core.Activators;
+using Autofac.Core.Activators.Delegate;
 using Autofac.Core.Activators.Reflection;
 using Autofac.Core.Resolving.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
@@ -130,11 +132,21 @@ public static class AutofacRegistration
                 }
             }
         }
-        else
+        else if (e.ComponentRegistration.Activator is DelegateActivator)
         {
             // With non-reflection activation, there are very few paths that would let the FromKeyedServicesAttribute
             // actually work.
             needFromKeyedServiceParameter = false;
+        }
+        else if (e.ComponentRegistration.Activator is InstanceActivator)
+        {
+            // Instance activators don't use parameters.
+            needFromKeyedServiceParameter = false;
+        }
+        else
+        {
+            // Unknown activator, assume we need the parameter.
+            needFromKeyedServiceParameter = true;
         }
 
         e.ComponentRegistration.PipelineBuilding += (sender, pipeline) =>
