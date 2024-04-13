@@ -89,21 +89,19 @@ public static class AutofacRegistration
             .SingleInstance();
 
         // Shims for keyed service compatibility.
-        builder.RegisterServiceMiddlewareSource(new ServiceKeyMiddlewareSource());
         builder.RegisterSource<AnyKeyRegistrationSource>();
-
         builder.ComponentRegistryBuilder.Registered += AddFromKeyedServiceParameterMiddleware;
 
         Register(builder, descriptors, lifetimeScopeTagForSingletons);
     }
 
     /// <summary>
-    /// Inspect each component registration, and determine whether or not we can avoid adding
-    /// <see cref="FromKeyedServiceMiddleware"/> to the resolve pipeline.
+    /// Inspect each component registration, and determine whether or not we can avoid adding the
+    /// <see cref="FromKeyedServicesAttribute"/> parameter to the resolve pipeline.
     /// </summary>
     private static void AddFromKeyedServiceParameterMiddleware(object? sender, ComponentRegisteredEventArgs e)
     {
-        var addParameterMiddleware = false;
+        var needFromKeyedServiceParameter = false;
 
         // We can optimise quite significantly in the case where we are using the reflection activator.
         // In that state we can inspect the constructors ahead of time and determine whether the parameter will even need to be added.
@@ -121,12 +119,12 @@ public static class AutofacRegistration
                     {
                         // One or more of the constructors we will use to activate has a FromKeyedServicesAttribute,
                         // we must add our middleware.
-                        addParameterMiddleware = true;
+                        needFromKeyedServiceParameter = true;
                         break;
                     }
                 }
 
-                if (addParameterMiddleware)
+                if (needFromKeyedServiceParameter)
                 {
                     break;
                 }
@@ -139,16 +137,20 @@ public static class AutofacRegistration
             // builder.Register(([FromKeyedServices("abc")] KeyedService service) => new ServiceConsumer(service));
             // If we need to support that case, then we will have to add our middleware to all non-reflection activations.
             // Which is a bit of shame, because it makes delegate activation slower than reflection activation in almost all cases.
-            addParameterMiddleware = true;
+            needFromKeyedServiceParameter = true;
         }
 
-        if (addParameterMiddleware)
+        e.ComponentRegistration.PipelineBuilding += (sender, pipeline) =>
         {
-            e.ComponentRegistration.PipelineBuilding += (sender, pipeline) =>
+            if (needFromKeyedServiceParameter)
             {
-                pipeline.Use(FromKeyedServiceMiddleware.Instance, MiddlewareInsertionMode.StartOfPhase);
-            };
-        }
+                pipeline.Use(KeyedServiceMiddleware.InstanceWithFromKeyedServicesParameter, MiddlewareInsertionMode.StartOfPhase);
+            }
+            else
+            {
+                pipeline.Use(KeyedServiceMiddleware.InstanceWithoutFromKeyedServicesParameter, MiddlewareInsertionMode.StartOfPhase);
+            }
+        };
     }
 
     /// <summary>
