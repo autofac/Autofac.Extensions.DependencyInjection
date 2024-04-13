@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 using System.Reflection;
 using Autofac.Builder;
+using Autofac.Core;
+using Autofac.Core.Activators.Reflection;
 using Autofac.Core.Resolving.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -63,9 +65,14 @@ public static class AutofacRegistration
         IEnumerable<ServiceDescriptor> descriptors,
         object? lifetimeScopeTagForSingletons)
     {
-        if (descriptors == null)
+        if (descriptors is null)
         {
             throw new ArgumentNullException(nameof(descriptors));
+        }
+
+        if (builder is null)
+        {
+            throw new ArgumentNullException(nameof(builder));
         }
 
         builder.RegisterType<AutofacServiceProvider>()
@@ -82,10 +89,66 @@ public static class AutofacRegistration
             .SingleInstance();
 
         // Shims for keyed service compatibility.
-        builder.RegisterServiceMiddlewareSource(new KeyedServiceMiddlewareSource());
+        builder.RegisterServiceMiddlewareSource(new ServiceKeyMiddlewareSource());
         builder.RegisterSource<AnyKeyRegistrationSource>();
 
+        builder.ComponentRegistryBuilder.Registered += AddFromKeyedServiceParameterMiddleware;
+
         Register(builder, descriptors, lifetimeScopeTagForSingletons);
+    }
+
+    /// <summary>
+    /// Inspect each component registration, and determine whether or not we can avoid adding
+    /// <see cref="FromKeyedServiceMiddleware"/> to the resolve pipeline.
+    /// </summary>
+    private static void AddFromKeyedServiceParameterMiddleware(object? sender, ComponentRegisteredEventArgs e)
+    {
+        var addParameterMiddleware = false;
+
+        // We can optimise quite significantly in the case where we are using the reflection activator.
+        // In that state we can inspect the constructors ahead of time and determine whether the parameter will even need to be added.
+        if (e.ComponentRegistration.Activator is ReflectionActivator reflectionActivator)
+        {
+            var constructors = reflectionActivator.ConstructorFinder.FindConstructors(reflectionActivator.LimitType);
+
+            // Go through all the constructors; if any have a FromKeyedServices, then we must add our component middleware to
+            // the pipeline.
+            foreach (var constructor in constructors)
+            {
+                foreach (var constructorParameter in constructor.GetParameters())
+                {
+                    if (constructorParameter.GetCustomAttribute<FromKeyedServicesAttribute>() is not null)
+                    {
+                        // One or more of the constructors we will use to activate has a FromKeyedServicesAttribute,
+                        // we must add our middleware.
+                        addParameterMiddleware = true;
+                        break;
+                    }
+                }
+
+                if (addParameterMiddleware)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // With non-reflection activation, the only case I can find where someone might reasonably expect FromKeyedServices
+            // to be respected is this one:
+            // builder.Register(([FromKeyedServices("abc")] KeyedService service) => new ServiceConsumer(service));
+            // If we need to support that case, then we will have to add our middleware to all non-reflection activations.
+            // Which is a bit of shame, because it makes delegate activation slower than reflection activation in almost all cases.
+            addParameterMiddleware = true;
+        }
+
+        if (addParameterMiddleware)
+        {
+            e.ComponentRegistration.PipelineBuilding += (sender, pipeline) =>
+            {
+                pipeline.Use(FromKeyedServiceMiddleware.Instance, MiddlewareInsertionMode.StartOfPhase);
+            };
+        }
     }
 
     /// <summary>
