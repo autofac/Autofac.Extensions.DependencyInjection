@@ -132,12 +132,9 @@ public static class AutofacRegistration
         }
         else
         {
-            // With non-reflection activation, the only case I can find where someone might reasonably expect FromKeyedServices
-            // to be respected is this one:
-            // builder.Register(([FromKeyedServices("abc")] KeyedService service) => new ServiceConsumer(service));
-            // If we need to support that case, then we will have to add our middleware to all non-reflection activations.
-            // Which is a bit of shame, because it makes delegate activation slower than reflection activation in almost all cases.
-            needFromKeyedServiceParameter = true;
+            // With non-reflection activation, there are very few paths that would let the FromKeyedServicesAttribute
+            // actually work.
+            needFromKeyedServiceParameter = false;
         }
 
         e.ComponentRegistration.PipelineBuilding += (sender, pipeline) =>
