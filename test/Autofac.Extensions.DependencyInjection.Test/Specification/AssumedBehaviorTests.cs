@@ -171,6 +171,17 @@ public abstract class AssumedBehaviorTests
         innerScope.Dispose();
     }
 
+    [Fact]
+    public void ServiceInstancesRegisteredAreNotDisposedWhenTheProviderIsDisposed()
+    {
+        var externalService = new DisposeTracker();
+        var services = new ServiceCollection().AddSingleton(externalService);
+        var rootProvider = CreateServiceProvider(services);
+        ((IDisposable)rootProvider).Dispose();
+
+        Assert.False(externalService.Disposed);
+    }
+
     protected abstract IServiceProvider CreateServiceProvider(IServiceCollection serviceCollection);
 
     [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated through reflection.")]
