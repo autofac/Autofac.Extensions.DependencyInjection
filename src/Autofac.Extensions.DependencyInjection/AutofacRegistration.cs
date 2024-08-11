@@ -329,7 +329,8 @@ public static class AutofacRegistration
             builder
                 .RegisterInstance(descriptor.NormalizedImplementationInstance()!)
                 .ConfigureServiceType(descriptor)
-                .ConfigureLifecycle(descriptor.Lifetime, null);
+                .ConfigureLifecycle(descriptor.Lifetime, null)
+                .ExternallyOwned();
         }
     }
 }
