@@ -1,10 +1,11 @@
 {
   "sdk": {
-    "version": "8.0.101",
+    "version": "8.0.401",
     "rollForward": "latestFeature"
   },
+
   "additionalSdks": [
-    "6.0.418",
-    "7.0.405"
+    "6.0.425",
+    "7.0.410"
   ]
 }
