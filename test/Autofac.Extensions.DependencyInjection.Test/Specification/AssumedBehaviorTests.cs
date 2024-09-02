@@ -174,11 +174,10 @@ public abstract class AssumedBehaviorTests
     [Fact]
     public void ServiceInstancesRegisteredAreNotDisposedWhenTheProviderIsDisposed()
     {
-        var externalService = new DisposeTracker();
+        using var externalService = new DisposeTracker();
         var services = new ServiceCollection().AddSingleton(externalService);
         var rootProvider = CreateServiceProvider(services);
         ((IDisposable)rootProvider).Dispose();
-
         Assert.False(externalService.Disposed);
     }
 
