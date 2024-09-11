@@ -31,7 +31,7 @@ public static class AutofacRegistration
         this ContainerBuilder builder,
         IEnumerable<ServiceDescriptor> descriptors)
     {
-        Populate(builder, descriptors, null);
+        Populate(builder, descriptors, null, null);
     }
 
     /// <summary>
@@ -67,6 +67,44 @@ public static class AutofacRegistration
         IEnumerable<ServiceDescriptor> descriptors,
         object? lifetimeScopeTagForSingletons)
     {
+        Populate(builder, descriptors, null, lifetimeScopeTagForSingletons);
+    }
+
+    /// <summary>
+    /// Populates the Autofac container builder with the set of registered service descriptors
+    /// and makes <see cref="IServiceProvider"/> and <see cref="IServiceScopeFactory"/>
+    /// available in the container. Using this overload is incompatible with the ASP.NET Core
+    /// support for <see cref="IServiceProviderFactory{TContainerBuilder}"/>.
+    /// </summary>
+    /// <param name="builder">
+    /// The <see cref="ContainerBuilder"/> into which the registrations should be made.
+    /// </param>
+    /// <param name="descriptors">
+    /// The set of service descriptors to register in the container.
+    /// </param>
+    /// <param name="registrationCallback">Represents a callback that can be used to configure a registration.</param>
+    /// <param name="lifetimeScopeTagForSingletons">
+    /// If provided and not <see langword="null"/> then all registrations with lifetime <see cref="ServiceLifetime.Singleton" /> are registered
+    /// using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.InstancePerMatchingLifetimeScope" />
+    /// with provided <paramref name="lifetimeScopeTagForSingletons"/>
+    /// instead of using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.SingleInstance"/>.
+    /// </param>
+    /// <remarks>
+    /// <para>
+    /// Specifying a <paramref name="lifetimeScopeTagForSingletons"/> addresses a specific case where you have
+    /// an application that uses Autofac but where you need to isolate a set of services in a child scope. For example,
+    /// if you have a large application that self-hosts ASP.NET Core items, you may want to isolate the ASP.NET
+    /// Core registrations in a child lifetime scope so they don't show up for the rest of the application.
+    /// This overload allows that. Note it is the developer's responsibility to execute this and create an
+    /// <see cref="AutofacServiceProvider"/> using the child lifetime scope.
+    /// </para>
+    /// </remarks>
+    public static void Populate(
+        this ContainerBuilder builder,
+        IEnumerable<ServiceDescriptor> descriptors,
+        IRegistrationCallback? registrationCallback,
+        object? lifetimeScopeTagForSingletons)
+    {
         if (descriptors is null)
         {
             throw new ArgumentNullException(nameof(descriptors));
@@ -94,7 +132,7 @@ public static class AutofacRegistration
         builder.RegisterSource<AnyKeyRegistrationSource>();
         builder.ComponentRegistryBuilder.Registered += AddFromKeyedServiceParameterMiddleware;
 
-        Register(builder, descriptors, lifetimeScopeTagForSingletons);
+        Register(builder, descriptors, registrationCallback, lifetimeScopeTagForSingletons);
     }
 
     /// <summary>
@@ -250,6 +288,7 @@ public static class AutofacRegistration
     /// <param name="descriptors">
     /// The set of service descriptors to register in the container.
     /// </param>
+    /// <param name="registrationCallback">Represents a callback that can be used to configure a registration.</param>
     /// <param name="lifetimeScopeTagForSingletons">
     /// If not <see langword="null"/> then all registrations with lifetime <see cref="ServiceLifetime.Singleton" /> are registered
     /// using <see cref="IRegistrationBuilder{TLimit,TActivatorData,TRegistrationStyle}.InstancePerMatchingLifetimeScope" />
@@ -260,6 +299,7 @@ public static class AutofacRegistration
     private static void Register(
         ContainerBuilder builder,
         IEnumerable<ServiceDescriptor> descriptors,
+        IRegistrationCallback? registrationCallback,
         object? lifetimeScopeTagForSingletons)
     {
         foreach (var descriptor in descriptors)
@@ -271,17 +311,21 @@ public static class AutofacRegistration
                 var serviceTypeInfo = descriptor.ServiceType.GetTypeInfo();
                 if (serviceTypeInfo.IsGenericTypeDefinition)
                 {
-                    builder
+                    var registrationBuilder = builder
                         .RegisterGeneric(implementationType)
                         .ConfigureServiceType(descriptor)
                         .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
+
+                    registrationCallback?.OnRegister(registrationBuilder);
                 }
                 else
                 {
-                    builder
+                    var registrationBuilder = builder
                         .RegisterType(implementationType)
                         .ConfigureServiceType(descriptor)
                         .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
+
+                    registrationCallback?.OnRegister(registrationBuilder);
                 }
 
                 continue;
@@ -289,7 +333,7 @@ public static class AutofacRegistration
 
             if (descriptor.IsKeyedService && descriptor.KeyedImplementationFactory != null)
             {
-                var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
+                var registrationBuilder = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
                 {
                     // At this point the context is always a ResolveRequestContext, which will expose the actual service type.
                     var requestContext = (ResolveRequestContext)context;
@@ -303,34 +347,41 @@ public static class AutofacRegistration
                     return descriptor.KeyedImplementationFactory(serviceProvider, key);
                 })
                 .ConfigureServiceType(descriptor)
-                .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
-                .CreateRegistration();
+                .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
 
-                builder.RegisterComponent(registration);
+                registrationCallback?.OnRegister(registrationBuilder);
+
+                builder.RegisterComponent(registrationBuilder.CreateRegistration());
 
                 continue;
             }
-            else if (!descriptor.IsKeyedService && descriptor.ImplementationFactory != null)
+
+            if (!descriptor.IsKeyedService && descriptor.ImplementationFactory != null)
             {
-                var registration = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
+                var registrationBuilder = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
                     {
                         var serviceProvider = context.Resolve<IServiceProvider>();
                         return descriptor.ImplementationFactory(serviceProvider);
                     })
                     .ConfigureServiceType(descriptor)
-                    .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons)
-                    .CreateRegistration();
+                    .ConfigureLifecycle(descriptor.Lifetime, lifetimeScopeTagForSingletons);
 
-                builder.RegisterComponent(registration);
+                registrationCallback?.OnRegister(registrationBuilder);
+
+                builder.RegisterComponent(registrationBuilder.CreateRegistration());
                 continue;
             }
 
-            // It's not a type or factory, so it must be an instance.
-            builder
-                .RegisterInstance(descriptor.NormalizedImplementationInstance()!)
-                .ConfigureServiceType(descriptor)
-                .ConfigureLifecycle(descriptor.Lifetime, null)
-                .ExternallyOwned();
+            {
+                // It's not a type or factory, so it must be an instance.
+                var registrationBuilder = builder
+                    .RegisterInstance(descriptor.NormalizedImplementationInstance()!)
+                    .ConfigureServiceType(descriptor)
+                    .ConfigureLifecycle(descriptor.Lifetime, null)
+                    .ExternallyOwned();
+
+                registrationCallback?.OnRegister(registrationBuilder);
+            }
         }
     }
 }

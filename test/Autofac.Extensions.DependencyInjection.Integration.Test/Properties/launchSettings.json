@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Autofac.Extensions.DependencyInjection.Integration.Test": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:58009;http://localhost:58010"
+    }
+  }
+}
