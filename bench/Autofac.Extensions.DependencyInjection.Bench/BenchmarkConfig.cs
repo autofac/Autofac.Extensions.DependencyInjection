@@ -9,6 +9,8 @@ namespace Autofac.Extensions.DependencyInjection.Bench;
 
 internal sealed class BenchmarkConfig : ManualConfig
 {
+    private const string BenchmarkArtifactsFolder = "BenchmarkDotNet.Artifacts";
+
     internal BenchmarkConfig()
     {
         Add(DefaultConfig.Instance);
@@ -17,7 +19,7 @@ internal sealed class BenchmarkConfig : ManualConfig
 
         var rootFolder = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.LastIndexOf("bin", StringComparison.OrdinalIgnoreCase));
         var runFolder = DateTime.Now.ToString("u").Replace(' ', '_').Replace(':', '-');
-        ArtifactsPath = Path.Join(rootFolder, "BenchmarkDotNet.Artifacts", runFolder);
+        ArtifactsPath = Path.Combine(rootFolder, BenchmarkArtifactsFolder, runFolder);
 
         AddDiagnoser(MemoryDiagnoser.Default);
     }
