@@ -10,9 +10,9 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 public class AutofacChildLifetimeScopeServiceProviderFactory : IServiceProviderFactory<AutofacChildLifetimeScopeConfigurationAdapter>
 {
+    private static readonly Action<ContainerBuilder> FallbackConfigurationAction = builder => { };
     private readonly Action<ContainerBuilder> _containerConfigurationAction;
     private readonly ILifetimeScope _rootLifetimeScope;
-    private static readonly Action<ContainerBuilder> FallbackConfigurationAction = builder => { };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AutofacChildLifetimeScopeServiceProviderFactory"/> class.

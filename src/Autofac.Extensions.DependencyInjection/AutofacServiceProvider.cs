@@ -30,6 +30,11 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     }
 
     /// <summary>
+    /// Gets the underlying instance of <see cref="ILifetimeScope" />.
+    /// </summary>
+    public ILifetimeScope LifetimeScope => _lifetimeScope;
+
+    /// <summary>
     /// Gets the service object of the specified type.
     /// </summary>
     /// <param name="serviceType">
@@ -159,9 +164,27 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     }
 
     /// <summary>
-    /// Gets the underlying instance of <see cref="ILifetimeScope" />.
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
     /// </summary>
-    public ILifetimeScope LifetimeScope => _lifetimeScope;
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Performs a dispose operation asynchronously.
+    /// </summary>
+    /// <returns>A task to await disposal.</returns>
+    public async ValueTask DisposeAsync()
+    {
+        if (!_disposed)
+        {
+            _disposed = true;
+            await _lifetimeScope.DisposeAsync().ConfigureAwait(false);
+            GC.SuppressFinalize(this);
+        }
+    }
 
     /// <summary>
     /// Releases unmanaged and - optionally - managed resources.
@@ -179,28 +202,6 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             {
                 _lifetimeScope.Dispose();
             }
-        }
-    }
-
-    /// <summary>
-    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-    /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Performs a dispose operation asynchronously.
-    /// </summary>
-    public async ValueTask DisposeAsync()
-    {
-        if (!_disposed)
-        {
-            _disposed = true;
-            await _lifetimeScope.DisposeAsync().ConfigureAwait(false);
-            GC.SuppressFinalize(this);
         }
     }
 }

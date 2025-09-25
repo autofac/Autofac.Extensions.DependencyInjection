@@ -11,8 +11,8 @@ namespace Autofac.Extensions.DependencyInjection;
 /// <seealso cref="IServiceScope" />
 internal class AutofacServiceScope : IServiceScope, IAsyncDisposable
 {
-    private bool _disposed;
     private readonly AutofacServiceProvider _serviceProvider;
+    private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AutofacServiceScope"/> class.
@@ -48,6 +48,16 @@ internal class AutofacServiceScope : IServiceScope, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (!_disposed)
+        {
+            _disposed = true;
+            await _serviceProvider.DisposeAsync().ConfigureAwait(false);
+        }
+    }
+
     /// <summary>
     /// Releases unmanaged and - optionally - managed resources.
     /// </summary>
@@ -64,16 +74,6 @@ internal class AutofacServiceScope : IServiceScope, IAsyncDisposable
             {
                 _serviceProvider.Dispose();
             }
-        }
-    }
-
-    /// <inheritdoc/>
-    public async ValueTask DisposeAsync()
-    {
-        if (!_disposed)
-        {
-            _disposed = true;
-            await _serviceProvider.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

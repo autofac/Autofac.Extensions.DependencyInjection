@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b" # v5.0.0
+    hooks:
+      - id: check-json
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: "192ad822316c3a22fb3d3cc8aa6eafa0b8488360" # v0.45.0
+    hooks:
+      - id: markdownlint
+        args:
+          - --fix
+  - repo: https://github.com/tillig/json-sort-cli
+    rev: "009ab2ab49e1f2fa9d6b9dfc31009ceeca055204" # v3.0.0
+    hooks:
+      - id: json-sort
+        args:
+          - --autofix

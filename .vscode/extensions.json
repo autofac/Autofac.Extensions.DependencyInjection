@@ -1,12 +1,8 @@
 {
   "recommendations": [
-    "bierner.markdown-emoji",
     "davidanson.vscode-markdownlint",
     "editorconfig.editorconfig",
-    "gruntfuggly.todo-tree",
-    "ms-dotnettools.csharp",
-    "ryanluker.vscode-coverage-gutters",
-    "stkb.rewrap",
+    "ms-dotnettools.csdevkit",
     "travisillig.vscode-json-stable-stringify"
   ]
 }

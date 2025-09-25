@@ -17,8 +17,6 @@
   "coverage-gutters.coverageFileNames": [
     "coverage.net6.0.info"
   ],
-  "dotnet-test-explorer.runInParallel": true,
-  "dotnet-test-explorer.testProjectPath": "test/**/*.Test.csproj",
   "dotnet.defaultSolution": "Autofac.Extensions.DependencyInjection.sln",
   "dotnet.preferRuntimeFromSDK": true,
   "dotnet.unitTestDebuggingOptions": {
