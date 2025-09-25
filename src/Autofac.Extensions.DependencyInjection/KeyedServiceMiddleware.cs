@@ -17,26 +17,16 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
     // for injection into a constructor. This is similar to the
     // Autofac [KeyFilter] attribute.
     private static readonly Parameter FromKeyedServicesParameter = new ResolvedParameter(
-            (p, c) =>
-            {
-                var filter = p.GetCustomAttributes<FromKeyedServicesAttribute>(true).FirstOrDefault();
-                return filter is not null && filter.CanResolveParameter(p, c);
-            },
-            (p, c) =>
-            {
-                var filter = p.GetCustomAttributes<FromKeyedServicesAttribute>(true).First();
-                return filter.ResolveParameter(p, c);
-            });
-
-    /// <summary>
-    /// Gets a single instance of this middleware that does not add the keyed services parameter.
-    /// </summary>
-    public static KeyedServiceMiddleware InstanceWithoutFromKeyedServicesParameter { get; } = new(addFromKeyedServiceParameter: false);
-
-    /// <summary>
-    /// Gets a single instance of this middleware that adds the keyed services parameter.
-    /// </summary>
-    public static KeyedServiceMiddleware InstanceWithFromKeyedServicesParameter { get; } = new(addFromKeyedServiceParameter: true);
+        (p, c) =>
+        {
+            var filter = p.GetCustomAttributes<FromKeyedServicesAttribute>(true).FirstOrDefault();
+            return filter is not null && filter.CanResolveParameter(p, c);
+        },
+        (p, c) =>
+        {
+            var filter = p.GetCustomAttributes<FromKeyedServicesAttribute>(true).First();
+            return filter.ResolveParameter(p, c);
+        });
 
     private readonly bool _addFromKeyedServiceParameter;
 
@@ -48,6 +38,16 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
     {
         _addFromKeyedServiceParameter = addFromKeyedServiceParameter;
     }
+
+    /// <summary>
+    /// Gets a single instance of this middleware that does not add the keyed services parameter.
+    /// </summary>
+    public static KeyedServiceMiddleware InstanceWithoutFromKeyedServicesParameter { get; } = new(addFromKeyedServiceParameter: false);
+
+    /// <summary>
+    /// Gets a single instance of this middleware that adds the keyed services parameter.
+    /// </summary>
+    public static KeyedServiceMiddleware InstanceWithFromKeyedServicesParameter { get; } = new(addFromKeyedServiceParameter: true);
 
     /// <inheritdoc />
     public PipelinePhase Phase => PipelinePhase.Activation;
