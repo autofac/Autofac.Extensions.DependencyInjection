@@ -51,7 +51,7 @@
     <AdditionalFiles Include="..\..\build\stylecop.json" Link="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="8.4.0" />
+    <PackageReference Include="Autofac" Version="8.1.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" Condition="Exists('$(MSBuildThisFileDirectory)../../.git')">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
