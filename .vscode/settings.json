@@ -6,16 +6,15 @@
     "diagnosers",
     "inheritdoc",
     "langword",
-    "netcoreapp",
     "paramref",
     "seealso",
     "typeparam",
     "unmanaged",
     "xunit"
   ],
-  "coverage-gutters.coverageBaseDir": "artifacts/coverage",
+  "coverage-gutters.coverageBaseDir": "artifacts/logs",
   "coverage-gutters.coverageFileNames": [
-    "coverage.net6.0.info"
+    "**/coverage.cobertura.xml"
   ],
   "dotnet.defaultSolution": "Autofac.Extensions.DependencyInjection.sln",
   "dotnet.preferRuntimeFromSDK": true,
@@ -32,6 +31,10 @@
     "symbolOptions": {
       "searchNuGetOrgSymbolServer": true
     }
+  },
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.resx": "$(capture).*.resx, $(capture).designer.cs, $(capture).designer.vb"
   },
   "files.watcherExclude": {
     "**/target": true
