@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- VersionPrefix patched by AppVeyor -->
-    <VersionPrefix>0.0.1</VersionPrefix>
     <!-- Assembly metadata -->
     <AssemblyName>Autofac.Extensions.DependencyInjection</AssemblyName>
     <AssemblyTitle>Autofac.Extensions.DependencyInjection</AssemblyTitle>
