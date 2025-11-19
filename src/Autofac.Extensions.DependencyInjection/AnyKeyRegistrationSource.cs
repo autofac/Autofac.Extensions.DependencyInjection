@@ -62,11 +62,14 @@ public class AnyKeyRegistrationSource : IRegistrationSource
         }
 
         // Use collection checks borrowed (without caching) from core Autofac.
-        if (IsCollection(keyedService.ServiceType))
+        if (keyedService.ServiceType.IsCollection())
         {
-            // We don't want to look for an anykey equivalent service when the target of the resolve is an enumerable.
-            // It will always return something, meaning we'll generate a result collection for 'anykey' instead of for the actual key.
-            // The normal collection registration source will do the work and call back into this source having stripped the collection type.
+            // We don't want to look for an AnyKey equivalent service when the
+            // target of the resolve is an enumerable. It will always return
+            // something, meaning we'll generate a result collection for
+            // 'AnyKey' instead of for the actual key. The normal collection
+            // registration source will do the work and call back into this
+            // source having stripped the collection type.
             return Enumerable.Empty<IComponentRegistration>();
         }
 
@@ -90,39 +93,5 @@ public class AnyKeyRegistrationSource : IRegistrationSource
             anyKeyRegistration.Registration.Metadata);
 
         return new[] { registrationMappedToOriginalService };
-    }
-
-    private static bool IsCollection(Type serviceType)
-    {
-        if (IsGenericTypeDefinedBy(serviceType, typeof(IEnumerable<>)))
-        {
-            return true;
-        }
-        else if (serviceType.IsArray)
-        {
-            // GetElementType always non-null if IsArray is true.
-            return true;
-        }
-        else if (IsGenericListOrCollectionInterfaceType(serviceType))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private static bool IsGenericTypeDefinedBy(Type type, Type openGeneric)
-    {
-        return !type.ContainsGenericParameters
-                && type.IsGenericType
-                && type.GetGenericTypeDefinition() == openGeneric;
-    }
-
-    private static bool IsGenericListOrCollectionInterfaceType(Type type)
-    {
-        return IsGenericTypeDefinedBy(type, typeof(IList<>))
-                   || IsGenericTypeDefinedBy(type, typeof(ICollection<>))
-                   || IsGenericTypeDefinedBy(type, typeof(IReadOnlyCollection<>))
-                   || IsGenericTypeDefinedBy(type, typeof(IReadOnlyList<>));
     }
 }
