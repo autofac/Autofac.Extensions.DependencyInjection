@@ -26,8 +26,16 @@ internal static class FromKeyedServicesAttributeExtensions
     public static object? ResolveParameter(this FromKeyedServicesAttribute attribute, ParameterInfo parameter, IComponentContext context)
     {
         // Adapter for FromKeyedServicesAttribute to work like Autofac.Features.AttributeFilters.KeyFilterAttribute.
-        context.TryResolveKeyed(attribute.Key, parameter.ParameterType, out var value);
-        return value;
+        object? instance;
+        if (attribute.Key is null)
+        {
+            // No key in the attribute means resolve by type.
+            context.TryResolve(parameter.ParameterType, out instance);
+            return instance;
+        }
+
+        context.TryResolveKeyed(attribute.Key, parameter.ParameterType, out instance);
+        return instance;
     }
 
     /// <summary>
@@ -40,6 +48,12 @@ internal static class FromKeyedServicesAttributeExtensions
     public static bool CanResolveParameter(this FromKeyedServicesAttribute attribute, ParameterInfo parameter, IComponentContext context)
     {
         // Adapter for FromKeyedServicesAttribute to work like Autofac.Features.AttributeFilters.KeyFilterAttribute.
+        if (attribute.Key is null)
+        {
+            // No key in the attribute means resolve by type.
+            return context.ComponentRegistry.IsRegistered(new Autofac.Core.TypedService(parameter.ParameterType));
+        }
+
         return context.ComponentRegistry.IsRegistered(new Autofac.Core.KeyedService(attribute.Key, parameter.ParameterType));
     }
 }
