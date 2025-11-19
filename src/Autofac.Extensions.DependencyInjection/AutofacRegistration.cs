@@ -105,14 +105,16 @@ public static class AutofacRegistration
     {
         var needFromKeyedServiceParameter = false;
 
-        // We can optimise quite significantly in the case where we are using the reflection activator.
-        // In that state we can inspect the constructors ahead of time and determine whether the parameter will even need to be added.
+        // We can optimize quite significantly in the case where we are using
+        // the reflection activator. In that state we can inspect the
+        // constructors ahead of time and determine whether the parameter will
+        // even need to be added.
         if (e.ComponentRegistration.Activator is ReflectionActivator reflectionActivator)
         {
             var constructors = reflectionActivator.ConstructorFinder.FindConstructors(reflectionActivator.LimitType);
 
-            // Go through all the constructors; if any have a FromKeyedServices, then we must add our component middleware to
-            // the pipeline.
+            // Go through all the constructors; if any have a FromKeyedServices,
+            // then we must add our component middleware to the pipeline.
             foreach (var constructor in constructors)
             {
                 foreach (var constructorParameter in constructor.GetParameters())
@@ -134,10 +136,13 @@ public static class AutofacRegistration
         }
         else if (e.ComponentRegistration.Activator is DelegateActivator)
         {
-            // For delegate activation there are very few paths that would let the FromKeyedServicesAttribute
-            // actually work, and none that MSDI supports directly.
-            // We're explicitly choosing here not to support [FromKeyedServices] on the Autofac-specific generic
-            // delegate resolve methods, to improve performance for the 99% case of other delegates that only
+            // For delegate activation there are very few paths that would let
+            // the FromKeyedServicesAttribute actually work, and none that MEDI
+            // supports directly.
+            //
+            // We're explicitly choosing here not to support [FromKeyedServices]
+            // on the Autofac-specific generic delegate resolve methods, to
+            // improve performance for the 99% case of other delegates that only
             // receive an IComponentContext or an IServiceProvider.
             needFromKeyedServiceParameter = false;
         }
@@ -267,7 +272,7 @@ public static class AutofacRegistration
             var implementationType = descriptor.NormalizedImplementationType();
             if (implementationType != null)
             {
-                // Test if the an open generic type is being registered
+                // Test if an open generic type is being registered
                 var serviceTypeInfo = descriptor.ServiceType.GetTypeInfo();
                 if (serviceTypeInfo.IsGenericTypeDefinition)
                 {

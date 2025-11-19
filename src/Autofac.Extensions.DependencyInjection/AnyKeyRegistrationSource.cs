@@ -9,6 +9,28 @@ namespace Autofac.Extensions.DependencyInjection;
 /// <summary>
 /// Handles fallback for an individual component registered with <see cref="Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey"/>.
 /// </summary>
+/// <remarks>
+/// <para>
+/// "AnyKey" is a challenging concept that may not always behave as expected. Based on the .NET 10 Microsoft.Extensions.DependencyInjection spec tests, the expected behavior is as follows:
+/// </para>
+/// <list type="bullet">
+/// <item><description>
+/// A null key is the same as unkeyed. This allows the KeyServices APIs to support both keyed and unkeyed.
+/// </description></item>
+/// <item><description>
+/// AnyKey is a special case of Keyed.
+/// </description></item>
+/// <item><description>
+/// AnyKey registrations are not returned with GetKeyedServices(AnyKey) and GetKeyedService(AnyKey) always throws.
+/// </description></item>
+/// <item><description>
+/// For IEnumerable, the ordering of the results are in registration order.
+/// </description></item>
+/// <item><description>
+/// For a singleton resolve, the last match wins.
+/// </description></item>
+/// </list>
+/// </remarks>
 public class AnyKeyRegistrationSource : IRegistrationSource
 {
     /// <inheritdoc/>
