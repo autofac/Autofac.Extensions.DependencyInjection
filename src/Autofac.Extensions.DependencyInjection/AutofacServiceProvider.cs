@@ -62,6 +62,7 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         }
         else if (serviceKey == Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey && !serviceType.IsCollection())
         {
+            // AnyKey can only be used with collection/IEnumerable resolutions.
             throw new InvalidOperationException(AutofacServiceProviderResources.KeyedServiceAnyKeyUsedToResolveService);
         }
         else
@@ -113,6 +114,7 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         }
         else if (serviceKey == Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey && !serviceType.IsCollection())
         {
+            // AnyKey can only be used with collection/IEnumerable resolutions.
             throw new InvalidOperationException(AutofacServiceProviderResources.KeyedServiceAnyKeyUsedToResolveService);
         }
         else
