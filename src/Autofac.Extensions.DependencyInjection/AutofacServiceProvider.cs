@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System.Diagnostics;
 using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
 using KeyedService = Autofac.Core.KeyedService;
@@ -71,12 +70,11 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             {
                 return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
             }
-            catch (DependencyResolutionException ex) when (ex.InnerException is KeyTypeConversionException conversionException)
+            catch (DependencyResolutionException ex)
             {
-                // If the issue was with converting the specified key type to
-                // match a [ServiceKey] parameter type, the M.E.DI contract is
-                // that it must be an InvalidOperationException.
-                throw new InvalidOperationException(conversionException.Message, conversionException);
+                // All exceptions resolving keyed services as of .NET 10 are
+                // expected to be InvalidOperationException.
+                throw new InvalidOperationException(ex.Message, ex);
             }
         }
     }
@@ -123,12 +121,11 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             {
                 return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
             }
-            catch (DependencyResolutionException ex) when (ex.InnerException is KeyTypeConversionException conversionException)
+            catch (DependencyResolutionException ex)
             {
-                // If the issue was with converting the specified key type to
-                // match a [ServiceKey] parameter type, the M.E.DI contract is
-                // that it must be an InvalidOperationException.
-                throw new InvalidOperationException(conversionException.Message, conversionException);
+                // All exceptions resolving keyed services as of .NET 10 are
+                // expected to be InvalidOperationException.
+                throw new InvalidOperationException(ex.Message, ex);
             }
         }
     }
