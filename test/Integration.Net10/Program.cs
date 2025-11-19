@@ -6,7 +6,7 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Integration.Net7;
+namespace Integration.Net8;
 
 public static class Program
 {

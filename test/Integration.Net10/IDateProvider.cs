@@ -3,4 +3,9 @@
 
 using System;
 
-[assembly: CLSCompliant(false)]
+namespace Integration.Net8;
+
+public interface IDateProvider
+{
+    DateTimeOffset GetDate();
+}

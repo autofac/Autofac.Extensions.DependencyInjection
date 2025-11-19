@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Integration.Net7;
+namespace Integration.Net8;
 
 public class DateProvider : IDateProvider
 {

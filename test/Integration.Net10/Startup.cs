@@ -6,7 +6,7 @@ using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Integration.Net6;
+namespace Integration.Net8;
 
 [SuppressMessage("CA1052", "CA1052", Justification = "Startup must not be a static class.")]
 public class Startup

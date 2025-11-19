@@ -4,7 +4,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Integration.Net7.Controllers;
+namespace Integration.Net8.Controllers;
 
 [ApiController]
 [Route("[controller]")]
