@@ -3,10 +3,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Integration.Net8;
+namespace Integration.Net10;
 
 [SuppressMessage("CA1052", "CA1052", Justification = "Startup must not be a static class.")]
 public class Startup
