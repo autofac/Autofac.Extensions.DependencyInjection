@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System.Diagnostics;
 using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
 using KeyedService = Autofac.Core.KeyedService;
@@ -49,10 +50,19 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </returns>
     public object? GetKeyedService(Type serviceType, object? serviceKey)
     {
+        if (serviceType is null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
         if (serviceKey is null)
         {
             // A null key equates to "not keyed."
             return _lifetimeScope.ResolveOptional(serviceType);
+        }
+        else if (serviceKey == Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey && serviceType.IsCollection())
+        {
+            throw new InvalidOperationException(AutofacServiceProviderResources.KeyedServiceAnyKeyUsedToResolveService);
         }
         else
         {
@@ -91,10 +101,19 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </exception>
     public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
     {
+        if (serviceType is null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
         if (serviceKey is null)
         {
             // A null key equates to "not keyed."
             return _lifetimeScope.Resolve(serviceType);
+        }
+        else if (serviceKey == Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey && serviceType.IsCollection())
+        {
+            throw new InvalidOperationException(AutofacServiceProviderResources.KeyedServiceAnyKeyUsedToResolveService);
         }
         else
         {
