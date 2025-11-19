@@ -6,6 +6,7 @@ using Autofac.Core;
 using Autofac.Core.Activators;
 using Autofac.Core.Activators.Delegate;
 using Autofac.Core.Activators.Reflection;
+using Autofac.Core.Registration;
 using Autofac.Core.Resolving.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -191,6 +192,11 @@ public static class AutofacRegistration
 
             // If it's keyed, the service key won't be null. A null key results in it _not_ being a keyed service.
             registrationBuilder.Keyed(key, descriptor.ServiceType);
+            if (descriptor.ServiceKey is not null && descriptor.ServiceKey.Equals(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
+            {
+                // Exclude AnyKey registrations from collection resolutions.
+                registrationBuilder.RegistrationData.Options |= RegistrationOptions.ExcludeFromCollections;
+            }
         }
         else
         {
