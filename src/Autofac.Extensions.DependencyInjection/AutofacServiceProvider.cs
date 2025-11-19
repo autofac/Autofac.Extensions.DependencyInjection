@@ -60,7 +60,7 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             // A null key equates to "not keyed."
             return _lifetimeScope.ResolveOptional(serviceType);
         }
-        else if (serviceKey == Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey && serviceType.IsCollection())
+        else if (serviceKey == Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey && !serviceType.IsCollection())
         {
             throw new InvalidOperationException(AutofacServiceProviderResources.KeyedServiceAnyKeyUsedToResolveService);
         }
@@ -111,7 +111,7 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             // A null key equates to "not keyed."
             return _lifetimeScope.Resolve(serviceType);
         }
-        else if (serviceKey == Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey && serviceType.IsCollection())
+        else if (serviceKey == Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey && !serviceType.IsCollection())
         {
             throw new InvalidOperationException(AutofacServiceProviderResources.KeyedServiceAnyKeyUsedToResolveService);
         }
