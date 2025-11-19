@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Integration.Net6": {
+    "Integration.Net8": {
       "applicationUrl": "https://localhost:7154;http://localhost:7155",
       "commandName": "Project",
       "dotnetRunMessages": true,
