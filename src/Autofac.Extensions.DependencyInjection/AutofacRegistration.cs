@@ -6,7 +6,6 @@ using Autofac.Core;
 using Autofac.Core.Activators;
 using Autofac.Core.Activators.Delegate;
 using Autofac.Core.Activators.Reflection;
-using Autofac.Core.Registration;
 using Autofac.Core.Resolving.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -307,7 +306,7 @@ public static class AutofacRegistration
 
                     var keyedService = (Autofac.Core.KeyedService)requestContext.Service;
 
-                    var key = keyedService.ServiceKey;
+                    var key = GetRequestedServiceKey(requestContext, keyedService.ServiceKey);
 
                     return descriptor.KeyedImplementationFactory(serviceProvider, key);
                 })
@@ -341,5 +340,18 @@ public static class AutofacRegistration
                 .ConfigureLifecycle(descriptor.Lifetime, null)
                 .ExternallyOwned();
         }
+    }
+
+    private static object? GetRequestedServiceKey(ResolveRequestContext requestContext, object? fallbackKey)
+    {
+        foreach (var parameter in requestContext.Parameters)
+        {
+            if (parameter is RequestedServiceKeyParameter requestedKeyParameter)
+            {
+                return requestedKeyParameter.ServiceKey;
+            }
+        }
+
+        return fallbackKey;
     }
 }

@@ -13,21 +13,6 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 internal class KeyedServiceMiddleware : IResolveMiddleware
 {
-    // [FromKeyedServices("key")] - Specifies a keyed service
-    // for injection into a constructor. This is similar to the
-    // Autofac [KeyFilter] attribute.
-    private static readonly Parameter FromKeyedServicesParameter = new ResolvedParameter(
-        (p, c) =>
-        {
-            var filter = p.GetCustomAttributes<FromKeyedServicesAttribute>(true).FirstOrDefault();
-            return filter is not null && filter.CanResolveParameter(p, c);
-        },
-        (p, c) =>
-        {
-            var filter = p.GetCustomAttributes<FromKeyedServicesAttribute>(true).First();
-            return filter.ResolveParameter(p, c);
-        });
-
     private readonly bool _addFromKeyedServiceParameter;
 
     /// <summary>
@@ -57,26 +42,22 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
     {
         List<Parameter>? newParameters = null;
 
-        if (context.Service is Autofac.Core.KeyedService keyedService)
+        var keyedService = context.Service as Autofac.Core.KeyedService;
+        var effectiveServiceKey = keyedService?.ServiceKey;
+
+        if (effectiveServiceKey is null || Autofac.Core.KeyedService.IsAnyKey(effectiveServiceKey))
+        {
+            var requestedKey = GetRequestedServiceKey(context.Parameters);
+            if (requestedKey is not null)
+            {
+                effectiveServiceKey = requestedKey;
+            }
+        }
+
+        if (keyedService is not null && effectiveServiceKey is not null && !Autofac.Core.KeyedService.IsAnyKey(effectiveServiceKey))
         {
             newParameters = new List<Parameter>(context.Parameters);
-
-            var key = keyedService.ServiceKey;
-
-            // [ServiceKey] - indicates that the parameter value should
-            // be the service key used during resolution.
-            newParameters.Add(new ResolvedParameter(
-                (p, c) =>
-                {
-                    return p.GetCustomAttributes<ServiceKeyAttribute>(true).FirstOrDefault() is not null;
-                },
-                (p, c) =>
-                {
-                    // If the key is an object but the constructor takes
-                    // a string, we need to safely convert that. This is
-                    // particularly interesting in the AnyKey scenario.
-                    return KeyTypeManipulation.ChangeToCompatibleType(key, p.ParameterType, p);
-                }));
+            newParameters.Add(CreateMicrosoftServiceKeyParameter(effectiveServiceKey));
         }
 
         if (_addFromKeyedServiceParameter)
@@ -86,7 +67,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             // [FromKeyedServices("key")] - Specifies a keyed service
             // for injection into a constructor. This is similar to the
             // Autofac [KeyFilter] attribute.
-            newParameters.Add(FromKeyedServicesParameter);
+            newParameters.Add(CreateFromKeyedServicesParameter(effectiveServiceKey));
         }
 
         if (newParameters is not null)
@@ -95,5 +76,45 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         }
 
         next(context);
+    }
+
+    private static ResolvedParameter CreateMicrosoftServiceKeyParameter(object serviceKey)
+    {
+        return new ResolvedParameter(
+            (p, c) =>
+            {
+                return Attribute.IsDefined(p, typeof(Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute), inherit: true);
+            },
+            (p, c) =>
+            {
+                return KeyTypeManipulation.ChangeToCompatibleType(serviceKey, p.ParameterType, p);
+            });
+    }
+
+    private static ResolvedParameter CreateFromKeyedServicesParameter(object? currentServiceKey)
+    {
+        return new ResolvedParameter(
+            (p, c) =>
+            {
+                return Attribute.IsDefined(p, typeof(FromKeyedServicesAttribute), inherit: true);
+            },
+            (p, c) =>
+            {
+                var filter = p.GetCustomAttribute<FromKeyedServicesAttribute>(inherit: true)!;
+                return filter.ResolveParameter(p, c, currentServiceKey);
+            });
+    }
+
+    private static object? GetRequestedServiceKey(IEnumerable<Parameter> parameters)
+    {
+        foreach (var parameter in parameters)
+        {
+            if (parameter is RequestedServiceKeyParameter requested)
+            {
+                return requested.ServiceKey;
+            }
+        }
+
+        return null;
     }
 }

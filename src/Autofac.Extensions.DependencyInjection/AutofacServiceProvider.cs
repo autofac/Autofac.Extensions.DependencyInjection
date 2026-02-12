@@ -54,21 +54,20 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             throw new ArgumentNullException(nameof(serviceType));
         }
 
-        if (serviceKey is null)
+        var normalizedKey = NormalizeServiceKey(serviceType, serviceKey, out var requestedServiceKey);
+
+        if (normalizedKey is null)
         {
             // A null key equates to "not keyed."
             return _lifetimeScope.ResolveOptional(serviceType);
         }
         else
         {
-            if (serviceKey.Equals(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
-            {
-                serviceKey = KeyedService.AnyKey;
-            }
+            var parameters = CreateResolutionParameters(requestedServiceKey);
 
             try
             {
-                return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
+                return _lifetimeScope.ResolveOptionalService(new KeyedService(normalizedKey, serviceType), parameters);
             }
             catch (DependencyResolutionException ex)
             {
@@ -105,21 +104,20 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             throw new ArgumentNullException(nameof(serviceType));
         }
 
-        if (serviceKey is null)
+        var normalizedKey = NormalizeServiceKey(serviceType, serviceKey, out var requestedServiceKey);
+
+        if (normalizedKey is null)
         {
             // A null key equates to "not keyed."
             return _lifetimeScope.Resolve(serviceType);
         }
         else
         {
-            if (serviceKey.Equals(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
-            {
-                serviceKey = KeyedService.AnyKey;
-            }
+            var parameters = CreateResolutionParameters(requestedServiceKey);
 
             try
             {
-                return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
+                return _lifetimeScope.ResolveKeyed(normalizedKey, serviceType, parameters);
             }
             catch (DependencyResolutionException ex)
             {
@@ -148,7 +146,14 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </exception>
     public object GetRequiredService(Type serviceType)
     {
-        return _lifetimeScope.Resolve(serviceType);
+        try
+        {
+            return _lifetimeScope.Resolve(serviceType);
+        }
+        catch (DependencyResolutionException ex)
+        {
+            throw new InvalidOperationException(ex.Message, ex);
+        }
     }
 
     /// <inheritdoc />
@@ -178,7 +183,14 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </returns>
     public object? GetService(Type serviceType)
     {
-        return _lifetimeScope.ResolveOptional(serviceType);
+        try
+        {
+            return _lifetimeScope.ResolveOptional(serviceType);
+        }
+        catch (DependencyResolutionException ex)
+        {
+            throw new InvalidOperationException(ex.Message, ex);
+        }
     }
 
     /// <summary>
@@ -221,5 +233,38 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
                 _lifetimeScope.Dispose();
             }
         }
+    }
+
+    private static object? NormalizeServiceKey(Type serviceType, object? serviceKey, out object? requestedServiceKey)
+    {
+        requestedServiceKey = serviceKey;
+
+        if (serviceKey is null)
+        {
+            return null;
+        }
+
+        if (ReferenceEquals(serviceKey, Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
+        {
+            requestedServiceKey = null;
+            if (!serviceType.IsCollection())
+            {
+                throw new InvalidOperationException("KeyedService.AnyKey cannot be used to resolve a single service.");
+            }
+
+            return KeyedService.AnyKey;
+        }
+
+        return serviceKey;
+    }
+
+    private static Parameter[] CreateResolutionParameters(object? requestedServiceKey)
+    {
+        if (requestedServiceKey is null)
+        {
+            return Array.Empty<Parameter>();
+        }
+
+        return new Parameter[] { new RequestedServiceKeyParameter(requestedServiceKey) };
     }
 }
