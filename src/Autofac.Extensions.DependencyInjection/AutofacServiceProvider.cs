@@ -59,13 +59,13 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             // A null key equates to "not keyed."
             return _lifetimeScope.ResolveOptional(serviceType);
         }
-        else if (serviceKey.Equals(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey) && !serviceType.IsCollection())
-        {
-            // AnyKey can only be used with collection/IEnumerable resolutions.
-            throw new InvalidOperationException(AutofacServiceProviderResources.KeyedServiceAnyKeyUsedToResolveService);
-        }
         else
         {
+            if (serviceKey.Equals(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
+            {
+                serviceKey = KeyedService.AnyKey;
+            }
+
             try
             {
                 return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
@@ -110,13 +110,13 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             // A null key equates to "not keyed."
             return _lifetimeScope.Resolve(serviceType);
         }
-        else if (serviceKey.Equals(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey) && !serviceType.IsCollection())
-        {
-            // AnyKey can only be used with collection/IEnumerable resolutions.
-            throw new InvalidOperationException(AutofacServiceProviderResources.KeyedServiceAnyKeyUsedToResolveService);
-        }
         else
         {
+            if (serviceKey.Equals(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
+            {
+                serviceKey = KeyedService.AnyKey;
+            }
+
             try
             {
                 return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
