@@ -41,7 +41,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
     /// <inheritdoc />
     public void Execute(ResolveRequestContext context, Action<ResolveRequestContext> next)
     {
-        List<Parameter>? newParameters = null;
+        List<Parameter>? appendedParameters = null;
 
         var keyedService = context.Service as Autofac.Core.KeyedService;
         object? inheritedServiceKey = null;
@@ -64,26 +64,42 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             effectiveServiceKey is not null &&
             !Autofac.Core.KeyedService.IsAnyKey(effectiveServiceKey))
         {
-            newParameters = new List<Parameter>(context.Parameters);
-            newParameters.Add(CreateMicrosoftServiceKeyParameter(effectiveServiceKey));
+            AddParameter(ref appendedParameters, CreateMicrosoftServiceKeyParameter(effectiveServiceKey));
         }
 
         if (_addFromKeyedServiceParameter)
         {
-            newParameters ??= new List<Parameter>(context.Parameters);
-
             // [FromKeyedServices("key")] - Specifies a keyed service
             // for injection into a constructor. This is similar to the
             // Autofac [KeyFilter] attribute.
-            newParameters.Add(CreateFromKeyedServicesParameter(inheritedServiceKey));
+            AddParameter(ref appendedParameters, CreateFromKeyedServicesParameter(inheritedServiceKey));
         }
 
-        if (newParameters is not null)
+        if (appendedParameters is not null)
         {
-            context.ChangeParameters(newParameters);
+            context.ChangeParameters(AppendParameters(context.Parameters, appendedParameters));
         }
 
         next(context);
+    }
+
+    private static void AddParameter(ref List<Parameter>? appendedParameters, Parameter parameter)
+    {
+        appendedParameters ??= new List<Parameter>();
+        appendedParameters.Add(parameter);
+    }
+
+    private static IEnumerable<Parameter> AppendParameters(IEnumerable<Parameter> original, List<Parameter> appended)
+    {
+        foreach (var existing in original)
+        {
+            yield return existing;
+        }
+
+        for (var i = 0; i < appended.Count; i++)
+        {
+            yield return appended[i];
+        }
     }
 
     private static ResolvedParameter CreateMicrosoftServiceKeyParameter(object serviceKey)
