@@ -110,28 +110,7 @@ public static class AutofacRegistration
         // even need to be added.
         if (e.ComponentRegistration.Activator is ReflectionActivator reflectionActivator)
         {
-            var constructors = reflectionActivator.ConstructorFinder.FindConstructors(reflectionActivator.LimitType);
-
-            // Go through all the constructors; if any have a FromKeyedServices,
-            // then we must add our component middleware to the pipeline.
-            foreach (var constructor in constructors)
-            {
-                foreach (var constructorParameter in constructor.GetParameters())
-                {
-                    if (constructorParameter.GetCustomAttribute<FromKeyedServicesAttribute>() is not null)
-                    {
-                        // One or more of the constructors we will use to activate has a FromKeyedServicesAttribute,
-                        // we must add our middleware.
-                        needFromKeyedServiceParameter = true;
-                        break;
-                    }
-                }
-
-                if (needFromKeyedServiceParameter)
-                {
-                    break;
-                }
-            }
+            needFromKeyedServiceParameter = FromKeyedServicesUsageCache.RequiresFromKeyedServicesMiddleware(reflectionActivator);
         }
         else if (e.ComponentRegistration.Activator is DelegateActivator)
         {
