@@ -43,18 +43,25 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         List<Parameter>? newParameters = null;
 
         var keyedService = context.Service as Autofac.Core.KeyedService;
-        var effectiveServiceKey = keyedService?.ServiceKey;
+        object? inheritedServiceKey = null;
 
-        if (effectiveServiceKey is null || Autofac.Core.KeyedService.IsAnyKey(effectiveServiceKey))
+        if (keyedService is not null)
         {
-            var requestedKey = GetRequestedServiceKey(context.Parameters);
-            if (requestedKey is not null)
+            if (Autofac.Core.KeyedService.IsAnyKey(keyedService.ServiceKey))
             {
-                effectiveServiceKey = requestedKey;
+                inheritedServiceKey = TryGetRequestedServiceKey(context.Parameters);
+            }
+            else
+            {
+                inheritedServiceKey = keyedService.ServiceKey;
             }
         }
 
-        if (keyedService is not null && effectiveServiceKey is not null && !Autofac.Core.KeyedService.IsAnyKey(effectiveServiceKey))
+        var effectiveServiceKey = inheritedServiceKey;
+
+        if (keyedService is not null &&
+            effectiveServiceKey is not null &&
+            !Autofac.Core.KeyedService.IsAnyKey(effectiveServiceKey))
         {
             newParameters = new List<Parameter>(context.Parameters);
             newParameters.Add(CreateMicrosoftServiceKeyParameter(effectiveServiceKey));
@@ -67,7 +74,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             // [FromKeyedServices("key")] - Specifies a keyed service
             // for injection into a constructor. This is similar to the
             // Autofac [KeyFilter] attribute.
-            newParameters.Add(CreateFromKeyedServicesParameter(effectiveServiceKey));
+            newParameters.Add(CreateFromKeyedServicesParameter(inheritedServiceKey));
         }
 
         if (newParameters is not null)
@@ -91,7 +98,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             });
     }
 
-    private static ResolvedParameter CreateFromKeyedServicesParameter(object? currentServiceKey)
+    private static ResolvedParameter CreateFromKeyedServicesParameter(object? requestedServiceKey)
     {
         return new ResolvedParameter(
             (p, c) =>
@@ -101,20 +108,19 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             (p, c) =>
             {
                 var filter = p.GetCustomAttribute<FromKeyedServicesAttribute>(inherit: true)!;
-                return filter.ResolveParameter(p, c, currentServiceKey);
+                return filter.ResolveParameter(p, c, requestedServiceKey);
             });
     }
 
-    private static object? GetRequestedServiceKey(IEnumerable<Parameter> parameters)
+    private static object? TryGetRequestedServiceKey(IEnumerable<Parameter> parameters)
     {
-        foreach (var parameter in parameters)
+        try
         {
-            if (parameter is RequestedServiceKeyParameter requested)
-            {
-                return requested.ServiceKey;
-            }
+            return parameters.KeyedServiceKey<object?>();
         }
-
-        return null;
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 }

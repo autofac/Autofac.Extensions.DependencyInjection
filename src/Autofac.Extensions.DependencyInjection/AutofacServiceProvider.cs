@@ -54,7 +54,7 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             throw new ArgumentNullException(nameof(serviceType));
         }
 
-        var normalizedKey = NormalizeServiceKey(serviceType, serviceKey, out var requestedServiceKey);
+        var normalizedKey = NormalizeServiceKey(serviceType, serviceKey);
 
         if (normalizedKey is null)
         {
@@ -63,11 +63,9 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         }
         else
         {
-            var parameters = CreateResolutionParameters(requestedServiceKey);
-
             try
             {
-                return _lifetimeScope.ResolveOptionalService(new KeyedService(normalizedKey, serviceType), parameters);
+                return _lifetimeScope.ResolveOptionalService(new KeyedService(normalizedKey, serviceType));
             }
             catch (DependencyResolutionException ex)
             {
@@ -104,7 +102,7 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
             throw new ArgumentNullException(nameof(serviceType));
         }
 
-        var normalizedKey = NormalizeServiceKey(serviceType, serviceKey, out var requestedServiceKey);
+        var normalizedKey = NormalizeServiceKey(serviceType, serviceKey);
 
         if (normalizedKey is null)
         {
@@ -113,11 +111,9 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         }
         else
         {
-            var parameters = CreateResolutionParameters(requestedServiceKey);
-
             try
             {
-                return _lifetimeScope.ResolveKeyed(normalizedKey, serviceType, parameters);
+                return _lifetimeScope.ResolveKeyed(normalizedKey, serviceType);
             }
             catch (DependencyResolutionException ex)
             {
@@ -235,10 +231,8 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         }
     }
 
-    private static object? NormalizeServiceKey(Type serviceType, object? serviceKey, out object? requestedServiceKey)
+    private static object? NormalizeServiceKey(Type serviceType, object? serviceKey)
     {
-        requestedServiceKey = serviceKey;
-
         if (serviceKey is null)
         {
             return null;
@@ -246,7 +240,6 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
 
         if (ReferenceEquals(serviceKey, Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
         {
-            requestedServiceKey = null;
             if (!serviceType.IsCollection())
             {
                 throw new InvalidOperationException("KeyedService.AnyKey cannot be used to resolve a single service.");
@@ -256,15 +249,5 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         }
 
         return serviceKey;
-    }
-
-    private static Parameter[] CreateResolutionParameters(object? requestedServiceKey)
-    {
-        if (requestedServiceKey is null)
-        {
-            return Array.Empty<Parameter>();
-        }
-
-        return new Parameter[] { new RequestedServiceKeyParameter(requestedServiceKey) };
     }
 }

@@ -305,8 +305,7 @@ public static class AutofacRegistration
                     var serviceProvider = context.Resolve<IServiceProvider>();
 
                     var keyedService = (Autofac.Core.KeyedService)requestContext.Service;
-
-                    var key = GetRequestedServiceKey(requestContext, keyedService.ServiceKey);
+                    var key = requestContext.Parameters.KeyedServiceKey<object>();
 
                     return descriptor.KeyedImplementationFactory(serviceProvider, key);
                 })
@@ -340,18 +339,5 @@ public static class AutofacRegistration
                 .ConfigureLifecycle(descriptor.Lifetime, null)
                 .ExternallyOwned();
         }
-    }
-
-    private static object? GetRequestedServiceKey(ResolveRequestContext requestContext, object? fallbackKey)
-    {
-        foreach (var parameter in requestContext.Parameters)
-        {
-            if (parameter is RequestedServiceKeyParameter requestedKeyParameter)
-            {
-                return requestedKeyParameter.ServiceKey;
-            }
-        }
-
-        return fallbackKey;
     }
 }
