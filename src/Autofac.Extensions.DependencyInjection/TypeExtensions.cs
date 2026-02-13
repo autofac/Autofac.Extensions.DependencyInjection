@@ -1,5 +1,6 @@
 // Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
+using System.Collections.Concurrent;
 
 namespace Autofac.Extensions.DependencyInjection;
 
@@ -8,6 +9,8 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 internal static class TypeExtensions
 {
+    private static readonly ConcurrentDictionary<Type, bool> CollectionTypeCache = new();
+
     /// <summary>
     /// Checks a type to determine if it is some kind of collection or enumerable.
     /// </summary>
@@ -17,23 +20,25 @@ internal static class TypeExtensions
     /// <returns><see langword="true"/> if the type is a collection or enumerable; otherwise, <see langword="false"/>.</returns>
     internal static bool IsCollection(this Type serviceType)
     {
-        return IsGenericTypeDefinedBy(serviceType, typeof(IEnumerable<>)) ||
-                serviceType.IsArray ||
-                IsGenericListOrCollectionInterfaceType(serviceType);
+        return CollectionTypeCache.GetOrAdd(
+            serviceType,
+            static type => IsGenericTypeDefinedBy(type, typeof(IEnumerable<>)) ||
+                           type.IsArray ||
+                           IsGenericListOrCollectionInterfaceType(type));
     }
 
     private static bool IsGenericTypeDefinedBy(Type type, Type openGeneric)
     {
-        return !type.ContainsGenericParameters
-                && type.IsGenericType
-                && type.GetGenericTypeDefinition() == openGeneric;
+        return !type.ContainsGenericParameters &&
+               type.IsGenericType &&
+               type.GetGenericTypeDefinition() == openGeneric;
     }
 
     private static bool IsGenericListOrCollectionInterfaceType(Type type)
     {
-        return IsGenericTypeDefinedBy(type, typeof(IList<>))
-                   || IsGenericTypeDefinedBy(type, typeof(ICollection<>))
-                   || IsGenericTypeDefinedBy(type, typeof(IReadOnlyCollection<>))
-                   || IsGenericTypeDefinedBy(type, typeof(IReadOnlyList<>));
+        return IsGenericTypeDefinedBy(type, typeof(IList<>)) ||
+               IsGenericTypeDefinedBy(type, typeof(ICollection<>)) ||
+               IsGenericTypeDefinedBy(type, typeof(IReadOnlyCollection<>)) ||
+               IsGenericTypeDefinedBy(type, typeof(IReadOnlyList<>));
     }
 }
