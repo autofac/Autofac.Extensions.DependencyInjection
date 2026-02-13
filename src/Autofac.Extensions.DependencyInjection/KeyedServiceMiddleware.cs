@@ -41,7 +41,8 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
     /// <inheritdoc />
     public void Execute(ResolveRequestContext context, Action<ResolveRequestContext> next)
     {
-        List<Parameter>? appendedParameters = null;
+        Parameter? microsoftServiceKeyParameter = null;
+        Parameter? fromKeyedServicesParameter = null;
 
         var keyedService = context.Service as Autofac.Core.KeyedService;
         object? inheritedServiceKey = null;
@@ -64,7 +65,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             effectiveServiceKey is not null &&
             !Autofac.Core.KeyedService.IsAnyKey(effectiveServiceKey))
         {
-            AddParameter(ref appendedParameters, CreateMicrosoftServiceKeyParameter(effectiveServiceKey));
+            microsoftServiceKeyParameter = CreateMicrosoftServiceKeyParameter(effectiveServiceKey);
         }
 
         if (_addFromKeyedServiceParameter)
@@ -72,33 +73,35 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             // [FromKeyedServices("key")] - Specifies a keyed service
             // for injection into a constructor. This is similar to the
             // Autofac [KeyFilter] attribute.
-            AddParameter(ref appendedParameters, CreateFromKeyedServicesParameter(inheritedServiceKey));
+            fromKeyedServicesParameter = CreateFromKeyedServicesParameter(inheritedServiceKey);
         }
 
-        if (appendedParameters is not null)
+        if (microsoftServiceKeyParameter is not null || fromKeyedServicesParameter is not null)
         {
-            context.ChangeParameters(AppendParameters(context.Parameters, appendedParameters));
+            context.ChangeParameters(AppendParameters(context.Parameters, microsoftServiceKeyParameter, fromKeyedServicesParameter));
         }
 
         next(context);
     }
 
-    private static void AddParameter(ref List<Parameter>? appendedParameters, Parameter parameter)
+    private static IEnumerable<Parameter> AppendParameters(IEnumerable<Parameter> original, Parameter? first, Parameter? second)
     {
-        appendedParameters ??= new List<Parameter>();
-        appendedParameters.Add(parameter);
-    }
-
-    private static IEnumerable<Parameter> AppendParameters(IEnumerable<Parameter> original, List<Parameter> appended)
-    {
+        // This append mechanism looks dumb, but since this is on a hot path, we
+        // want to avoid the overhead of creating a new collection or allocating
+        // new iterators if we don't have to.
         foreach (var existing in original)
         {
             yield return existing;
         }
 
-        for (var i = 0; i < appended.Count; i++)
+        if (first is not null)
         {
-            yield return appended[i];
+            yield return first;
+        }
+
+        if (second is not null)
+        {
+            yield return second;
         }
     }
 
@@ -132,11 +135,21 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         }
     }
 
+    /// <summary>
+    /// Caches the presence of relevant attributes on parameters to avoid repeated reflection calls.
+    /// </summary>
     private static class ParameterAttributeCache
     {
         private static readonly ConcurrentDictionary<ParameterInfo, bool> MicrosoftServiceKeyAttributePresence = new();
         private static readonly ConcurrentDictionary<ParameterInfo, FromKeyedServicesAttribute?> FromKeyedServicesAttributes = new();
 
+        /// <summary>
+        /// Determines whether the parameter has the <see cref="Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute"/> defined.
+        /// </summary>
+        /// <param name="parameter">The parameter to check.</param>
+        /// <returns>
+        /// <see langword="true"/> if the parameter has the attribute; otherwise, <see langword="false"/>.
+        /// </returns>
         public static bool HasMicrosoftServiceKey(ParameterInfo parameter)
         {
             if (parameter is null)
@@ -149,11 +162,25 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
                 static p => Attribute.IsDefined(p, typeof(Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute), inherit: true));
         }
 
+        /// <summary>
+        /// Determines whether the parameter has the <see cref="FromKeyedServicesAttribute"/> defined.
+        /// </summary>
+        /// <param name="parameter">The parameter to check.</param>
+        /// <returns>
+        /// <see langword="true"/> if the parameter has the attribute; otherwise, <see langword="false"/>.
+        /// </returns>
         public static bool HasFromKeyedServicesAttribute(ParameterInfo parameter)
         {
             return GetFromKeyedServicesAttribute(parameter) is not null;
         }
 
+        /// <summary>
+        /// Gets the <see cref="FromKeyedServicesAttribute"/> defined on the parameter, if any.
+        /// </summary>
+        /// <param name="parameter">The parameter to check.</param>
+        /// <returns>
+        /// The <see cref="FromKeyedServicesAttribute"/> if defined; otherwise, <see langword="null"/>.
+        /// </returns>
         public static FromKeyedServicesAttribute? GetFromKeyedServicesAttribute(ParameterInfo parameter)
         {
             if (parameter is null)
