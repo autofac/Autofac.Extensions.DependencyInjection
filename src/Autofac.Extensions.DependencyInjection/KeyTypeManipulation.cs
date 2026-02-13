@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
@@ -15,6 +16,11 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 internal class KeyTypeManipulation
 {
+    private static readonly ConcurrentDictionary<ParameterInfo, TypeConverterAttribute?> ParameterConverterAttributes = new();
+    private static readonly ConcurrentDictionary<MemberInfo, TypeConverterAttribute?> MemberConverterAttributes = new();
+    private static readonly ConcurrentDictionary<string, Type> ConverterTypeCache = new(StringComparer.Ordinal);
+    private static readonly ConcurrentDictionary<Type, MethodInfo?> TryParseMethodCache = new();
+
     /// <summary>
     /// Converts an object to a type compatible with a given parameter.
     /// </summary>
@@ -35,7 +41,11 @@ internal class KeyTypeManipulation
         TypeConverterAttribute? attrib = null;
         if (memberInfo != null)
         {
-            attrib = memberInfo.GetCustomAttributes(typeof(TypeConverterAttribute), true).Cast<TypeConverterAttribute>().FirstOrDefault();
+            attrib = ParameterConverterAttributes.GetOrAdd(
+                memberInfo,
+                static parameter => parameter.GetCustomAttributes(typeof(TypeConverterAttribute), true)
+                    .Cast<TypeConverterAttribute>()
+                    .FirstOrDefault());
         }
 
         return ChangeToCompatibleType(value, destinationType, attrib);
@@ -61,7 +71,9 @@ internal class KeyTypeManipulation
         TypeConverterAttribute? attrib = null;
         if (memberInfo != null)
         {
-            attrib = memberInfo.GetCustomAttributes(typeof(TypeConverterAttribute), true).Cast<TypeConverterAttribute>().FirstOrDefault();
+            attrib = MemberConverterAttributes.GetOrAdd(
+                memberInfo,
+                static m => m.GetCustomAttributes(typeof(TypeConverterAttribute), true).Cast<TypeConverterAttribute>().FirstOrDefault());
         }
 
         return ChangeToCompatibleType(value, destinationType, attrib);
@@ -135,14 +147,20 @@ internal class KeyTypeManipulation
         }
 
         // Try a TryParse method.
-        if (value is string)
+        if (value is string stringValue)
         {
             // Some types in later frameworks have string TryParse and ReadOnlySpan<char> TryParse
             // so they result in an AmbiguousMatchException unless we specify.
-            var parser = destinationType.GetMethod("TryParse", BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Standard, new Type[] { typeof(string), destinationType.MakeByRefType() }, null);
+            var parser = TryParseMethodCache.GetOrAdd(
+                destinationType,
+                static type =>
+                {
+                    var parameterTypes = new[] { typeof(string), type.MakeByRefType() };
+                    return type.GetMethod("TryParse", BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Standard, parameterTypes, null);
+                });
             if (parser != null)
             {
-                var parameters = new[] { value, null };
+                var parameters = new object?[] { stringValue, null };
                 if ((bool)parser.Invoke(null, parameters)!)
                 {
                     return parameters[1];
@@ -168,9 +186,24 @@ internal class KeyTypeManipulation
     /// </exception>
     private static TypeConverter GetTypeConverterFromName(string converterTypeName)
     {
-        var converterType = Type.GetType(converterTypeName, true);
-        return Activator.CreateInstance(converterType!) is not TypeConverter converter
-            ? throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, KeyTypeManipulationResources.TypeConverterAttributeTypeNotConverter, converterTypeName))
-            : converter;
+        var converterType = ConverterTypeCache.GetOrAdd(
+            converterTypeName,
+            static name =>
+            {
+                var resolvedType = Type.GetType(name, true)!;
+                if (!typeof(TypeConverter).GetTypeInfo().IsAssignableFrom(resolvedType.GetTypeInfo()))
+                {
+                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, KeyTypeManipulationResources.TypeConverterAttributeTypeNotConverter, name));
+                }
+
+                return resolvedType;
+            });
+
+        if (Activator.CreateInstance(converterType) is TypeConverter converter)
+        {
+            return converter;
+        }
+
+        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, KeyTypeManipulationResources.TypeConverterAttributeTypeNotConverter, converterTypeName));
     }
 }
