@@ -15,6 +15,7 @@
     <IsPackable>false</IsPackable>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PreserveCompilationContext>true</PreserveCompilationContext>
+    <UseProjectReference Condition="'$(UseProjectReference)' == ''">true</UseProjectReference>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="BenchmarkDotNet.Attributes" />
@@ -39,8 +40,13 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseProjectReference)' == 'true'">
     <ProjectReference Include="..\..\src\Autofac.Extensions.DependencyInjection\Autofac.Extensions.DependencyInjection.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseProjectReference)' != 'true' and '$(BaselinePackageVersion)' != ''">
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(BaselinePackageVersion)" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\projects\Bench.AutofacApiServer\BenchProject.AutofacApiServer.csproj" />
   </ItemGroup>
   <ItemGroup>

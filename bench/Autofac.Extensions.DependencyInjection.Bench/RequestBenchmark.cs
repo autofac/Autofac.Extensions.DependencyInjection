@@ -27,6 +27,13 @@ public class RequestBenchmark
         _autofacClient = _autofacFactory.CreateClient();
     }
 
+    [GlobalCleanup]
+    public void Cleanup()
+    {
+        _defaultFactory.Dispose();
+        _autofacFactory.Dispose();
+    }
+
     [Benchmark(Baseline = true)]
     public async Task RequestDefaultDI()
     {
@@ -47,12 +54,5 @@ public class RequestBenchmark
         {
             throw new HttpRequestException();
         }
-    }
-
-    [GlobalCleanup]
-    public void Cleanup()
-    {
-        _defaultFactory.Dispose();
-        _autofacFactory.Dispose();
     }
 }

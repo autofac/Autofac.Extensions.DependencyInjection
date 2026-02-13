@@ -3,7 +3,6 @@
 
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Jobs;
 
 namespace Autofac.Extensions.DependencyInjection.Bench;
 
@@ -14,8 +13,6 @@ internal sealed class BenchmarkConfig : ManualConfig
     internal BenchmarkConfig()
     {
         Add(DefaultConfig.Instance);
-
-        AddJob(Job.InProcess);
 
         var rootFolder = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.LastIndexOf("bin", StringComparison.OrdinalIgnoreCase));
         var runFolder = DateTime.Now.ToString("u").Replace(' ', '_').Replace(':', '-');
