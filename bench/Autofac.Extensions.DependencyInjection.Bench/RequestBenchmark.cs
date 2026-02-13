@@ -12,10 +12,10 @@ namespace Autofac.Extensions.DependencyInjection.Bench;
 public class RequestBenchmark
 {
     private static readonly Uri ValuesUri = new("/api/values", UriKind.Relative);
-    private WebApplicationFactory<DefaultStartup> _defaultFactory;
-    private WebApplicationFactory<DefaultStartup> _autofacFactory;
-    private HttpClient _defaultClient;
-    private HttpClient _autofacClient;
+    private WebApplicationFactory<DefaultStartup> _defaultFactory = null!;
+    private WebApplicationFactory<DefaultStartup> _autofacFactory = null!;
+    private HttpClient _defaultClient = null!;
+    private HttpClient _autofacClient = null!;
 
     [GlobalSetup]
     public void Setup()
