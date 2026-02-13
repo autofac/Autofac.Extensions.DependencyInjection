@@ -10,6 +10,9 @@ public class Harness
     [Fact]
     public void Request() => RunBenchmark<RequestBenchmark>();
 
+    [Fact]
+    public void KeyedResolution() => RunBenchmark<KeyedResolutionBenchmark>();
+
     /// <remarks>
     /// This method is used to enforce that benchmark types are added to <see cref="Benchmarks.All"/>
     /// so that they can be used directly from the command line in <see cref="Program.Main"/> as well.
