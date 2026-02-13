@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-// Disable the "file may only contain one type" warnings for these tiny
-// logic-free stubs. If they grow to hold logic, we should split them up.
 #pragma warning disable SA1402, SA1649
 
-namespace BenchProject.AutofacApiServer;
+namespace Autofac.Extensions.DependencyInjection.Bench.SampleApp;
 
 public class A
 {

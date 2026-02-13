@@ -3,13 +3,19 @@
 
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using Microsoft.Extensions.Hosting;
 
 namespace Autofac.Extensions.DependencyInjection.Bench;
 
-internal static class Program
+public sealed class Program
 {
-    internal static void Main(string[] args)
+    private Program()
     {
+    }
+
+    public static void Main(string[] args)
+    {
+        ArgumentNullException.ThrowIfNull(args);
         var (filteredArgs, baselineVersion) = ExtractBaselineVersion(args);
 
         // Usage:
@@ -38,6 +44,9 @@ internal static class Program
 
         new BenchmarkSwitcher(Benchmarks.All).Run(filteredArgs, config);
     }
+
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        SampleApp.Program.CreateHostBuilder(args);
 
     private static (string[] RemainingArgs, string? BaselineVersion) ExtractBaselineVersion(string[] args)
     {

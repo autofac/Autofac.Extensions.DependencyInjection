@@ -47,9 +47,6 @@
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(BaselinePackageVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\projects\Bench.AutofacApiServer\BenchProject.AutofacApiServer.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <AdditionalFiles Include="..\..\build\stylecop.json" Link="stylecop.json" />
   </ItemGroup>
 </Project>

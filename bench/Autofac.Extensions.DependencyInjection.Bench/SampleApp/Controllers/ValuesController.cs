@@ -3,7 +3,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace BenchProject.AutofacApiServer.Controllers;
+namespace Autofac.Extensions.DependencyInjection.Bench.SampleApp.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
