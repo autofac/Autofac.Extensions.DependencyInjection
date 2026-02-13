@@ -3,8 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
-using AutofacKeyedService = Autofac.Core.KeyedService;
-using ServiceKeyAttributeAlias = Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute;
+using MicrosoftServiceKey = Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute;
 
 namespace Autofac.Extensions.DependencyInjection.Bench;
 
@@ -25,11 +24,11 @@ public class KeyedResolutionBenchmark
     {
         var services = new ServiceCollection();
 
-        services.AddTransient<IRegularService, DefaultRegularService>();
+        services.AddTransient<IService, DefaultService>();
 
-        services.AddKeyedTransient<IRegularService, AlphaRegularService>(AlphaKey);
-        services.AddKeyedTransient<IRegularService, BetaRegularService>(BetaKey);
-        services.AddKeyedTransient<IRegularService, ServiceKeyAwareRegularService>(ServiceKeyAwareKey);
+        services.AddKeyedTransient<IService, AlphaService>(AlphaKey);
+        services.AddKeyedTransient<IService, BetaService>(BetaKey);
+        services.AddKeyedTransient<IService, ServiceKeyAwareService>(ServiceKeyAwareKey);
 
         services.AddTransient<FromKeyedServicesConsumer>();
         services.AddKeyedTransient<CombinedConsumer>(CombinedKey);
@@ -50,19 +49,19 @@ public class KeyedResolutionBenchmark
     [Benchmark(Baseline = true)]
     public int StandardTypedResolution()
     {
-        return _serviceProvider.GetRequiredService<IRegularService>().Value;
+        return _serviceProvider.GetRequiredService<IService>().Value;
     }
 
     [Benchmark]
     public int KeyedResolutionWithoutAttributes()
     {
-        return _serviceProvider.GetRequiredKeyedService<IRegularService>(AlphaKey).Value;
+        return _serviceProvider.GetRequiredKeyedService<IService>(AlphaKey).Value;
     }
 
     [Benchmark]
     public int KeyedResolutionWithServiceKeyAttribute()
     {
-        return _serviceProvider.GetRequiredKeyedService<IRegularService>(ServiceKeyAwareKey).Value;
+        return _serviceProvider.GetRequiredKeyedService<IService>(ServiceKeyAwareKey).Value;
     }
 
     [Benchmark]
@@ -80,15 +79,7 @@ public class KeyedResolutionBenchmark
     [Benchmark]
     public int KeyedResolutionWithAnyKey()
     {
-        var result = (IEnumerable<IRegularService>?)_serviceProvider.GetKeyedService(
-            typeof(IEnumerable<IRegularService>),
-            AutofacKeyedService.AnyKey);
-
-        if (result is null)
-        {
-            throw new InvalidOperationException("Unable to resolve AnyKey enumerable.");
-        }
-
+        var result = _serviceProvider.GetKeyedServices<IService>(KeyedService.AnyKey);
         var total = 0;
         foreach (var service in result)
         {
@@ -98,31 +89,31 @@ public class KeyedResolutionBenchmark
         return total;
     }
 
-    private interface IRegularService
+    private interface IService
     {
         int Value { get; }
     }
 
-    private sealed class DefaultRegularService : IRegularService
+    private sealed class DefaultService : IService
     {
         public int Value => 1;
     }
 
-    private sealed class AlphaRegularService : IRegularService
+    private sealed class AlphaService : IService
     {
         public int Value => 2;
     }
 
-    private sealed class BetaRegularService : IRegularService
+    private sealed class BetaService : IService
     {
         public int Value => 3;
     }
 
     private sealed class FromKeyedServicesConsumer
     {
-        private readonly IRegularService _service;
+        private readonly IService _service;
 
-        public FromKeyedServicesConsumer([FromKeyedServices(BetaKey)] IRegularService service)
+        public FromKeyedServicesConsumer([FromKeyedServices(BetaKey)] IService service)
         {
             _service = service;
         }
@@ -132,12 +123,12 @@ public class KeyedResolutionBenchmark
 
     private sealed class CombinedConsumer
     {
-        private readonly IRegularService _fromKeyedService;
+        private readonly IService _fromKeyedService;
         private readonly object? _requestedKey;
 
         public CombinedConsumer(
-            [FromKeyedServices(BetaKey)] IRegularService fromKeyedService,
-            [ServiceKeyAttributeAlias] object? requestedKey)
+            [FromKeyedServices(BetaKey)] IService fromKeyedService,
+            [MicrosoftServiceKey] object? requestedKey)
         {
             _fromKeyedService = fromKeyedService;
             _requestedKey = requestedKey;
@@ -153,15 +144,15 @@ public class KeyedResolutionBenchmark
         }
     }
 
-    private sealed class ServiceKeyAwareRegularService : IRegularService
+    private sealed class ServiceKeyAwareService : IService
     {
-        private readonly object? _resolvedKey;
+        private readonly string _resolvedKey;
 
-        public ServiceKeyAwareRegularService([ServiceKeyAttributeAlias] object? resolvedKey)
+        public ServiceKeyAwareService([MicrosoftServiceKey] string resolvedKey)
         {
             _resolvedKey = resolvedKey;
         }
 
-        public int Value => _resolvedKey is string s ? s.Length : 0;
+        public int Value => _resolvedKey.Length;
     }
 }
