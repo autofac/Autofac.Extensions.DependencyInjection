@@ -51,7 +51,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         {
             if (Autofac.Core.KeyedService.IsAnyKey(keyedService.ServiceKey))
             {
-                inheritedServiceKey = TryGetRequestedServiceKey(context.Parameters);
+                context.Parameters.TryGetKeyedServiceKey<object>(out inheritedServiceKey);
             }
             else
             {
@@ -121,18 +121,6 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
                 var filter = ParameterAttributeCache.GetFromKeyedServicesAttribute(p)!;
                 return filter.ResolveParameter(p, c, requestedServiceKey);
             });
-    }
-
-    private static object? TryGetRequestedServiceKey(IEnumerable<Parameter> parameters)
-    {
-        try
-        {
-            return parameters.KeyedServiceKey<object?>();
-        }
-        catch (InvalidOperationException)
-        {
-            return null;
-        }
     }
 
     /// <summary>
