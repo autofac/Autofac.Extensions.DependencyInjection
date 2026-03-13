@@ -27,6 +27,25 @@ public class KeyedServiceTests
         Assert.Equal("ab", result);
     }
 
+    [Fact]
+    public void KeyedResolutionWithFromKeyedServicesAndNormalDependency()
+    {
+        var services = new ServiceCollection();
+        services.AddTransient<INormalDependency, NormalDependency>();
+        services.AddKeyedTransient<IKeyedDependency, KeyedDependency>("dep");
+        services.AddKeyedTransient<IMixedService, MixedService>("svc");
+
+        var builder = new ContainerBuilder();
+        builder.Populate(services);
+
+        var container = builder.Build();
+        using var serviceProvider = new AutofacServiceProvider(container);
+
+        var resolved = serviceProvider.GetRequiredKeyedService<IMixedService>("svc");
+
+        Assert.Equal("dep:normal", resolved.Value);
+    }
+
     private interface IService
     {
         string Value { get; }
@@ -42,5 +61,44 @@ public class KeyedServiceTests
         }
 
         public string Value => _resolvedKey;
+    }
+
+    private interface IKeyedDependency
+    {
+        string Value { get; }
+    }
+
+    private interface INormalDependency
+    {
+        string Value { get; }
+    }
+
+    private interface IMixedService
+    {
+        string Value { get; }
+    }
+
+    private sealed class KeyedDependency : IKeyedDependency
+    {
+        public string Value => "dep";
+    }
+
+    private sealed class NormalDependency : INormalDependency
+    {
+        public string Value => "normal";
+    }
+
+    private sealed class MixedService : IMixedService
+    {
+        private readonly IKeyedDependency _keyedDependency;
+        private readonly INormalDependency _normalDependency;
+
+        public MixedService([FromKeyedServices("dep")] IKeyedDependency keyedDependency, INormalDependency normalDependency)
+        {
+            _keyedDependency = keyedDependency;
+            _normalDependency = normalDependency;
+        }
+
+        public string Value => $"{_keyedDependency.Value}:{_normalDependency.Value}";
     }
 }

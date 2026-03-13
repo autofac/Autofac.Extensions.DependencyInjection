@@ -121,26 +121,9 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         /// </returns>
         public static bool HasMicrosoftServiceKey(ParameterInfo parameter)
         {
-            if (parameter is null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
-
             return MicrosoftServiceKeyAttributePresence.GetOrAdd(
                 parameter,
                 static p => Attribute.IsDefined(p, typeof(Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute), inherit: true));
-        }
-
-        /// <summary>
-        /// Determines whether the parameter has the <see cref="FromKeyedServicesAttribute"/> defined.
-        /// </summary>
-        /// <param name="parameter">The parameter to check.</param>
-        /// <returns>
-        /// <see langword="true"/> if the parameter has the attribute; otherwise, <see langword="false"/>.
-        /// </returns>
-        public static bool HasFromKeyedServicesAttribute(ParameterInfo parameter)
-        {
-            return GetFromKeyedServicesAttribute(parameter) is not null;
         }
 
         /// <summary>
@@ -152,11 +135,6 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         /// </returns>
         public static FromKeyedServicesAttribute? GetFromKeyedServicesAttribute(ParameterInfo parameter)
         {
-            if (parameter is null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
-
             return FromKeyedServicesAttributes.GetOrAdd(
                 parameter,
                 static p => p.GetCustomAttribute<FromKeyedServicesAttribute>(inherit: true));
