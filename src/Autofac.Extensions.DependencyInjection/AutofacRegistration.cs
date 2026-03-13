@@ -91,7 +91,6 @@ public static class AutofacRegistration
             .SingleInstance();
 
         // Shims for keyed service compatibility.
-        builder.RegisterSource<AnyKeyRegistrationSource>();
         builder.ComponentRegistryBuilder.Registered += AddFromKeyedServiceParameterMiddleware;
 
         Register(builder, descriptors, lifetimeScopeTagForSingletons);
@@ -105,39 +104,23 @@ public static class AutofacRegistration
     {
         var needFromKeyedServiceParameter = false;
 
-        // We can optimise quite significantly in the case where we are using the reflection activator.
-        // In that state we can inspect the constructors ahead of time and determine whether the parameter will even need to be added.
+        // We can optimize quite significantly in the case where we are using
+        // the reflection activator. In that state we can inspect the
+        // constructors ahead of time and determine whether the parameter will
+        // even need to be added.
         if (e.ComponentRegistration.Activator is ReflectionActivator reflectionActivator)
         {
-            var constructors = reflectionActivator.ConstructorFinder.FindConstructors(reflectionActivator.LimitType);
-
-            // Go through all the constructors; if any have a FromKeyedServices, then we must add our component middleware to
-            // the pipeline.
-            foreach (var constructor in constructors)
-            {
-                foreach (var constructorParameter in constructor.GetParameters())
-                {
-                    if (constructorParameter.GetCustomAttribute<FromKeyedServicesAttribute>() is not null)
-                    {
-                        // One or more of the constructors we will use to activate has a FromKeyedServicesAttribute,
-                        // we must add our middleware.
-                        needFromKeyedServiceParameter = true;
-                        break;
-                    }
-                }
-
-                if (needFromKeyedServiceParameter)
-                {
-                    break;
-                }
-            }
+            needFromKeyedServiceParameter = FromKeyedServicesUsageCache.RequiresFromKeyedServicesMiddleware(reflectionActivator);
         }
         else if (e.ComponentRegistration.Activator is DelegateActivator)
         {
-            // For delegate activation there are very few paths that would let the FromKeyedServicesAttribute
-            // actually work, and none that MSDI supports directly.
-            // We're explicitly choosing here not to support [FromKeyedServices] on the Autofac-specific generic
-            // delegate resolve methods, to improve performance for the 99% case of other delegates that only
+            // For delegate activation there are very few paths that would let
+            // the FromKeyedServicesAttribute actually work, and none that MEDI
+            // supports directly.
+            //
+            // We're explicitly choosing here not to support [FromKeyedServices]
+            // on the Autofac-specific generic delegate resolve methods, to
+            // improve performance for the 99% case of other delegates that only
             // receive an IComponentContext or an IServiceProvider.
             needFromKeyedServiceParameter = false;
         }
@@ -180,11 +163,15 @@ public static class AutofacRegistration
         this IRegistrationBuilder<object, TActivatorData, TRegistrationStyle> registrationBuilder,
         ServiceDescriptor descriptor)
     {
+        // If it's keyed, the service key won't be null. A null key results in it _not_ being a keyed service.
         if (descriptor.IsKeyedService)
         {
             var key = descriptor.ServiceKey!;
+            if (key.Equals(Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
+            {
+                key = Autofac.Core.KeyedService.AnyKey;
+            }
 
-            // If it's keyed, the service key won't be null. A null key results in it _not_ being a keyed service.
             registrationBuilder.Keyed(key, descriptor.ServiceType);
         }
         else
@@ -267,7 +254,7 @@ public static class AutofacRegistration
             var implementationType = descriptor.NormalizedImplementationType();
             if (implementationType != null)
             {
-                // Test if the an open generic type is being registered
+                // Test if an open generic type is being registered
                 var serviceTypeInfo = descriptor.ServiceType.GetTypeInfo();
                 if (serviceTypeInfo.IsGenericTypeDefinition)
                 {
@@ -297,8 +284,7 @@ public static class AutofacRegistration
                     var serviceProvider = context.Resolve<IServiceProvider>();
 
                     var keyedService = (Autofac.Core.KeyedService)requestContext.Service;
-
-                    var key = keyedService.ServiceKey;
+                    var key = requestContext.Parameters.KeyedServiceKey<object>();
 
                     return descriptor.KeyedImplementationFactory(serviceProvider, key);
                 })

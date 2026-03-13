@@ -12,7 +12,7 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 /// <seealso cref="IServiceProvider" />
 /// <seealso cref="ISupportRequiredService" />
-public partial class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IKeyedServiceProvider, IServiceProviderIsService, IServiceProviderIsKeyedService, IDisposable, IAsyncDisposable
+public class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IKeyedServiceProvider, IServiceProviderIsService, IServiceProviderIsKeyedService, IDisposable, IAsyncDisposable
 {
     private readonly ILifetimeScope _lifetimeScope;
 
@@ -26,7 +26,7 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </param>
     public AutofacServiceProvider(ILifetimeScope lifetimeScope)
     {
-        _lifetimeScope = lifetimeScope;
+        _lifetimeScope = lifetimeScope ?? throw new ArgumentNullException(nameof(lifetimeScope));
     }
 
     /// <summary>
@@ -49,7 +49,14 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </returns>
     public object? GetKeyedService(Type serviceType, object? serviceKey)
     {
-        if (serviceKey is null)
+        if (serviceType is null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        var normalizedKey = NormalizeServiceKey(serviceType, serviceKey);
+
+        if (normalizedKey is null)
         {
             // A null key equates to "not keyed."
             return _lifetimeScope.ResolveOptional(serviceType);
@@ -58,14 +65,13 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         {
             try
             {
-                return _lifetimeScope.ResolveOptionalService(new KeyedService(serviceKey, serviceType));
+                return _lifetimeScope.ResolveOptionalService(new KeyedService(normalizedKey, serviceType));
             }
-            catch (DependencyResolutionException ex) when (ex.InnerException is KeyTypeConversionException conversionException)
+            catch (DependencyResolutionException ex)
             {
-                // If the issue was with converting the specified key type to
-                // match a [ServiceKey] parameter type, the M.E.DI contract is
-                // that it must be an InvalidOperationException.
-                throw new InvalidOperationException(conversionException.Message, conversionException);
+                // All exceptions resolving keyed services as of .NET 10 are
+                // expected to be InvalidOperationException.
+                throw new InvalidOperationException(ex.Message, ex);
             }
         }
     }
@@ -91,7 +97,14 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </exception>
     public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
     {
-        if (serviceKey is null)
+        if (serviceType is null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        var normalizedKey = NormalizeServiceKey(serviceType, serviceKey);
+
+        if (normalizedKey is null)
         {
             // A null key equates to "not keyed."
             return _lifetimeScope.Resolve(serviceType);
@@ -100,14 +113,13 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
         {
             try
             {
-                return _lifetimeScope.ResolveKeyed(serviceKey, serviceType);
+                return _lifetimeScope.ResolveKeyed(normalizedKey, serviceType);
             }
-            catch (DependencyResolutionException ex) when (ex.InnerException is KeyTypeConversionException conversionException)
+            catch (DependencyResolutionException ex)
             {
-                // If the issue was with converting the specified key type to
-                // match a [ServiceKey] parameter type, the M.E.DI contract is
-                // that it must be an InvalidOperationException.
-                throw new InvalidOperationException(conversionException.Message, conversionException);
+                // All exceptions resolving keyed services as of .NET 10 are
+                // expected to be InvalidOperationException.
+                throw new InvalidOperationException(ex.Message, ex);
             }
         }
     }
@@ -130,7 +142,14 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </exception>
     public object GetRequiredService(Type serviceType)
     {
-        return _lifetimeScope.Resolve(serviceType);
+        try
+        {
+            return _lifetimeScope.Resolve(serviceType);
+        }
+        catch (DependencyResolutionException ex)
+        {
+            throw new InvalidOperationException(ex.Message, ex);
+        }
     }
 
     /// <inheritdoc />
@@ -160,7 +179,14 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
     /// </returns>
     public object? GetService(Type serviceType)
     {
-        return _lifetimeScope.ResolveOptional(serviceType);
+        try
+        {
+            return _lifetimeScope.ResolveOptional(serviceType);
+        }
+        catch (DependencyResolutionException ex)
+        {
+            throw new InvalidOperationException(ex.Message, ex);
+        }
     }
 
     /// <summary>
@@ -203,5 +229,25 @@ public partial class AutofacServiceProvider : IServiceProvider, ISupportRequired
                 _lifetimeScope.Dispose();
             }
         }
+    }
+
+    private static object? NormalizeServiceKey(Type serviceType, object? serviceKey)
+    {
+        if (serviceKey is null)
+        {
+            return null;
+        }
+
+        if (ReferenceEquals(serviceKey, Microsoft.Extensions.DependencyInjection.KeyedService.AnyKey))
+        {
+            if (!serviceType.IsCollection())
+            {
+                throw new InvalidOperationException("KeyedService.AnyKey cannot be used to resolve a single service.");
+            }
+
+            return KeyedService.AnyKey;
+        }
+
+        return serviceKey;
     }
 }

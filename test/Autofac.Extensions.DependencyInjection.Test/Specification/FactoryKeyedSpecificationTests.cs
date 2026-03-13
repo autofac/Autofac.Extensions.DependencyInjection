@@ -4,7 +4,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Specification;
 
-namespace Autofac.Extensions.DependencyInjection.Test;
+namespace Autofac.Extensions.DependencyInjection.Test.Specification;
 
 public class FactoryKeyedSpecificationTests : KeyedDependencyInjectionSpecificationTests
 {

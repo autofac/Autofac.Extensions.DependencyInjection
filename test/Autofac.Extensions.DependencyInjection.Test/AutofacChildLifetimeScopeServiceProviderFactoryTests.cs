@@ -124,6 +124,18 @@ public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
         serviceProvider.GetRequiredService<DependencyOne>();
     }
 
+    [Fact]
+    public void Ctor_NullRootAccessor()
+    {
+        Assert.Throws<ArgumentNullException>(() => new AutofacChildLifetimeScopeServiceProviderFactory((Func<ILifetimeScope>)null!));
+    }
+
+    [Fact]
+    public void Ctor_NullRootScope()
+    {
+        Assert.Throws<ArgumentNullException>(() => new AutofacChildLifetimeScopeServiceProviderFactory((ILifetimeScope)null!));
+    }
+
     private static ILifetimeScope GetRootLifetimeScope() => new ContainerBuilder().Build();
 
     private static ILifetimeScope GetRootLifetimeScopeWithDependency<TAs>(Type type)

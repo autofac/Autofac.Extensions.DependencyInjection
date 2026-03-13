@@ -3,44 +3,6 @@
     {
       "args": [
       ],
-      "cwd": "${workspaceFolder}/test/Integration.Net6",
-      "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "name": "Launch .NET 6 Integration Site",
-      "preLaunchTask": "build",
-      "program": "${workspaceFolder}/test/Integration.Net6/bin/Debug/net6.0/Integration.Net6.dll",
-      "request": "launch",
-      "serverReadyAction": {
-        "action": "openExternally",
-        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
-        "uriFormat": "%s/date"
-      },
-      "stopAtEntry": false,
-      "type": "coreclr"
-    },
-    {
-      "args": [
-      ],
-      "cwd": "${workspaceFolder}/test/Integration.Net7",
-      "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "name": "Launch .NET 7 Integration Site",
-      "preLaunchTask": "build",
-      "program": "${workspaceFolder}/test/Integration.Net7/bin/Debug/net7.0/Integration.Net7.dll",
-      "request": "launch",
-      "serverReadyAction": {
-        "action": "openExternally",
-        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
-        "uriFormat": "%s/date"
-      },
-      "stopAtEntry": false,
-      "type": "coreclr"
-    },
-    {
-      "args": [
-      ],
       "cwd": "${workspaceFolder}/test/Integration.Net8",
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -48,6 +10,25 @@
       "name": "Launch .NET 8 Integration Site",
       "preLaunchTask": "build",
       "program": "${workspaceFolder}/test/Integration.Net8/bin/Debug/net8.0/Integration.Net8.dll",
+      "request": "launch",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/date"
+      },
+      "stopAtEntry": false,
+      "type": "coreclr"
+    },
+    {
+      "args": [
+      ],
+      "cwd": "${workspaceFolder}/test/Integration.Net10",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "name": "Launch .NET 10 Integration Site",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/test/Integration.Net10/bin/Debug/net10.0/Integration.Net10.dll",
       "request": "launch",
       "serverReadyAction": {
         "action": "openExternally",

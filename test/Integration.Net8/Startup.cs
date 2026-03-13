@@ -3,8 +3,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Integration.Net8;
 

@@ -17,7 +17,6 @@
     "**/coverage.cobertura.xml"
   ],
   "dotnet.defaultSolution": "Autofac.Extensions.DependencyInjection.sln",
-  "dotnet.preferRuntimeFromSDK": true,
   "dotnet.unitTestDebuggingOptions": {
     "enableStepFiltering": false,
     "justMyCode": false,

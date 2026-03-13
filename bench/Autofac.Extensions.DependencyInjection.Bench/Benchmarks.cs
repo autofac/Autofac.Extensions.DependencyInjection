@@ -8,5 +8,6 @@ public static class Benchmarks
     public static readonly Type[] All =
     {
         typeof(RequestBenchmark),
+        typeof(KeyedResolutionBenchmark),
     };
 }

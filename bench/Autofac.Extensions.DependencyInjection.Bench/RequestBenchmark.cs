@@ -3,7 +3,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using BenchProject.AutofacApiServer;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Autofac.Extensions.DependencyInjection.Bench;
@@ -12,19 +11,26 @@ namespace Autofac.Extensions.DependencyInjection.Bench;
 public class RequestBenchmark
 {
     private static readonly Uri ValuesUri = new("/api/values", UriKind.Relative);
-    private WebApplicationFactory<DefaultStartup> _defaultFactory;
-    private WebApplicationFactory<DefaultStartup> _autofacFactory;
-    private HttpClient _defaultClient;
-    private HttpClient _autofacClient;
+    private WebApplicationFactory<Program> _defaultFactory = null!;
+    private WebApplicationFactory<Program> _autofacFactory = null!;
+    private HttpClient _defaultClient = null!;
+    private HttpClient _autofacClient = null!;
 
     [GlobalSetup]
     public void Setup()
     {
-        _defaultFactory = new WebApplicationFactory<DefaultStartup>();
-        _autofacFactory = new AutofacWebApplicationFactory<DefaultStartup>();
+        _defaultFactory = new DefaultWebApplicationFactory<Program>();
+        _autofacFactory = new AutofacWebApplicationFactory<Program>();
 
         _defaultClient = _defaultFactory.CreateClient();
         _autofacClient = _autofacFactory.CreateClient();
+    }
+
+    [GlobalCleanup]
+    public void Cleanup()
+    {
+        _defaultFactory.Dispose();
+        _autofacFactory.Dispose();
     }
 
     [Benchmark(Baseline = true)]
@@ -47,12 +53,5 @@ public class RequestBenchmark
         {
             throw new HttpRequestException();
         }
-    }
-
-    [GlobalCleanup]
-    public void Cleanup()
-    {
-        _defaultFactory.Dispose();
-        _autofacFactory.Dispose();
     }
 }

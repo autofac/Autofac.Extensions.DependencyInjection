@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
+using Autofac.Core;
 
 namespace Autofac.Extensions.DependencyInjection;
 
@@ -15,6 +17,13 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 internal class KeyTypeManipulation
 {
+    private static readonly KeyTypeManipulationReflectionCache ReflectionCache = new();
+
+    static KeyTypeManipulation()
+    {
+        ReflectionCacheSet.Shared.RegisterExternalCache(ReflectionCache);
+    }
+
     /// <summary>
     /// Converts an object to a type compatible with a given parameter.
     /// </summary>
@@ -35,7 +44,7 @@ internal class KeyTypeManipulation
         TypeConverterAttribute? attrib = null;
         if (memberInfo != null)
         {
-            attrib = memberInfo.GetCustomAttributes(typeof(TypeConverterAttribute), true).Cast<TypeConverterAttribute>().FirstOrDefault();
+            attrib = ReflectionCache.GetOrAddParameterConverterAttribute(memberInfo);
         }
 
         return ChangeToCompatibleType(value, destinationType, attrib);
@@ -61,7 +70,7 @@ internal class KeyTypeManipulation
         TypeConverterAttribute? attrib = null;
         if (memberInfo != null)
         {
-            attrib = memberInfo.GetCustomAttributes(typeof(TypeConverterAttribute), true).Cast<TypeConverterAttribute>().FirstOrDefault();
+            attrib = ReflectionCache.GetOrAddMemberConverterAttribute(memberInfo);
         }
 
         return ChangeToCompatibleType(value, destinationType, attrib);
@@ -91,7 +100,9 @@ internal class KeyTypeManipulation
 
         if (value == null)
         {
-            return destinationType.GetTypeInfo().IsValueType ? Activator.CreateInstance(destinationType) : null;
+            return destinationType.GetTypeInfo().IsValueType
+                ? ReflectionCache.GetOrAddDefaultValue(destinationType)
+                : null;
         }
 
         // Try implicit conversion.
@@ -135,14 +146,14 @@ internal class KeyTypeManipulation
         }
 
         // Try a TryParse method.
-        if (value is string)
+        if (value is string stringValue)
         {
             // Some types in later frameworks have string TryParse and ReadOnlySpan<char> TryParse
             // so they result in an AmbiguousMatchException unless we specify.
-            var parser = destinationType.GetMethod("TryParse", BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Standard, new Type[] { typeof(string), destinationType.MakeByRefType() }, null);
+            var parser = ReflectionCache.GetOrAddTryParseMethod(destinationType);
             if (parser != null)
             {
-                var parameters = new[] { value, null };
+                var parameters = new object?[] { stringValue, null };
                 if ((bool)parser.Invoke(null, parameters)!)
                 {
                     return parameters[1];
@@ -168,9 +179,144 @@ internal class KeyTypeManipulation
     /// </exception>
     private static TypeConverter GetTypeConverterFromName(string converterTypeName)
     {
-        var converterType = Type.GetType(converterTypeName, true);
-        return Activator.CreateInstance(converterType!) is not TypeConverter converter
-            ? throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, KeyTypeManipulationResources.TypeConverterAttributeTypeNotConverter, converterTypeName))
-            : converter;
+        var converterType = ReflectionCache.GetOrAddConverterType(converterTypeName);
+
+        return (TypeConverter)Activator.CreateInstance(converterType)!;
+    }
+
+    [ExcludeFromCodeCoverage]
+    private sealed class KeyTypeManipulationReflectionCache : IReflectionCache
+    {
+        private readonly ConcurrentDictionary<ParameterInfo, TypeConverterAttribute?> _parameterConverterAttributes = new();
+        private readonly ConcurrentDictionary<MemberInfo, TypeConverterAttribute?> _memberConverterAttributes = new();
+        private readonly ConcurrentDictionary<string, Type> _converterTypeCache = new(StringComparer.Ordinal);
+        private readonly ConcurrentDictionary<Type, MethodInfo?> _tryParseMethodCache = new();
+        private readonly ConcurrentDictionary<Type, object?> _defaultValueCache = new();
+
+        public ReflectionCacheUsage Usage => ReflectionCacheUsage.Resolution;
+
+        public TypeConverterAttribute? GetOrAddParameterConverterAttribute(ParameterInfo parameter)
+        {
+            return _parameterConverterAttributes.GetOrAdd(
+                parameter,
+                static p => p.GetCustomAttributes(typeof(TypeConverterAttribute), true)
+                    .Cast<TypeConverterAttribute>()
+                    .FirstOrDefault());
+        }
+
+        public TypeConverterAttribute? GetOrAddMemberConverterAttribute(MemberInfo member)
+        {
+            return _memberConverterAttributes.GetOrAdd(
+                member,
+                static m => m.GetCustomAttributes(typeof(TypeConverterAttribute), true)
+                    .Cast<TypeConverterAttribute>()
+                    .FirstOrDefault());
+        }
+
+        public Type GetOrAddConverterType(string converterTypeName)
+        {
+            return _converterTypeCache.GetOrAdd(
+                converterTypeName,
+                static name =>
+                {
+                    var resolvedType = Type.GetType(name, true)!;
+                    if (!typeof(TypeConverter).GetTypeInfo().IsAssignableFrom(resolvedType.GetTypeInfo()))
+                    {
+                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, KeyTypeManipulationResources.TypeConverterAttributeTypeNotConverter, name));
+                    }
+
+                    return resolvedType;
+                });
+        }
+
+        public MethodInfo? GetOrAddTryParseMethod(Type destinationType)
+        {
+            return _tryParseMethodCache.GetOrAdd(
+                destinationType,
+                static type =>
+                {
+                    var parameterTypes = new[] { typeof(string), type.MakeByRefType() };
+                    return type.GetMethod("TryParse", BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Standard, parameterTypes, null);
+                });
+        }
+
+        public object? GetOrAddDefaultValue(Type destinationType)
+        {
+            return _defaultValueCache.GetOrAdd(destinationType, static t => Activator.CreateInstance(t));
+        }
+
+        public void Clear()
+        {
+            _parameterConverterAttributes.Clear();
+            _memberConverterAttributes.Clear();
+            _converterTypeCache.Clear();
+            _tryParseMethodCache.Clear();
+            _defaultValueCache.Clear();
+        }
+
+        public void Clear(ReflectionCacheClearPredicate clearPredicate)
+        {
+            if (clearPredicate is null)
+            {
+                throw new ArgumentNullException(nameof(clearPredicate));
+            }
+
+            foreach (var parameter in _parameterConverterAttributes.Keys)
+            {
+                var member = parameter.Member;
+                var assemblies = GetParameterAssemblies(parameter);
+                if (clearPredicate(member, assemblies))
+                {
+                    _parameterConverterAttributes.TryRemove(parameter, out _);
+                }
+            }
+
+            foreach (var member in _memberConverterAttributes.Keys)
+            {
+                if (clearPredicate(member, new[] { member.Module.Assembly }))
+                {
+                    _memberConverterAttributes.TryRemove(member, out _);
+                }
+            }
+
+            foreach (var type in _tryParseMethodCache.Keys)
+            {
+                if (clearPredicate(type, new[] { type.Assembly }))
+                {
+                    _tryParseMethodCache.TryRemove(type, out _);
+                }
+            }
+
+            foreach (var type in _defaultValueCache.Keys)
+            {
+                if (clearPredicate(type, new[] { type.Assembly }))
+                {
+                    _defaultValueCache.TryRemove(type, out _);
+                }
+            }
+
+            foreach (var entry in _converterTypeCache)
+            {
+                if (clearPredicate(entry.Value, new[] { entry.Value.Assembly }))
+                {
+                    _converterTypeCache.TryRemove(entry.Key, out _);
+                }
+            }
+        }
+
+        private static IEnumerable<Assembly> GetParameterAssemblies(ParameterInfo parameter)
+        {
+            var memberAssembly = parameter.Member.Module.Assembly;
+            var parameterAssembly = parameter.ParameterType.Assembly;
+
+            if (ReferenceEquals(memberAssembly, parameterAssembly))
+            {
+                yield return memberAssembly;
+                yield break;
+            }
+
+            yield return memberAssembly;
+            yield return parameterAssembly;
+        }
     }
 }
