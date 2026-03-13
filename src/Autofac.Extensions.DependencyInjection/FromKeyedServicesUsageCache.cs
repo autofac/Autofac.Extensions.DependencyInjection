@@ -27,11 +27,6 @@ internal static class FromKeyedServicesUsageCache
         }
 
         var constructorFinder = activator.ConstructorFinder;
-        if (constructorFinder is null)
-        {
-            throw new InvalidOperationException("The reflection activator must provide a constructor finder.");
-        }
-
         var cacheKey = new CacheKey(activator.LimitType, constructorFinder.GetType());
 
 #if NETSTANDARD2_0
@@ -52,16 +47,6 @@ internal static class FromKeyedServicesUsageCache
 
     private static bool ScanConstructors(IConstructorFinder constructorFinder, Type limitType)
     {
-        if (constructorFinder is null)
-        {
-            throw new ArgumentNullException(nameof(constructorFinder));
-        }
-
-        if (limitType is null)
-        {
-            throw new ArgumentNullException(nameof(limitType));
-        }
-
         var constructors = constructorFinder.FindConstructors(limitType);
 
         foreach (var constructor in constructors)
@@ -96,6 +81,7 @@ internal static class FromKeyedServicesUsageCache
                    ConstructorFinderType == other.ConstructorFinderType;
         }
 
+        [ExcludeFromCodeCoverage]
         public override bool Equals(object? obj)
         {
             return obj is CacheKey other && Equals(other);

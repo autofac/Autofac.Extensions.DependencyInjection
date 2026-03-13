@@ -1,4 +1,4 @@
-﻿// Copyright (c) Autofac Project. All rights reserved.
+// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System.ComponentModel;
@@ -8,7 +8,7 @@ using System.Net;
 
 namespace Autofac.Extensions.DependencyInjection.Test;
 
-public class TypeManipulationFixture
+public class KeyTypeManipulationFixture
 {
     [Fact]
     public void ChangeToCompatibleTypeAllowsNullMemberInfo()
@@ -66,6 +66,17 @@ public class TypeManipulationFixture
         var ex = Assert.Throws<KeyTypeConversionException>(() => KeyTypeManipulation.ChangeToCompatibleType("not-valid", typeof(ParseOnlyType)));
         Assert.Equal(typeof(string), ex.ResolutionKeyType);
         Assert.Equal(typeof(ParseOnlyType), ex.AttributeKeyType);
+    }
+
+    [Fact]
+    public void ChangeToCompatibleTypeTypeConverterAttributeCannotConvertFromFallsBackToDefaultConversion()
+    {
+        var actual = KeyTypeManipulation.ChangeToCompatibleType(
+            15,
+            typeof(string),
+            new TypeConverterAttribute(typeof(NonConvertingConverter)));
+
+        Assert.Equal("15", actual);
     }
 
     [Fact]
@@ -147,6 +158,15 @@ public class TypeManipulationFixture
 
             var converter = TypeDescriptor.GetConverter(typeof(int));
             return new Convertible { Value = (int)converter.ConvertFromString(context, culture, str) };
+        }
+    }
+
+    [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated through TypeConverterAttribute.")]
+    private class NonConvertingConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            return false;
         }
     }
 

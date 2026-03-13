@@ -26,7 +26,7 @@ public class AutofacServiceProvider : IServiceProvider, ISupportRequiredService,
     /// </param>
     public AutofacServiceProvider(ILifetimeScope lifetimeScope)
     {
-        _lifetimeScope = lifetimeScope;
+        _lifetimeScope = lifetimeScope ?? throw new ArgumentNullException(nameof(lifetimeScope));
     }
 
     /// <summary>

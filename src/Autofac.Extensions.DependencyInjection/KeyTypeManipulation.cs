@@ -202,11 +202,6 @@ internal class KeyTypeManipulation
                 return resolvedType;
             });
 
-        if (Activator.CreateInstance(converterType) is TypeConverter converter)
-        {
-            return converter;
-        }
-
-        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, KeyTypeManipulationResources.TypeConverterAttributeTypeNotConverter, converterTypeName));
+        return (TypeConverter)Activator.CreateInstance(converterType)!;
     }
 }

@@ -44,7 +44,6 @@ internal static class FromKeyedServicesAttributeExtensions
 
         return attribute.LookupMode switch
         {
-            ServiceKeyLookupMode.NullKey => ResolveUnkeyed(parameter, context),
             ServiceKeyLookupMode.ExplicitKey => ResolveKeyed(parameter, context, NormalizeKey(attribute.Key)),
             ServiceKeyLookupMode.InheritKey => ResolveKeyed(parameter, context, NormalizeKey(parentServiceKey)),
             _ => ResolveUnkeyed(parameter, context),
