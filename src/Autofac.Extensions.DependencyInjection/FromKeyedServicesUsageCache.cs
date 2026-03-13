@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System.Collections.Concurrent;
+using Autofac.Core;
 using Autofac.Core.Activators.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +13,12 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 internal static class FromKeyedServicesUsageCache
 {
-    private static readonly ConcurrentDictionary<CacheKey, bool> Cache = new();
+    private static readonly FromKeyedServicesUsageReflectionCache ReflectionCache = new();
+
+    static FromKeyedServicesUsageCache()
+    {
+        ReflectionCacheSet.Shared.RegisterExternalCache(ReflectionCache);
+    }
 
     /// <summary>
     /// Determines whether the resolve pipeline needs <see cref="KeyedServiceMiddleware"/> for the given activator.
@@ -30,15 +36,15 @@ internal static class FromKeyedServicesUsageCache
         var cacheKey = new CacheKey(activator.LimitType, constructorFinder.GetType());
 
 #if NETSTANDARD2_0
-        if (Cache.TryGetValue(cacheKey, out var cachedResult))
+        if (ReflectionCache.TryGet(cacheKey, out var cachedResult))
         {
             return cachedResult;
         }
 
         var computed = ScanConstructors(constructorFinder, activator.LimitType);
-        return Cache.GetOrAdd(cacheKey, computed);
+        return ReflectionCache.GetOrAdd(cacheKey, computed);
 #else
-        return Cache.GetOrAdd(
+        return ReflectionCache.GetOrAdd(
             cacheKey,
             static (_, state) => ScanConstructors(state.ConstructorFinder, state.LimitType),
             (ConstructorFinder: constructorFinder, activator.LimitType));
@@ -75,6 +81,18 @@ internal static class FromKeyedServicesUsageCache
 
         private Type ConstructorFinderType { get; }
 
+        public bool Matches(ReflectionCacheClearPredicate clearPredicate)
+        {
+            var implementationAssemblies = new[] { ImplementationType.Assembly };
+            if (clearPredicate(ImplementationType, implementationAssemblies))
+            {
+                return true;
+            }
+
+            var constructorFinderAssemblies = new[] { ConstructorFinderType.Assembly };
+            return clearPredicate(ConstructorFinderType, constructorFinderAssemblies);
+        }
+
         public bool Equals(CacheKey other)
         {
             return ImplementationType == other.ImplementationType &&
@@ -92,6 +110,53 @@ internal static class FromKeyedServicesUsageCache
             unchecked
             {
                 return (ImplementationType.GetHashCode() * 397) ^ ConstructorFinderType.GetHashCode();
+            }
+        }
+    }
+
+    private sealed class FromKeyedServicesUsageReflectionCache : IReflectionCache
+    {
+        private readonly ConcurrentDictionary<CacheKey, bool> _cache = new();
+
+        public ReflectionCacheUsage Usage => ReflectionCacheUsage.Registration;
+
+        public bool TryGet(CacheKey key, out bool result)
+        {
+            return _cache.TryGetValue(key, out result);
+        }
+
+        public bool GetOrAdd(CacheKey key, bool value)
+        {
+            return _cache.GetOrAdd(key, value);
+        }
+
+        public bool GetOrAdd(CacheKey key, Func<CacheKey, (IConstructorFinder ConstructorFinder, Type LimitType), bool> valueFactory, (IConstructorFinder ConstructorFinder, Type LimitType) state)
+        {
+#if NETSTANDARD2_0
+            return _cache.GetOrAdd(key, cacheKey => valueFactory(cacheKey, state));
+#else
+            return _cache.GetOrAdd(key, valueFactory, state);
+#endif
+        }
+
+        public void Clear()
+        {
+            _cache.Clear();
+        }
+
+        public void Clear(ReflectionCacheClearPredicate clearPredicate)
+        {
+            if (clearPredicate is null)
+            {
+                throw new ArgumentNullException(nameof(clearPredicate));
+            }
+
+            foreach (var key in _cache.Keys)
+            {
+                if (key.Matches(clearPredicate))
+                {
+                    _cache.TryRemove(key, out _);
+                }
             }
         }
     }

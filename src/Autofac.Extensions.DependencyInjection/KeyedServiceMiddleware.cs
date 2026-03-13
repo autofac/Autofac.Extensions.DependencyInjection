@@ -109,8 +109,12 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
     /// </summary>
     private static class ParameterAttributeCache
     {
-        private static readonly ConcurrentDictionary<ParameterInfo, bool> MicrosoftServiceKeyAttributePresence = new();
-        private static readonly ConcurrentDictionary<ParameterInfo, FromKeyedServicesAttribute?> FromKeyedServicesAttributes = new();
+        private static readonly ParameterAttributeReflectionCache ReflectionCache = new();
+
+        static ParameterAttributeCache()
+        {
+            ReflectionCacheSet.Shared.RegisterExternalCache(ReflectionCache);
+        }
 
         /// <summary>
         /// Determines whether the parameter has the <see cref="Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute"/> defined.
@@ -121,9 +125,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         /// </returns>
         public static bool HasMicrosoftServiceKey(ParameterInfo parameter)
         {
-            return MicrosoftServiceKeyAttributePresence.GetOrAdd(
-                parameter,
-                static p => Attribute.IsDefined(p, typeof(Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute), inherit: true));
+            return ReflectionCache.GetOrAddMicrosoftServiceKeyAttributePresence(parameter);
         }
 
         /// <summary>
@@ -135,9 +137,73 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         /// </returns>
         public static FromKeyedServicesAttribute? GetFromKeyedServicesAttribute(ParameterInfo parameter)
         {
-            return FromKeyedServicesAttributes.GetOrAdd(
-                parameter,
-                static p => p.GetCustomAttribute<FromKeyedServicesAttribute>(inherit: true));
+            return ReflectionCache.GetOrAddFromKeyedServicesAttribute(parameter);
+        }
+
+        private sealed class ParameterAttributeReflectionCache : IReflectionCache
+        {
+            private readonly ConcurrentDictionary<ParameterInfo, bool> _microsoftServiceKeyAttributePresence = new();
+            private readonly ConcurrentDictionary<ParameterInfo, FromKeyedServicesAttribute?> _fromKeyedServicesAttributes = new();
+
+            public ReflectionCacheUsage Usage => ReflectionCacheUsage.Resolution;
+
+            public bool GetOrAddMicrosoftServiceKeyAttributePresence(ParameterInfo parameter)
+            {
+                return _microsoftServiceKeyAttributePresence.GetOrAdd(
+                    parameter,
+                    static p => Attribute.IsDefined(p, typeof(Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute), inherit: true));
+            }
+
+            public FromKeyedServicesAttribute? GetOrAddFromKeyedServicesAttribute(ParameterInfo parameter)
+            {
+                return _fromKeyedServicesAttributes.GetOrAdd(
+                    parameter,
+                    static p => p.GetCustomAttribute<FromKeyedServicesAttribute>(inherit: true));
+            }
+
+            public void Clear()
+            {
+                _microsoftServiceKeyAttributePresence.Clear();
+                _fromKeyedServicesAttributes.Clear();
+            }
+
+            public void Clear(ReflectionCacheClearPredicate clearPredicate)
+            {
+                if (clearPredicate is null)
+                {
+                    throw new ArgumentNullException(nameof(clearPredicate));
+                }
+
+                foreach (var parameter in _microsoftServiceKeyAttributePresence.Keys)
+                {
+                    if (Matches(clearPredicate, parameter))
+                    {
+                        _microsoftServiceKeyAttributePresence.TryRemove(parameter, out _);
+                    }
+                }
+
+                foreach (var parameter in _fromKeyedServicesAttributes.Keys)
+                {
+                    if (Matches(clearPredicate, parameter))
+                    {
+                        _fromKeyedServicesAttributes.TryRemove(parameter, out _);
+                    }
+                }
+            }
+
+            private static bool Matches(ReflectionCacheClearPredicate clearPredicate, ParameterInfo parameter)
+            {
+                var member = parameter.Member;
+                var memberAssembly = member.Module.Assembly;
+                var parameterAssembly = parameter.ParameterType.Assembly;
+
+                if (ReferenceEquals(memberAssembly, parameterAssembly))
+                {
+                    return clearPredicate(member, new[] { memberAssembly });
+                }
+
+                return clearPredicate(member, new[] { memberAssembly, parameterAssembly });
+            }
         }
     }
 
