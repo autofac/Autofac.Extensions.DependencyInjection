@@ -10,6 +10,7 @@ namespace Autofac.Extensions.DependencyInjection;
 /// using the
 /// <see cref="Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute"/>.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class KeyTypeConversionException : Exception
 {
     /// <summary>
