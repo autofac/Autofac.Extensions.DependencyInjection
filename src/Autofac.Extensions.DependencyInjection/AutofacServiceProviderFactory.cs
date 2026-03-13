@@ -11,6 +11,8 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 public class AutofacServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
 {
+    private static readonly Action<ContainerBuilder> FallbackConfigurationAction = builder => { };
+
     private readonly Action<ContainerBuilder> _configurationAction;
     private readonly ContainerBuildOptions _containerBuildOptions = ContainerBuildOptions.None;
 
@@ -30,7 +32,7 @@ public class AutofacServiceProviderFactory : IServiceProviderFactory<ContainerBu
     /// </summary>
     /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the container..</param>
     public AutofacServiceProviderFactory(Action<ContainerBuilder>? configurationAction = null) =>
-        _configurationAction = configurationAction ?? (builder => { });
+        _configurationAction = configurationAction ?? FallbackConfigurationAction;
 
     /// <summary>
     /// Creates a container builder from an <see cref="IServiceCollection" />.
