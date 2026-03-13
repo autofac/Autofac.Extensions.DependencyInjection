@@ -22,9 +22,21 @@ internal static class TypeExtensions
     {
         return CollectionTypeCache.GetOrAdd(
             serviceType,
-            static type => IsGenericTypeDefinedBy(type, typeof(IEnumerable<>)) ||
-                           type.IsArray ||
-                           IsGenericListOrCollectionInterfaceType(type));
+            static type =>
+            {
+                if (type.IsArray)
+                {
+                    return true;
+                }
+
+                if (!type.IsGenericType)
+                {
+                    return false;
+                }
+
+                return IsGenericTypeDefinedBy(type, typeof(IEnumerable<>)) ||
+                       IsGenericListOrCollectionInterfaceType(type);
+            });
     }
 
     private static bool IsGenericTypeDefinedBy(Type type, Type openGeneric)
