@@ -161,7 +161,7 @@ public class KeyTypeManipulationFixture
         }
     }
 
-    [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated through TypeConverterAttribute.")]
+    [SuppressMessage("CA1812", "CA1812", Justification = "Class instantiated through reflection.")]
     private class NonConvertingConverter : TypeConverter
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)

@@ -183,7 +183,7 @@ public abstract class AssumedBehaviorTests
 
     protected abstract IServiceProvider CreateServiceProvider(IServiceCollection serviceCollection);
 
-    [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated through reflection.")]
+    [SuppressMessage("CA1812", "CA1812", Justification = "Class instantiated through reflection.")]
     private class DisposeTrackerConsumer
     {
         public DisposeTrackerConsumer(IEnumerable<DisposeTracker> trackers)
