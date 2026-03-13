@@ -65,7 +65,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             effectiveServiceKey is not null &&
             !Autofac.Core.KeyedService.IsAnyKey(effectiveServiceKey))
         {
-            microsoftServiceKeyParameter = CreateMicrosoftServiceKeyParameter(effectiveServiceKey);
+            microsoftServiceKeyParameter = new MicrosoftServiceKeyParameter(effectiveServiceKey);
         }
 
         if (_addFromKeyedServiceParameter)
@@ -73,7 +73,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             // [FromKeyedServices("key")] - Specifies a keyed service
             // for injection into a constructor. This is similar to the
             // Autofac [KeyFilter] attribute.
-            fromKeyedServicesParameter = CreateFromKeyedServicesParameter(inheritedServiceKey);
+            fromKeyedServicesParameter = new FromKeyedServicesParameter(inheritedServiceKey);
         }
 
         if (microsoftServiceKeyParameter is not null || fromKeyedServicesParameter is not null)
@@ -84,43 +84,24 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         next(context);
     }
 
-    private static IEnumerable<Parameter> AppendParameters(IEnumerable<Parameter> original, Parameter? first, Parameter? second)
+    private static List<Parameter> AppendParameters(IEnumerable<Parameter> original, Parameter? first, Parameter? second)
     {
-        // This append mechanism looks dumb, but since this is on a hot path, we
-        // want to avoid the overhead of creating a new collection or allocating
-        // new iterators if we don't have to.
-        foreach (var existing in original)
-        {
-            yield return existing;
-        }
+        // Build a concrete list rather than using yield return, which would
+        // allocate a compiler-generated state machine on every call.
+        var list = new List<Parameter>(original is ICollection<Parameter> col ? col.Count + 2 : 4);
+        list.AddRange(original);
 
         if (first is not null)
         {
-            yield return first;
+            list.Add(first);
         }
 
         if (second is not null)
         {
-            yield return second;
+            list.Add(second);
         }
-    }
 
-    private static ResolvedParameter CreateMicrosoftServiceKeyParameter(object serviceKey)
-    {
-        return new ResolvedParameter(
-            (p, c) => ParameterAttributeCache.HasMicrosoftServiceKey(p),
-            (p, c) => KeyTypeManipulation.ChangeToCompatibleType(serviceKey, p.ParameterType, p));
-    }
-
-    private static ResolvedParameter CreateFromKeyedServicesParameter(object? requestedServiceKey)
-    {
-        return new ResolvedParameter(
-            (p, c) => ParameterAttributeCache.HasFromKeyedServicesAttribute(p),
-            (p, c) =>
-            {
-                var filter = ParameterAttributeCache.GetFromKeyedServicesAttribute(p)!;
-                return filter.ResolveParameter(p, c, requestedServiceKey);
-            });
+        return list;
     }
 
     /// <summary>
@@ -179,6 +160,63 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             return FromKeyedServicesAttributes.GetOrAdd(
                 parameter,
                 static p => p.GetCustomAttribute<FromKeyedServicesAttribute>(inherit: true));
+        }
+    }
+
+    /// <summary>
+    /// A <see cref="Parameter"/> that supplies the service key for parameters
+    /// marked with <see cref="Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute"/>.
+    /// Uses a field instead of a closure to avoid delegate/closure allocations.
+    /// </summary>
+    private sealed class MicrosoftServiceKeyParameter : Parameter
+    {
+        private readonly object _serviceKey;
+
+        public MicrosoftServiceKeyParameter(object serviceKey)
+        {
+            _serviceKey = serviceKey;
+        }
+
+        public override bool CanSupplyValue(ParameterInfo pi, IComponentContext context, [NotNullWhen(true)] out Func<object?>? valueProvider)
+        {
+            if (ParameterAttributeCache.HasMicrosoftServiceKey(pi))
+            {
+                var key = _serviceKey;
+                valueProvider = () => KeyTypeManipulation.ChangeToCompatibleType(key, pi.ParameterType, pi);
+                return true;
+            }
+
+            valueProvider = null;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// A <see cref="Parameter"/> that supplies keyed service dependencies for parameters
+    /// marked with <see cref="FromKeyedServicesAttribute"/>.
+    /// Uses a field instead of a closure to avoid delegate/closure allocations.
+    /// </summary>
+    private sealed class FromKeyedServicesParameter : Parameter
+    {
+        private readonly object? _requestedServiceKey;
+
+        public FromKeyedServicesParameter(object? requestedServiceKey)
+        {
+            _requestedServiceKey = requestedServiceKey;
+        }
+
+        public override bool CanSupplyValue(ParameterInfo pi, IComponentContext context, [NotNullWhen(true)] out Func<object?>? valueProvider)
+        {
+            var filter = ParameterAttributeCache.GetFromKeyedServicesAttribute(pi);
+            if (filter is not null)
+            {
+                var key = _requestedServiceKey;
+                valueProvider = () => filter.ResolveParameter(pi, context, key);
+                return true;
+            }
+
+            valueProvider = null;
+            return false;
         }
     }
 }
