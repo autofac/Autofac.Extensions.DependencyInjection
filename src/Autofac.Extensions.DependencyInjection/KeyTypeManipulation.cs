@@ -20,6 +20,7 @@ internal class KeyTypeManipulation
     private static readonly ConcurrentDictionary<MemberInfo, TypeConverterAttribute?> MemberConverterAttributes = new();
     private static readonly ConcurrentDictionary<string, Type> ConverterTypeCache = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<Type, MethodInfo?> TryParseMethodCache = new();
+    private static readonly ConcurrentDictionary<Type, object?> DefaultValueCache = new();
 
     /// <summary>
     /// Converts an object to a type compatible with a given parameter.
@@ -103,7 +104,9 @@ internal class KeyTypeManipulation
 
         if (value == null)
         {
-            return destinationType.GetTypeInfo().IsValueType ? Activator.CreateInstance(destinationType) : null;
+            return destinationType.GetTypeInfo().IsValueType
+                ? DefaultValueCache.GetOrAdd(destinationType, static t => Activator.CreateInstance(t))
+                : null;
         }
 
         // Try implicit conversion.
