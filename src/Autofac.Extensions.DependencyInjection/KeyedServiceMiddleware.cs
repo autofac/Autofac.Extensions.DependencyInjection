@@ -140,6 +140,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
             return ReflectionCache.GetOrAddFromKeyedServicesAttribute(parameter);
         }
 
+        [ExcludeFromCodeCoverage]
         private sealed class ParameterAttributeReflectionCache : IReflectionCache
         {
             private readonly ConcurrentDictionary<ParameterInfo, bool> _microsoftServiceKeyAttributePresence = new();

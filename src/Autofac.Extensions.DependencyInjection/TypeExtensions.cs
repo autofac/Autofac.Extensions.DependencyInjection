@@ -60,6 +60,7 @@ internal static class TypeExtensions
                IsGenericTypeDefinedBy(type, typeof(IReadOnlyList<>));
     }
 
+    [ExcludeFromCodeCoverage]
     private sealed class TypeExtensionsReflectionCache : IReflectionCache
     {
         private readonly ConcurrentDictionary<Type, bool> _collectionTypeCache = new();

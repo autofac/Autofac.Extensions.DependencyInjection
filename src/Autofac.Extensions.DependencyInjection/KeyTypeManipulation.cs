@@ -184,6 +184,7 @@ internal class KeyTypeManipulation
         return (TypeConverter)Activator.CreateInstance(converterType)!;
     }
 
+    [ExcludeFromCodeCoverage]
     private sealed class KeyTypeManipulationReflectionCache : IReflectionCache
     {
         private readonly ConcurrentDictionary<ParameterInfo, TypeConverterAttribute?> _parameterConverterAttributes = new();

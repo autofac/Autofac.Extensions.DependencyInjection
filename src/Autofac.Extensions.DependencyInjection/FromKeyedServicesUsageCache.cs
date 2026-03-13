@@ -11,6 +11,7 @@ namespace Autofac.Extensions.DependencyInjection;
 /// <summary>
 /// Caches lookups for <see cref="FromKeyedServicesAttribute"/> usage on constructor parameters.
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class FromKeyedServicesUsageCache
 {
     private static readonly FromKeyedServicesUsageReflectionCache ReflectionCache = new();
