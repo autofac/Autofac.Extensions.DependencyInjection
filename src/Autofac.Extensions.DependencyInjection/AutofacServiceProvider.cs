@@ -12,7 +12,7 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 /// <seealso cref="IServiceProvider" />
 /// <seealso cref="ISupportRequiredService" />
-public partial class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IKeyedServiceProvider, IServiceProviderIsService, IServiceProviderIsKeyedService, IDisposable, IAsyncDisposable
+public class AutofacServiceProvider : IServiceProvider, ISupportRequiredService, IKeyedServiceProvider, IServiceProviderIsService, IServiceProviderIsKeyedService, IDisposable, IAsyncDisposable
 {
     private readonly ILifetimeScope _lifetimeScope;
 
