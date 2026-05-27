@@ -54,13 +54,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac" Version="9.1.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" Condition="Exists('$(MSBuildThisFileDirectory)../../.git')">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.300" Condition="Exists('$(MSBuildThisFileDirectory)../../.git')">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
   </ItemGroup>
   <ItemDefinitionGroup>
     <EmbeddedResource>
