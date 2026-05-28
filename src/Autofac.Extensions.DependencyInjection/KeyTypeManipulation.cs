@@ -254,18 +254,18 @@ internal class KeyTypeManipulation
             _defaultValueCache.Clear();
         }
 
-        public void Clear(ReflectionCacheClearPredicate clearPredicate)
+        public void Clear(ReflectionCacheClearPredicate predicate)
         {
-            if (clearPredicate is null)
+            if (predicate is null)
             {
-                throw new ArgumentNullException(nameof(clearPredicate));
+                throw new ArgumentNullException(nameof(predicate));
             }
 
             foreach (var parameter in _parameterConverterAttributes.Keys)
             {
                 var member = parameter.Member;
                 var assemblies = GetParameterAssemblies(parameter);
-                if (clearPredicate(member, assemblies))
+                if (predicate(member, assemblies))
                 {
                     _parameterConverterAttributes.TryRemove(parameter, out _);
                 }
@@ -273,7 +273,7 @@ internal class KeyTypeManipulation
 
             foreach (var member in _memberConverterAttributes.Keys)
             {
-                if (clearPredicate(member, new[] { member.Module.Assembly }))
+                if (predicate(member, new[] { member.Module.Assembly }))
                 {
                     _memberConverterAttributes.TryRemove(member, out _);
                 }
@@ -281,7 +281,7 @@ internal class KeyTypeManipulation
 
             foreach (var type in _tryParseMethodCache.Keys)
             {
-                if (clearPredicate(type, new[] { type.Assembly }))
+                if (predicate(type, new[] { type.Assembly }))
                 {
                     _tryParseMethodCache.TryRemove(type, out _);
                 }
@@ -289,7 +289,7 @@ internal class KeyTypeManipulation
 
             foreach (var type in _defaultValueCache.Keys)
             {
-                if (clearPredicate(type, new[] { type.Assembly }))
+                if (predicate(type, new[] { type.Assembly }))
                 {
                     _defaultValueCache.TryRemove(type, out _);
                 }
@@ -297,7 +297,7 @@ internal class KeyTypeManipulation
 
             foreach (var entry in _converterTypeCache)
             {
-                if (clearPredicate(entry.Value, new[] { entry.Value.Assembly }))
+                if (predicate(entry.Value, new[] { entry.Value.Assembly }))
                 {
                     _converterTypeCache.TryRemove(entry.Key, out _);
                 }

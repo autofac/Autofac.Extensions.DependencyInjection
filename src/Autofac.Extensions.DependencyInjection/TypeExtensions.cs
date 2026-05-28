@@ -77,16 +77,16 @@ internal static class TypeExtensions
             _collectionTypeCache.Clear();
         }
 
-        public void Clear(ReflectionCacheClearPredicate clearPredicate)
+        public void Clear(ReflectionCacheClearPredicate predicate)
         {
-            if (clearPredicate is null)
+            if (predicate is null)
             {
-                throw new ArgumentNullException(nameof(clearPredicate));
+                throw new ArgumentNullException(nameof(predicate));
             }
 
             foreach (var type in _collectionTypeCache.Keys)
             {
-                if (clearPredicate(type, new[] { type.Assembly }))
+                if (predicate(type, new[] { type.Assembly }))
                 {
                     _collectionTypeCache.TryRemove(type, out _);
                 }

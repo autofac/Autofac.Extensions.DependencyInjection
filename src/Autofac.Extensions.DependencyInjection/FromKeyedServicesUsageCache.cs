@@ -145,16 +145,16 @@ internal static class FromKeyedServicesUsageCache
             _cache.Clear();
         }
 
-        public void Clear(ReflectionCacheClearPredicate clearPredicate)
+        public void Clear(ReflectionCacheClearPredicate predicate)
         {
-            if (clearPredicate is null)
+            if (predicate is null)
             {
-                throw new ArgumentNullException(nameof(clearPredicate));
+                throw new ArgumentNullException(nameof(predicate));
             }
 
             foreach (var key in _cache.Keys)
             {
-                if (key.Matches(clearPredicate))
+                if (key.Matches(predicate))
                 {
                     _cache.TryRemove(key, out _);
                 }
