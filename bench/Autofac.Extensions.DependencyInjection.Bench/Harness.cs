@@ -8,10 +8,18 @@ namespace Autofac.Extensions.DependencyInjection.Bench;
 public class Harness
 {
     [Fact]
-    public void Request() => RunBenchmark<RequestBenchmark>();
+    public void Request()
+    {
+        var exception = Record.Exception(RunBenchmark<RequestBenchmark>);
+        Assert.Null(exception);
+    }
 
     [Fact]
-    public void KeyedResolution() => RunBenchmark<KeyedResolutionBenchmark>();
+    public void KeyedResolution()
+    {
+        var exception = Record.Exception(RunBenchmark<KeyedResolutionBenchmark>);
+        Assert.Null(exception);
+    }
 
     /// <remarks>
     /// This method is used to enforce that benchmark types are added to <see cref="Benchmarks.All"/>

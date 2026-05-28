@@ -167,8 +167,12 @@ public abstract class AssumedBehaviorTests
         outerScope.Dispose();
 
         // This part will blow up if the scopes are hierarchical.
-        innerScope.ServiceProvider.GetRequiredService<DisposeTracker>();
-        innerScope.Dispose();
+        var exception = Record.Exception(() =>
+        {
+            innerScope.ServiceProvider.GetRequiredService<DisposeTracker>();
+            innerScope.Dispose();
+        });
+        Assert.Null(exception);
     }
 
     [Fact]
