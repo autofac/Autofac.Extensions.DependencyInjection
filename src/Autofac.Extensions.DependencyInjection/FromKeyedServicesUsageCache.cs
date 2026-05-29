@@ -121,16 +121,19 @@ internal static class FromKeyedServicesUsageCache
 
         public ReflectionCacheUsage Usage => ReflectionCacheUsage.Registration;
 
+        [SuppressMessage("S1144", "S1144", Justification = "Method is required for IReflectionCache but not used by this implementation.")]
         public bool TryGet(CacheKey key, out bool result)
         {
             return _cache.TryGetValue(key, out result);
         }
 
+        [SuppressMessage("S1144", "S1144", Justification = "Method is required for IReflectionCache but not used by this implementation.")]
         public bool GetOrAdd(CacheKey key, bool value)
         {
             return _cache.GetOrAdd(key, value);
         }
 
+        [SuppressMessage("S1144", "S1144", Justification = "Method is required for IReflectionCache but not used by this implementation.")]
         public bool GetOrAdd(CacheKey key, Func<CacheKey, (IConstructorFinder ConstructorFinder, Type LimitType), bool> valueFactory, (IConstructorFinder ConstructorFinder, Type LimitType) state)
         {
 #if NETSTANDARD2_0
