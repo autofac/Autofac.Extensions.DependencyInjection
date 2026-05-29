@@ -168,16 +168,16 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
                 _fromKeyedServicesAttributes.Clear();
             }
 
-            public void Clear(ReflectionCacheClearPredicate clearPredicate)
+            public void Clear(ReflectionCacheClearPredicate predicate)
             {
-                if (clearPredicate is null)
+                if (predicate is null)
                 {
-                    throw new ArgumentNullException(nameof(clearPredicate));
+                    throw new ArgumentNullException(nameof(predicate));
                 }
 
                 foreach (var parameter in _microsoftServiceKeyAttributePresence.Keys)
                 {
-                    if (Matches(clearPredicate, parameter))
+                    if (Matches(predicate, parameter))
                     {
                         _microsoftServiceKeyAttributePresence.TryRemove(parameter, out _);
                     }
@@ -185,7 +185,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
 
                 foreach (var parameter in _fromKeyedServicesAttributes.Keys)
                 {
-                    if (Matches(clearPredicate, parameter))
+                    if (Matches(predicate, parameter))
                     {
                         _fromKeyedServicesAttributes.TryRemove(parameter, out _);
                     }

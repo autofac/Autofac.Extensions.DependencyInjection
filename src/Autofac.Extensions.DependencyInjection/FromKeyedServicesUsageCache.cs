@@ -121,16 +121,19 @@ internal static class FromKeyedServicesUsageCache
 
         public ReflectionCacheUsage Usage => ReflectionCacheUsage.Registration;
 
+        [SuppressMessage("S1144", "S1144", Justification = "Method is required for IReflectionCache but not used by this implementation.")]
         public bool TryGet(CacheKey key, out bool result)
         {
             return _cache.TryGetValue(key, out result);
         }
 
+        [SuppressMessage("S1144", "S1144", Justification = "Method is required for IReflectionCache but not used by this implementation.")]
         public bool GetOrAdd(CacheKey key, bool value)
         {
             return _cache.GetOrAdd(key, value);
         }
 
+        [SuppressMessage("S1144", "S1144", Justification = "Method is required for IReflectionCache but not used by this implementation.")]
         public bool GetOrAdd(CacheKey key, Func<CacheKey, (IConstructorFinder ConstructorFinder, Type LimitType), bool> valueFactory, (IConstructorFinder ConstructorFinder, Type LimitType) state)
         {
 #if NETSTANDARD2_0
@@ -145,16 +148,16 @@ internal static class FromKeyedServicesUsageCache
             _cache.Clear();
         }
 
-        public void Clear(ReflectionCacheClearPredicate clearPredicate)
+        public void Clear(ReflectionCacheClearPredicate predicate)
         {
-            if (clearPredicate is null)
+            if (predicate is null)
             {
-                throw new ArgumentNullException(nameof(clearPredicate));
+                throw new ArgumentNullException(nameof(predicate));
             }
 
             foreach (var key in _cache.Keys)
             {
-                if (key.Matches(clearPredicate))
+                if (key.Matches(predicate))
                 {
                     _cache.TryRemove(key, out _);
                 }

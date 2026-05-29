@@ -111,28 +111,14 @@ internal class KeyTypeManipulation
             return value;
         }
 
-        TypeConverter converter;
-
         // Try to get custom type converter information.
-        if (converterAttribute != null && !string.IsNullOrEmpty(converterAttribute.ConverterTypeName))
+        if (TryConvertWithAttribute(value, destinationType, converterAttribute, out var attributeResult))
         {
-            try
-            {
-                converter = GetTypeConverterFromName(converterAttribute.ConverterTypeName);
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new KeyTypeConversionException(value.GetType(), destinationType, ex);
-            }
-
-            if (converter.CanConvertFrom(value.GetType()))
-            {
-                return converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
-            }
+            return attributeResult;
         }
 
         // If there's not a custom converter specified via attribute, try for a default.
-        converter = TypeDescriptor.GetConverter(value.GetType());
+        var converter = TypeDescriptor.GetConverter(value.GetType());
         if (converter.CanConvertTo(destinationType))
         {
             return converter.ConvertTo(null, CultureInfo.InvariantCulture, value, destinationType);
@@ -162,6 +148,34 @@ internal class KeyTypeManipulation
         }
 
         throw new KeyTypeConversionException(value.GetType(), destinationType);
+    }
+
+    private static bool TryConvertWithAttribute(object value, Type destinationType, TypeConverterAttribute? converterAttribute, out object? converted)
+    {
+        converted = null;
+
+        if (converterAttribute == null || string.IsNullOrEmpty(converterAttribute.ConverterTypeName))
+        {
+            return false;
+        }
+
+        TypeConverter converter;
+        try
+        {
+            converter = GetTypeConverterFromName(converterAttribute.ConverterTypeName);
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new KeyTypeConversionException(value.GetType(), destinationType, ex);
+        }
+
+        if (!converter.CanConvertFrom(value.GetType()))
+        {
+            return false;
+        }
+
+        converted = converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
+        return true;
     }
 
     /// <summary>
@@ -254,54 +268,18 @@ internal class KeyTypeManipulation
             _defaultValueCache.Clear();
         }
 
-        public void Clear(ReflectionCacheClearPredicate clearPredicate)
+        public void Clear(ReflectionCacheClearPredicate predicate)
         {
-            if (clearPredicate is null)
+            if (predicate is null)
             {
-                throw new ArgumentNullException(nameof(clearPredicate));
+                throw new ArgumentNullException(nameof(predicate));
             }
 
-            foreach (var parameter in _parameterConverterAttributes.Keys)
-            {
-                var member = parameter.Member;
-                var assemblies = GetParameterAssemblies(parameter);
-                if (clearPredicate(member, assemblies))
-                {
-                    _parameterConverterAttributes.TryRemove(parameter, out _);
-                }
-            }
-
-            foreach (var member in _memberConverterAttributes.Keys)
-            {
-                if (clearPredicate(member, new[] { member.Module.Assembly }))
-                {
-                    _memberConverterAttributes.TryRemove(member, out _);
-                }
-            }
-
-            foreach (var type in _tryParseMethodCache.Keys)
-            {
-                if (clearPredicate(type, new[] { type.Assembly }))
-                {
-                    _tryParseMethodCache.TryRemove(type, out _);
-                }
-            }
-
-            foreach (var type in _defaultValueCache.Keys)
-            {
-                if (clearPredicate(type, new[] { type.Assembly }))
-                {
-                    _defaultValueCache.TryRemove(type, out _);
-                }
-            }
-
-            foreach (var entry in _converterTypeCache)
-            {
-                if (clearPredicate(entry.Value, new[] { entry.Value.Assembly }))
-                {
-                    _converterTypeCache.TryRemove(entry.Key, out _);
-                }
-            }
+            ClearParameterConverterAttributes(predicate);
+            ClearMemberConverterAttributes(predicate);
+            ClearTryParseMethodCache(predicate);
+            ClearDefaultValueCache(predicate);
+            ClearConverterTypeCache(predicate);
         }
 
         private static IEnumerable<Assembly> GetParameterAssemblies(ParameterInfo parameter)
@@ -317,6 +295,63 @@ internal class KeyTypeManipulation
 
             yield return memberAssembly;
             yield return parameterAssembly;
+        }
+
+        private void ClearParameterConverterAttributes(ReflectionCacheClearPredicate predicate)
+        {
+            foreach (var parameter in _parameterConverterAttributes.Keys)
+            {
+                var member = parameter.Member;
+                var assemblies = GetParameterAssemblies(parameter);
+                if (predicate(member, assemblies))
+                {
+                    _parameterConverterAttributes.TryRemove(parameter, out _);
+                }
+            }
+        }
+
+        private void ClearMemberConverterAttributes(ReflectionCacheClearPredicate predicate)
+        {
+            foreach (var member in _memberConverterAttributes.Keys)
+            {
+                if (predicate(member, new[] { member.Module.Assembly }))
+                {
+                    _memberConverterAttributes.TryRemove(member, out _);
+                }
+            }
+        }
+
+        private void ClearTryParseMethodCache(ReflectionCacheClearPredicate predicate)
+        {
+            foreach (var type in _tryParseMethodCache.Keys)
+            {
+                if (predicate(type, new[] { type.Assembly }))
+                {
+                    _tryParseMethodCache.TryRemove(type, out _);
+                }
+            }
+        }
+
+        private void ClearDefaultValueCache(ReflectionCacheClearPredicate predicate)
+        {
+            foreach (var type in _defaultValueCache.Keys)
+            {
+                if (predicate(type, new[] { type.Assembly }))
+                {
+                    _defaultValueCache.TryRemove(type, out _);
+                }
+            }
+        }
+
+        private void ClearConverterTypeCache(ReflectionCacheClearPredicate predicate)
+        {
+            foreach (var entry in _converterTypeCache)
+            {
+                if (predicate(entry.Value, new[] { entry.Value.Assembly }))
+                {
+                    _converterTypeCache.TryRemove(entry.Key, out _);
+                }
+            }
         }
     }
 }

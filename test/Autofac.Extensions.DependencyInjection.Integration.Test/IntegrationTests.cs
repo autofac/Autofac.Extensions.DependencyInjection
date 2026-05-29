@@ -27,6 +27,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Startup>>
     {
         var client = AppFactory.CreateClient();
         var response = await client.GetAsync(new Uri("/Date", UriKind.Relative));
-        response.EnsureSuccessStatusCode();
+        var exception = Record.Exception(() => response.EnsureSuccessStatusCode());
+        Assert.Null(exception);
     }
 }

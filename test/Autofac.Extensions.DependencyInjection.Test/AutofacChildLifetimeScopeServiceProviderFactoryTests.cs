@@ -38,7 +38,7 @@ public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
     [Fact]
     public void CreateBuilderAllowsForNullConfigurationAction()
     {
-        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope, null);
 
         var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
 
@@ -108,8 +108,12 @@ public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
 
         var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
 
-        serviceProvider.GetRequiredService<DependencyOne>();
-        serviceProvider.GetRequiredService<DependencyTwo>();
+        var exception = Record.Exception(() =>
+        {
+            serviceProvider.GetRequiredService<DependencyOne>();
+            serviceProvider.GetRequiredService<DependencyTwo>();
+        });
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -121,7 +125,8 @@ public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
 
         var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
 
-        serviceProvider.GetRequiredService<DependencyOne>();
+        var exception = Record.Exception(() => serviceProvider.GetRequiredService<DependencyOne>());
+        Assert.Null(exception);
     }
 
     [Fact]
