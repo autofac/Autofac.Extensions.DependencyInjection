@@ -52,10 +52,17 @@ public sealed class Program
     {
         var forwarded = new List<string>(args.Length);
         string? baseline = null;
+        var expectingBaselineValue = false;
 
-        for (var i = 0; i < args.Length; i++)
+        foreach (var arg in args)
         {
-            var arg = args[i];
+            if (expectingBaselineValue)
+            {
+                baseline = arg;
+                expectingBaselineValue = false;
+                continue;
+            }
+
             if (TryMatchBaselineArg(arg, out var inlineVersion))
             {
                 if (!string.IsNullOrWhiteSpace(inlineVersion))
@@ -64,16 +71,16 @@ public sealed class Program
                     continue;
                 }
 
-                if (i + 1 >= args.Length)
-                {
-                    throw new ArgumentException("Missing version value for baseline argument.", nameof(args));
-                }
-
-                baseline = args[++i];
+                expectingBaselineValue = true;
                 continue;
             }
 
             forwarded.Add(arg);
+        }
+
+        if (expectingBaselineValue)
+        {
+            throw new ArgumentException("Missing version value for baseline argument.", nameof(args));
         }
 
         return (forwarded.ToArray(), baseline);
