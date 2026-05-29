@@ -163,7 +163,7 @@ public abstract class AssumedBehaviorTests
         var rootProvider = CreateServiceProvider(services);
 
         var outerScope = rootProvider.CreateScope();
-        var innerScope = outerScope.ServiceProvider.CreateScope();
+        using var innerScope = outerScope.ServiceProvider.CreateScope();
         outerScope.Dispose();
 
         // This part will blow up if the scopes are hierarchical.

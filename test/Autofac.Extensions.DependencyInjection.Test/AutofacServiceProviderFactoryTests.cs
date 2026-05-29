@@ -31,7 +31,7 @@ public class AutofacServiceProviderFactoryTests
     [Fact]
     public void CreateBuilderAllowsForNullConfigurationAction()
     {
-        var factory = new AutofacServiceProviderFactory();
+        var factory = new AutofacServiceProviderFactory(null);
 
         var builder = factory.CreateBuilder(new ServiceCollection());
 

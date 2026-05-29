@@ -38,7 +38,7 @@ public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
     [Fact]
     public void CreateBuilderAllowsForNullConfigurationAction()
     {
-        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
+        var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope, null);
 
         var configurationAdapter = factory.CreateBuilder(new ServiceCollection());
 
