@@ -133,7 +133,10 @@ public class KeyTypeManipulationFixture
     [SuppressMessage("CA1812", "CA1812", Justification = "Class instantiated through reflection.")]
     private class Convertible
     {
-        public int Value { get; set; }
+        public int Value
+        {
+            get; set;
+        }
     }
 
     [SuppressMessage("CA1812", "CA1812", Justification = "Class instantiated through reflection.")]
@@ -179,7 +182,10 @@ public class KeyTypeManipulationFixture
         }
 
         [TypeConverter(typeof(ConvertibleConverter))]
-        public Convertible Property { get; set; }
+        public Convertible Property
+        {
+            get; set;
+        }
     }
 
     private readonly struct ParseOnlyType

@@ -24,7 +24,10 @@ internal sealed class NotNullWhenAttribute : Attribute
     /// <summary>
     /// Gets a value indicating whether the return value should be true or false for the parameter to be non-null.
     /// </summary>
-    public bool ReturnValue { get; }
+    public bool ReturnValue
+    {
+        get;
+    }
 }
 
 #endif

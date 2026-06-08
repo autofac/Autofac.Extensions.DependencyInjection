@@ -10,7 +10,7 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 public class AutofacChildLifetimeScopeServiceProviderFactory : IServiceProviderFactory<AutofacChildLifetimeScopeConfigurationAdapter>
 {
-    private static readonly Action<ContainerBuilder> FallbackConfigurationAction = builder => { };
+    private static readonly Action<ContainerBuilder> _fallbackConfigurationAction = builder => { };
     private readonly Action<ContainerBuilder> _containerConfigurationAction;
     private readonly ILifetimeScope _rootLifetimeScope;
 
@@ -27,7 +27,7 @@ public class AutofacChildLifetimeScopeServiceProviderFactory : IServiceProviderF
         }
 
         _rootLifetimeScope = rootLifetimeScopeAccessor();
-        _containerConfigurationAction = configurationAction ?? FallbackConfigurationAction;
+        _containerConfigurationAction = configurationAction ?? _fallbackConfigurationAction;
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public class AutofacChildLifetimeScopeServiceProviderFactory : IServiceProviderF
     public AutofacChildLifetimeScopeServiceProviderFactory(ILifetimeScope rootLifetimeScope, Action<ContainerBuilder>? configurationAction = null)
     {
         _rootLifetimeScope = rootLifetimeScope ?? throw new ArgumentNullException(nameof(rootLifetimeScope));
-        _containerConfigurationAction = configurationAction ?? FallbackConfigurationAction;
+        _containerConfigurationAction = configurationAction ?? _fallbackConfigurationAction;
     }
 
     /// <summary>

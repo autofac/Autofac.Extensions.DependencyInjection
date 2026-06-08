@@ -202,45 +202,45 @@ public class AutofacRegistrationTests
     [Fact]
     public void RegistrationsAddedAfterPopulateComeLastWhenResolvedWithIEnumerable()
     {
-        const string s1 = "s1";
-        const string s2 = "s2";
-        const string s3 = "s3";
-        const string s4 = "s4";
+        const string S1 = "s1";
+        const string S2 = "s2";
+        const string S3 = "s3";
+        const string S4 = "s4";
 
         var collection = new ServiceCollection();
-        collection.AddTransient(provider => s1);
-        collection.AddTransient(provider => s2);
+        collection.AddTransient(provider => S1);
+        collection.AddTransient(provider => S2);
         var builder = new ContainerBuilder();
         builder.Populate(collection);
-        builder.Register(c => s3);
-        builder.Register(c => s4);
+        builder.Register(c => S3);
+        builder.Register(c => S4);
         var container = builder.Build();
 
         var resolved = container.Resolve<IEnumerable<string>>().ToArray();
 
-        Assert.Equal(resolved, new[] { s1, s2, s3, s4 });
+        Assert.Equal(resolved, new[] { S1, S2, S3, S4 });
     }
 
     [Fact]
     public void RegistrationsAddedBeforePopulateComeFirstWhenResolvedWithIEnumerable()
     {
-        const string s1 = "s1";
-        const string s2 = "s2";
-        const string s3 = "s3";
-        const string s4 = "s4";
+        const string S1 = "s1";
+        const string S2 = "s2";
+        const string S3 = "s3";
+        const string S4 = "s4";
 
         var builder = new ContainerBuilder();
-        builder.Register(c => s1);
-        builder.Register(c => s2);
+        builder.Register(c => S1);
+        builder.Register(c => S2);
         var collection = new ServiceCollection();
-        collection.AddTransient(provider => s3);
-        collection.AddTransient(provider => s4);
+        collection.AddTransient(provider => S3);
+        collection.AddTransient(provider => S4);
         builder.Populate(collection);
         var container = builder.Build();
 
         var resolved = container.Resolve<IEnumerable<string>>().ToArray();
 
-        Assert.Equal(resolved, new[] { s1, s2, s3, s4 });
+        Assert.Equal(resolved, new[] { S1, S2, S3, S4 });
     }
 
     private class Service : IService
@@ -254,6 +254,9 @@ public class AutofacRegistrationTests
     [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
     private class TestOptions
     {
-        public int Value { get; set; }
+        public int Value
+        {
+            get; set;
+        }
     }
 }

@@ -10,11 +10,11 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 internal static class TypeExtensions
 {
-    private static readonly TypeExtensionsReflectionCache ReflectionCache = new();
+    private static readonly TypeExtensionsReflectionCache _reflectionCache = new();
 
     static TypeExtensions()
     {
-        ReflectionCacheSet.Shared.RegisterExternalCache(ReflectionCache);
+        ReflectionCacheSet.Shared.RegisterExternalCache(_reflectionCache);
     }
 
     /// <summary>
@@ -26,7 +26,7 @@ internal static class TypeExtensions
     /// <returns><see langword="true"/> if the type is a collection or enumerable; otherwise, <see langword="false"/>.</returns>
     internal static bool IsCollection(this Type serviceType)
     {
-        return ReflectionCache.GetOrAddCollectionType(
+        return _reflectionCache.GetOrAddCollectionType(
             serviceType,
             static type =>
             {

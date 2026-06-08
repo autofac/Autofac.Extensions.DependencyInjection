@@ -17,11 +17,11 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 internal class KeyTypeManipulation
 {
-    private static readonly KeyTypeManipulationReflectionCache ReflectionCache = new();
+    private static readonly KeyTypeManipulationReflectionCache _reflectionCache = new();
 
     static KeyTypeManipulation()
     {
-        ReflectionCacheSet.Shared.RegisterExternalCache(ReflectionCache);
+        ReflectionCacheSet.Shared.RegisterExternalCache(_reflectionCache);
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ internal class KeyTypeManipulation
         TypeConverterAttribute? attrib = null;
         if (memberInfo != null)
         {
-            attrib = ReflectionCache.GetOrAddParameterConverterAttribute(memberInfo);
+            attrib = _reflectionCache.GetOrAddParameterConverterAttribute(memberInfo);
         }
 
         return ChangeToCompatibleType(value, destinationType, attrib);
@@ -70,7 +70,7 @@ internal class KeyTypeManipulation
         TypeConverterAttribute? attrib = null;
         if (memberInfo != null)
         {
-            attrib = ReflectionCache.GetOrAddMemberConverterAttribute(memberInfo);
+            attrib = _reflectionCache.GetOrAddMemberConverterAttribute(memberInfo);
         }
 
         return ChangeToCompatibleType(value, destinationType, attrib);
@@ -101,7 +101,7 @@ internal class KeyTypeManipulation
         if (value == null)
         {
             return destinationType.GetTypeInfo().IsValueType
-                ? ReflectionCache.GetOrAddDefaultValue(destinationType)
+                ? _reflectionCache.GetOrAddDefaultValue(destinationType)
                 : null;
         }
 
@@ -136,7 +136,7 @@ internal class KeyTypeManipulation
         {
             // Some types in later frameworks have string TryParse and ReadOnlySpan<char> TryParse
             // so they result in an AmbiguousMatchException unless we specify.
-            var parser = ReflectionCache.GetOrAddTryParseMethod(destinationType);
+            var parser = _reflectionCache.GetOrAddTryParseMethod(destinationType);
             if (parser != null)
             {
                 var parameters = new object?[] { stringValue, null };
@@ -193,7 +193,7 @@ internal class KeyTypeManipulation
     /// </exception>
     private static TypeConverter GetTypeConverterFromName(string converterTypeName)
     {
-        var converterType = ReflectionCache.GetOrAddConverterType(converterTypeName);
+        var converterType = _reflectionCache.GetOrAddConverterType(converterTypeName);
 
         return (TypeConverter)Activator.CreateInstance(converterType)!;
     }

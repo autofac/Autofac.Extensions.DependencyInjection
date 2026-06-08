@@ -20,7 +20,10 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Startup>>
         AppFactory = appFactory;
     }
 
-    public WebApplicationFactory<Startup> AppFactory { get; }
+    public WebApplicationFactory<Startup> AppFactory
+    {
+        get;
+    }
 
     [Fact]
     public async Task GetDate()

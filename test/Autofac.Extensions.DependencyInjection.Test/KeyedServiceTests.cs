@@ -48,7 +48,10 @@ public class KeyedServiceTests
 
     private interface IService
     {
-        string Value { get; }
+        string Value
+        {
+            get;
+        }
     }
 
     private sealed class ServiceKeyAwareService : IService
@@ -65,17 +68,26 @@ public class KeyedServiceTests
 
     private interface IKeyedDependency
     {
-        string Value { get; }
+        string Value
+        {
+            get;
+        }
     }
 
     private interface INormalDependency
     {
-        string Value { get; }
+        string Value
+        {
+            get;
+        }
     }
 
     private interface IMixedService
     {
-        string Value { get; }
+        string Value
+        {
+            get;
+        }
     }
 
     private sealed class KeyedDependency : IKeyedDependency

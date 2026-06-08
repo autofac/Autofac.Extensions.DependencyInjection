@@ -14,11 +14,11 @@ namespace Autofac.Extensions.DependencyInjection;
 [ExcludeFromCodeCoverage]
 internal static class FromKeyedServicesUsageCache
 {
-    private static readonly FromKeyedServicesUsageReflectionCache ReflectionCache = new();
+    private static readonly FromKeyedServicesUsageReflectionCache _reflectionCache = new();
 
     static FromKeyedServicesUsageCache()
     {
-        ReflectionCacheSet.Shared.RegisterExternalCache(ReflectionCache);
+        ReflectionCacheSet.Shared.RegisterExternalCache(_reflectionCache);
     }
 
     /// <summary>
@@ -37,15 +37,15 @@ internal static class FromKeyedServicesUsageCache
         var cacheKey = new CacheKey(activator.LimitType, constructorFinder.GetType());
 
 #if NETSTANDARD2_0
-        if (ReflectionCache.TryGet(cacheKey, out var cachedResult))
+        if (_reflectionCache.TryGet(cacheKey, out var cachedResult))
         {
             return cachedResult;
         }
 
         var computed = ScanConstructors(constructorFinder, activator.LimitType);
-        return ReflectionCache.GetOrAdd(cacheKey, computed);
+        return _reflectionCache.GetOrAdd(cacheKey, computed);
 #else
-        return ReflectionCache.GetOrAdd(
+        return _reflectionCache.GetOrAdd(
             cacheKey,
             static (_, state) => ScanConstructors(state.ConstructorFinder, state.LimitType),
             (ConstructorFinder: constructorFinder, activator.LimitType));
@@ -78,9 +78,15 @@ internal static class FromKeyedServicesUsageCache
             ConstructorFinderType = constructorFinderType ?? throw new ArgumentNullException(nameof(constructorFinderType));
         }
 
-        private Type ImplementationType { get; }
+        private Type ImplementationType
+        {
+            get;
+        }
 
-        private Type ConstructorFinderType { get; }
+        private Type ConstructorFinderType
+        {
+            get;
+        }
 
         public bool Matches(ReflectionCacheClearPredicate clearPredicate)
         {

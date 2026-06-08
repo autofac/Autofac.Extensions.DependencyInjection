@@ -102,7 +102,10 @@ public class KeyTypeConversionException : Exception
     /// which is the destination where the key should be injected. This should
     /// be compatible with the key provided during resolution.
     /// </value>
-    public Type AttributeKeyType { get; }
+    public Type AttributeKeyType
+    {
+        get;
+    }
 
     /// <summary>
     /// Gets the type of the key specified during service resolution.
@@ -112,5 +115,8 @@ public class KeyTypeConversionException : Exception
     /// operation. This is what would be injected as a constructor parameter to
     /// the service being resolved.
     /// </value>
-    public Type ResolutionKeyType { get; }
+    public Type ResolutionKeyType
+    {
+        get;
+    }
 }

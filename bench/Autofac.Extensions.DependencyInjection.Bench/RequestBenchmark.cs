@@ -10,7 +10,7 @@ namespace Autofac.Extensions.DependencyInjection.Bench;
 [SuppressMessage("CA1001", "CA1001", Justification = "Benchmark disposal happens in a global cleanup method.")]
 public class RequestBenchmark
 {
-    private static readonly Uri ValuesUri = new("/api/values", UriKind.Relative);
+    private static readonly Uri _valuesUri = new("/api/values", UriKind.Relative);
     private WebApplicationFactory<Program> _defaultFactory = null!;
     private WebApplicationFactory<Program> _autofacFactory = null!;
     private HttpClient _defaultClient = null!;
@@ -36,7 +36,7 @@ public class RequestBenchmark
     [Benchmark(Baseline = true)]
     public async Task RequestDefaultDI()
     {
-        var response = await _defaultClient.GetAsync(ValuesUri).ConfigureAwait(false);
+        var response = await _defaultClient.GetAsync(_valuesUri).ConfigureAwait(false);
 
         if (response.StatusCode != HttpStatusCode.OK)
         {
@@ -47,7 +47,7 @@ public class RequestBenchmark
     [Benchmark]
     public async Task RequestAutofacDI()
     {
-        var response = await _autofacClient.GetAsync(ValuesUri).ConfigureAwait(false);
+        var response = await _autofacClient.GetAsync(_valuesUri).ConfigureAwait(false);
 
         if (response.StatusCode != HttpStatusCode.OK)
         {

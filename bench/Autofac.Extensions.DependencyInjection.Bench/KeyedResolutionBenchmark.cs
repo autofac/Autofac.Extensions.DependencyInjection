@@ -91,7 +91,10 @@ public class KeyedResolutionBenchmark
 
     private interface IService
     {
-        int Value { get; }
+        int Value
+        {
+            get;
+        }
     }
 
     private sealed class DefaultService : IService

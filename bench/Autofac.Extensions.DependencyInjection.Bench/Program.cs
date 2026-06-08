@@ -45,8 +45,8 @@ public sealed class Program
         new BenchmarkSwitcher(Benchmarks.All).Run(filteredArgs, config);
     }
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        SampleApp.Program.CreateHostBuilder(args);
+    public static IHostBuilder CreateHostBuilder(string[] args)
+        => SampleApp.Program.CreateHostBuilder(args);
 
     private static (string[] RemainingArgs, string? BaselineVersion) ExtractBaselineVersion(string[] args)
     {
@@ -90,8 +90,8 @@ public sealed class Program
     {
         valueFromAssignment = null;
 
-        static bool Matches(string candidate) =>
-            candidate.Equals("--baseline-version", StringComparison.OrdinalIgnoreCase) ||
+        static bool Matches(string candidate)
+            => candidate.Equals("--baseline-version", StringComparison.OrdinalIgnoreCase) ||
             candidate.Equals("--baselineVersion", StringComparison.OrdinalIgnoreCase);
 
         var equalsIndex = arg.AsSpan().IndexOf('=');

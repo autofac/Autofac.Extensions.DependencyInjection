@@ -195,15 +195,24 @@ public abstract class AssumedBehaviorTests
             Trackers = trackers;
         }
 
-        public IEnumerable<DisposeTracker> Trackers { get; }
+        public IEnumerable<DisposeTracker> Trackers
+        {
+            get;
+        }
     }
 
     [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
     private class DisposeTracker : IDisposable
     {
-        public int DisposeCount { get; set; }
+        public int DisposeCount
+        {
+            get; set;
+        }
 
-        public bool Disposed { get; set; }
+        public bool Disposed
+        {
+            get; set;
+        }
 
         public void Dispose()
         {
@@ -215,9 +224,15 @@ public abstract class AssumedBehaviorTests
     [SuppressMessage("CA1812", "CA1812", Justification = "Instantiated via dependency injection.")]
     private class AsyncDisposeTracker : IDisposable, IAsyncDisposable
     {
-        public bool SyncDisposed { get; set; }
+        public bool SyncDisposed
+        {
+            get; set;
+        }
 
-        public bool AsyncDisposed { get; set; }
+        public bool AsyncDisposed
+        {
+            get; set;
+        }
 
         public void Dispose()
         {

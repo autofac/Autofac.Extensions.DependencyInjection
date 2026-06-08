@@ -109,11 +109,11 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
     /// </summary>
     private static class ParameterAttributeCache
     {
-        private static readonly ParameterAttributeReflectionCache ReflectionCache = new();
+        private static readonly ParameterAttributeReflectionCache _reflectionCache = new();
 
         static ParameterAttributeCache()
         {
-            ReflectionCacheSet.Shared.RegisterExternalCache(ReflectionCache);
+            ReflectionCacheSet.Shared.RegisterExternalCache(_reflectionCache);
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         /// </returns>
         public static bool HasMicrosoftServiceKey(ParameterInfo parameter)
         {
-            return ReflectionCache.GetOrAddMicrosoftServiceKeyAttributePresence(parameter);
+            return _reflectionCache.GetOrAddMicrosoftServiceKeyAttributePresence(parameter);
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ internal class KeyedServiceMiddleware : IResolveMiddleware
         /// </returns>
         public static FromKeyedServicesAttribute? GetFromKeyedServicesAttribute(ParameterInfo parameter)
         {
-            return ReflectionCache.GetOrAddFromKeyedServicesAttribute(parameter);
+            return _reflectionCache.GetOrAddFromKeyedServicesAttribute(parameter);
         }
 
         [ExcludeFromCodeCoverage]

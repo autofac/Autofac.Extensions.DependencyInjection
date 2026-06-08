@@ -43,7 +43,7 @@ internal static class Assertions
 
     public static IComponentRegistration RegistrationFor<TService>(this IComponentContext context)
     {
-        Assert.True(context.ComponentRegistry.TryGetRegistration(new TypedService(typeof(TService)), out IComponentRegistration r));
+        Assert.True(context.ComponentRegistry.TryGetRegistration(new TypedService(typeof(TService)), out var r));
         return r;
     }
 }

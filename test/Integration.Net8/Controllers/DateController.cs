@@ -14,7 +14,10 @@ public class DateController : ControllerBase
         DateProvider = dateProvider;
     }
 
-    public IDateProvider DateProvider { get; }
+    public IDateProvider DateProvider
+    {
+        get;
+    }
 
     [HttpGet]
     public ActionResult<DateTimeOffset> Get() => DateProvider.GetDate();
