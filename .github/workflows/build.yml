@@ -20,7 +20,7 @@ jobs:
       - name: Build and test
         run: dotnet msbuild ./default.proj
       - name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           fail_ci_if_error: true
           files: artifacts/logs/*/coverage.cobertura.xml
