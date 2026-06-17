@@ -107,6 +107,7 @@ public class KeyTypeManipulationFixture
     public void ChangeToCompatibleTypeUsesTypeConverterOnParameter()
     {
         var ctor = typeof(HasTypeConverterAttributes).GetConstructor(new Type[] { typeof(Convertible) });
+        Assert.NotNull(ctor);
         var member = ctor.GetParameters()[0];
         var actual = KeyTypeManipulation.ChangeToCompatibleType("25", typeof(Convertible), member) as Convertible;
         Assert.NotNull(actual);
@@ -117,6 +118,7 @@ public class KeyTypeManipulationFixture
     public void ChangeToCompatibleTypeUsesTypeConverterOnProperty()
     {
         var member = typeof(HasTypeConverterAttributes).GetProperty("Property");
+        Assert.NotNull(member);
         var actual = KeyTypeManipulation.ChangeToCompatibleType("25", typeof(Convertible), member) as Convertible;
         Assert.NotNull(actual);
         Assert.Equal(25, actual.Value);
@@ -142,12 +144,12 @@ public class KeyTypeManipulationFixture
     [SuppressMessage("CA1812", "CA1812", Justification = "Class instantiated through reflection.")]
     private class ConvertibleConverter : TypeConverter
     {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
         {
             return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
         }
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         {
             if (value == null)
             {
@@ -160,14 +162,14 @@ public class KeyTypeManipulationFixture
             }
 
             var converter = TypeDescriptor.GetConverter(typeof(int));
-            return new Convertible { Value = (int)converter.ConvertFromString(context, culture, str) };
+            return new Convertible { Value = (int)converter.ConvertFromString(context, culture, str)! };
         }
     }
 
     [SuppressMessage("CA1812", "CA1812", Justification = "Class instantiated through reflection.")]
     private class NonConvertingConverter : TypeConverter
     {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
         {
             return false;
         }

@@ -17,5 +17,5 @@ public sealed class AutofacChildLifetimeScopeConfigurationAdapterTests
 
     [Fact]
     public void AddNullConfigurationThrows()
-        => Assert.Throws<ArgumentNullException>(() => new AutofacChildLifetimeScopeConfigurationAdapter().Add(null));
+        => Assert.Throws<ArgumentNullException>(() => new AutofacChildLifetimeScopeConfigurationAdapter().Add(null!));
 }

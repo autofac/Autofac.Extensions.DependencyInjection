@@ -80,7 +80,7 @@ public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
     {
         var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
 
-        var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
+        var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null!));
 
         Assert.Equal("containerBuilder", exception.ParamName);
     }
@@ -144,6 +144,7 @@ public sealed class AutofacChildLifetimeScopeServiceProviderFactoryTests
     private static ILifetimeScope GetRootLifetimeScope() => new ContainerBuilder().Build();
 
     private static ILifetimeScope GetRootLifetimeScopeWithDependency<TAs>(Type type)
+        where TAs : notnull
     {
         var containerBuilder = new ContainerBuilder();
 

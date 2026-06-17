@@ -37,7 +37,8 @@ public sealed class ServiceCollectionExtensionsTests
         collection.AddAutofac(config => config.Register(c => "Foo"));
 
         var serviceProvider = collection.BuildServiceProvider();
-        var factory = (IServiceProviderFactory<ContainerBuilder>)serviceProvider.GetService(typeof(IServiceProviderFactory<ContainerBuilder>));
+        var factory = serviceProvider.GetService(typeof(IServiceProviderFactory<ContainerBuilder>)) as IServiceProviderFactory<ContainerBuilder>;
+        Assert.NotNull(factory);
         var builder = factory.CreateBuilder(collection);
         Assert.Equal("Foo", builder.Build().Resolve<string>());
     }

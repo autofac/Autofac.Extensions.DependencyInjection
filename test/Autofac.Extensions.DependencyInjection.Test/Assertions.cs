@@ -8,16 +8,19 @@ namespace Autofac.Extensions.DependencyInjection.Test;
 internal static class Assertions
 {
     public static void AssertRegistered<TService>(this IComponentContext context)
+        where TService : notnull
     {
         Assert.True(context.IsRegistered<TService>());
     }
 
     public static void AssertNotRegistered<TService>(this IComponentContext context)
+        where TService : notnull
     {
         Assert.False(context.IsRegistered<TService>());
     }
 
     public static void AssertImplementation<TService, TImplementation>(this IComponentContext context)
+        where TService : notnull
     {
         var service = context.Resolve<TService>();
         Assert.IsAssignableFrom<TImplementation>(service);

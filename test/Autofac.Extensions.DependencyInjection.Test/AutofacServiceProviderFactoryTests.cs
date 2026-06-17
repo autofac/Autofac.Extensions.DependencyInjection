@@ -67,7 +67,7 @@ public class AutofacServiceProviderFactoryTests
     {
         var factory = new AutofacServiceProviderFactory();
 
-        var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null));
+        var exception = Assert.Throws<ArgumentNullException>(() => factory.CreateServiceProvider(null!));
 
         Assert.Equal("containerBuilder", exception.ParamName);
     }
