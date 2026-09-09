@@ -17,6 +17,13 @@ namespace Autofac.Extensions.DependencyInjection;
 public static class AutofacRegistration
 {
     /// <summary>
+    /// Key used in <see cref="ContainerBuilder.Properties"/> to indicate that
+    /// <see cref="Populate(ContainerBuilder, IEnumerable{ServiceDescriptor}, object?)"/>
+    /// has already been called.
+    /// </summary>
+    private const string PopulatedPropertyKey = "Autofac.Extensions.DependencyInjection.Populated";
+
+    /// <summary>
     /// Populates the Autofac container builder with the set of registered service descriptors
     /// and makes <see cref="IServiceProvider"/> and <see cref="IServiceScopeFactory"/>
     /// available in the container.
@@ -77,21 +84,29 @@ public static class AutofacRegistration
             throw new ArgumentNullException(nameof(builder));
         }
 
-        builder.RegisterType<AutofacServiceProvider>()
-               .As<IServiceProvider>()
-               .As<IServiceProviderIsService>()
-               .As<IKeyedServiceProvider>()
-               .As<IServiceProviderIsKeyedService>()
-               .ExternallyOwned();
+        // Only perform additional registration if they weren't already added in a previous Populate call.
+        // This allows multiple calls to Populate to be made, without duplicated registrations and additional
+        // callback overhead.
+        if (!builder.Properties.ContainsKey(PopulatedPropertyKey))
+        {
+            builder.Properties[PopulatedPropertyKey] = true;
 
-        // Issue #83: IServiceScopeFactory must be a singleton and scopes must be flat, not hierarchical.
-        builder
-            .RegisterType<AutofacServiceScopeFactory>()
-            .As<IServiceScopeFactory>()
-            .SingleInstance();
+            builder.RegisterType<AutofacServiceProvider>()
+           .As<IServiceProvider>()
+           .As<IServiceProviderIsService>()
+           .As<IKeyedServiceProvider>()
+           .As<IServiceProviderIsKeyedService>()
+           .ExternallyOwned();
 
-        // Shims for keyed service compatibility.
-        builder.ComponentRegistryBuilder.Registered += AddFromKeyedServiceParameterMiddleware;
+            // Issue #83: IServiceScopeFactory must be a singleton and scopes must be flat, not hierarchical.
+            builder
+                .RegisterType<AutofacServiceScopeFactory>()
+                .As<IServiceScopeFactory>()
+                .SingleInstance();
+
+            // Shims for keyed service compatibility.
+            builder.ComponentRegistryBuilder.Registered += AddFromKeyedServiceParameterMiddleware;
+        }
 
         Register(builder, descriptors, lifetimeScopeTagForSingletons);
     }
