@@ -74,6 +74,27 @@ public class AutofacRegistrationTests
     }
 
     [Fact]
+    public void PopulateRegistersMediImplementationsOnlyOnce()
+    {
+        var builder = new ContainerBuilder();
+        builder.Populate(Enumerable.Empty<ServiceDescriptor>());
+        builder.Populate(Enumerable.Empty<ServiceDescriptor>());
+        var container = builder.Build();
+
+        var serviceProviders = container
+            .Resolve<IEnumerable<IServiceProvider>>()
+            .OfType<AutofacServiceProvider>()
+            .ToArray();
+        Assert.Single(serviceProviders);
+
+        var serviceScopeFactories = container
+            .Resolve<IEnumerable<IServiceScopeFactory>>()
+            .OfType<AutofacServiceScopeFactory>()
+            .ToArray();
+        Assert.Single(serviceScopeFactories);
+    }
+
+    [Fact]
     public void CanRegisterTransientService()
     {
         var builder = new ContainerBuilder();
