@@ -8,6 +8,13 @@ namespace Autofac.Extensions.DependencyInjection.Bench;
 public class Harness
 {
     [Fact]
+    public void Populate()
+    {
+        var exception = Record.Exception(RunBenchmark<PopulateBenchmark>);
+        Assert.Null(exception);
+    }
+
+    [Fact]
     public void Request()
     {
         var exception = Record.Exception(RunBenchmark<RequestBenchmark>);
