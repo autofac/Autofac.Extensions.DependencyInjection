@@ -9,5 +9,6 @@ public static class Benchmarks
     {
         typeof(RequestBenchmark),
         typeof(KeyedResolutionBenchmark),
+        typeof(PopulateBenchmark),
     };
 }

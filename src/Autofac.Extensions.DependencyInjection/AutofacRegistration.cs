@@ -16,6 +16,13 @@ namespace Autofac.Extensions.DependencyInjection;
 /// </summary>
 public static class AutofacRegistration
 {
+    // Shared by every registration so Populate does not allocate a closure and delegate per component.
+    private static readonly EventHandler<IResolvePipelineBuilder> _useFromKeyedServicesParameterMiddleware =
+        static (_, pipeline) => pipeline.Use(KeyedServiceMiddleware.InstanceWithFromKeyedServicesParameter, MiddlewareInsertionMode.StartOfPhase);
+
+    private static readonly EventHandler<IResolvePipelineBuilder> _useWithoutFromKeyedServicesParameterMiddleware =
+        static (_, pipeline) => pipeline.Use(KeyedServiceMiddleware.InstanceWithoutFromKeyedServicesParameter, MiddlewareInsertionMode.StartOfPhase);
+
     /// <summary>
     /// Populates the Autofac container builder with the set of registered service descriptors
     /// and makes <see cref="IServiceProvider"/> and <see cref="IServiceScopeFactory"/>
@@ -102,7 +109,7 @@ public static class AutofacRegistration
     /// </summary>
     private static void AddFromKeyedServiceParameterMiddleware(object? sender, ComponentRegisteredEventArgs e)
     {
-        var needFromKeyedServiceParameter = false;
+        bool needFromKeyedServiceParameter;
 
         // We can optimize quite significantly in the case where we are using
         // the reflection activator. In that state we can inspect the
@@ -135,17 +142,9 @@ public static class AutofacRegistration
             needFromKeyedServiceParameter = true;
         }
 
-        e.ComponentRegistration.PipelineBuilding += (sender, pipeline) =>
-        {
-            if (needFromKeyedServiceParameter)
-            {
-                pipeline.Use(KeyedServiceMiddleware.InstanceWithFromKeyedServicesParameter, MiddlewareInsertionMode.StartOfPhase);
-            }
-            else
-            {
-                pipeline.Use(KeyedServiceMiddleware.InstanceWithoutFromKeyedServicesParameter, MiddlewareInsertionMode.StartOfPhase);
-            }
-        };
+        e.ComponentRegistration.PipelineBuilding += needFromKeyedServiceParameter
+            ? _useFromKeyedServicesParameterMiddleware
+            : _useWithoutFromKeyedServicesParameterMiddleware;
     }
 
     /// <summary>
